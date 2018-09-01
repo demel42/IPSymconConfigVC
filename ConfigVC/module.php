@@ -65,7 +65,7 @@ class ConfigVC extends IPSModule
 
         $formActions = [];
         $formActions[] = ['type' => 'Label', 'label' => 'Action takes up to 1 minute (depending on amount of data)'];
-        $formActions[] = ['type' => 'Button', 'label' => 'Perform', 'onClick' => 'ConfigVC_Perform($id);'];
+        $formActions[] = ['type' => 'Button', 'label' => 'Perform', 'onClick' => 'CVC_Perform($id);'];
 		$formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
 		$formActions[] = [
 							'type'    => 'Button',
