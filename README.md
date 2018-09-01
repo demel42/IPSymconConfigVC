@@ -40,13 +40,13 @@ Anschließend erscheint ein Eintrag für das Modul in der Liste der Instanz _Mod
 
 ### c. Einrichtung in IPS
 
-In IP-Symcon nun _Instanz hinzufügen_ (_CTRL+1_) auswählen unter der Kategorie, unter der man die Instanz hinzufügen will, und Hersteller _(sonstiges)_ und als Gerät _ConfigVC_ auswählen.
+In IP-Symcon nun _Instanz hinzufügen_ (_CTRL+1_) auswählen unter der Kategorie, unter der man die Instanz hinzufügen will, und Hersteller _(sonstiges)_ und als Gerät _Configuration Version-Control_ auswählen.
 
 ## 4. Funktionsreferenz
 
 ### zentrale Funktion
 
-`boolean ConfigVC_XXXX(integer $InstanzID)`<br>
+`boolean CVC_Perform(integer $InstanzID)`<br>
 
 ## 5. Konfiguration:
 
@@ -54,7 +54,7 @@ In IP-Symcon nun _Instanz hinzufügen_ (_CTRL+1_) auswählen unter der Kategorie
 
 | Eigenschaft                     | Typ      | Standardwert | Beschreibung |
 | :-----------------------------: | :-----:  | :----------: | :----------------------------------------------------------------------------------------------------------: |
-| Aktualisiere Daten ...          | integer  | 60           | Aktualisierungsintervall, Angabe in Minuten |
+| Git-Repository                  | string   |              | Pfad zu Git-Repository |
 
 ## 6. Anhang
 
