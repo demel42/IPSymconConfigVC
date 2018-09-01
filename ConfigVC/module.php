@@ -26,12 +26,12 @@ if (@constant('IPS_BASE') == null) {
 }
 
 if (!defined('vtBoolean')) {
-	define('vtBoolean', 0);
-	define('vtInteger', 1);
-	define('vtFloat', 2);
-	define('vtString', 3);
-	define('vtArray', 8);
-	define('vtObject', 9);
+    define('vtBoolean', 0);
+    define('vtInteger', 1);
+    define('vtFloat', 2);
+    define('vtString', 3);
+    define('vtArray', 8);
+    define('vtObject', 9);
 }
 
 class ConfigVC extends IPSModule
@@ -66,18 +66,18 @@ class ConfigVC extends IPSModule
         $formActions = [];
         $formActions[] = ['type' => 'Label', 'label' => 'Action takes up to 1 minute (depending on amount of data)'];
         $formActions[] = ['type' => 'Button', 'label' => 'Perform', 'onClick' => 'CVC_Perform($id);'];
-		$formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
-		$formActions[] = [
-							'type'    => 'Button',
-							'caption' => 'Module description',
-							'onClick' => 'echo "https://github.com/demel42/IPSymconConfigVC/blob/master/README.md";'
-						];
+        $formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
+        $formActions[] = [
+                            'type'    => 'Button',
+                            'caption' => 'Module description',
+                            'onClick' => 'echo "https://github.com/demel42/IPSymconConfigVC/blob/master/README.md";'
+                        ];
 
         $formStatus = [];
         $formStatus[] = ['code' => '101', 'icon' => 'inactive', 'caption' => 'Instance getting created'];
         $formStatus[] = ['code' => '102', 'icon' => 'active', 'caption' => 'Instance is active'];
         $formStatus[] = ['code' => '104', 'icon' => 'inactive', 'caption' => 'Instance is inactive'];
-		$formStatus[] = ['code' => '201', 'icon' => 'inactive (invalid configuration)', 'caption' => 'Instance is inactive (invalid configuration)'];
+        $formStatus[] = ['code' => '201', 'icon' => 'inactive (invalid configuration)', 'caption' => 'Instance is inactive (invalid configuration)'];
 
         return json_encode(['elements' => $formElements, 'actions' => $formActions, 'status' => $formStatus]);
     }
