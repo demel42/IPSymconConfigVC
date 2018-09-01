@@ -54,8 +54,6 @@ class ConfigVC extends IPSModule
         $this->MaintainVariable('LastUpdate', $this->Translate('Last versioning'), vtInteger, '~UnixTimestamp', $vpos++, true);
 
         $this->SetStatus(102);
-
-        $this->SetUpdateInterval();
     }
 
     public function GetConfigurationForm()
