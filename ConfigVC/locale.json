@@ -1,0 +1,16 @@
+{
+	"translations": {
+		"de": {
+			"Action takes up to 1 minute (depending on amount of data)": "Die Aktion dauert bis zu einer Minute (in Abhängigkeit von der Datenmenge)",
+			"Perform": "Durchführen",
+
+			"Module description": "Modulbeschreibung",
+
+			"Instance getting created": "Instanz wird erstellt",
+			"Instance is active": "Instanz ist aktiv",
+			"Instance is inactive": "Instanz ist inaktiv",
+
+			"Instance is inactive (invalid configuration)": "Instanz ist inaktiv (ungültige Konfiguration)"
+		}
+	}
+}

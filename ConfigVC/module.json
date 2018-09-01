@@ -1,0 +1,13 @@
+{
+	"id": "{396EA137-2E5F-413A-A996-D662158EA481}",
+	"name": "ConfigVC",
+	"type": 0,
+	"vendor": "",
+	"aliases": [
+		"Configuration Version-Control"
+	],
+	"parentRequirements": [],
+	"childRequirements": [],
+	"implemented": [],
+	"prefix": "CVC"
+}
