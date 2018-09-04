@@ -45,7 +45,7 @@ class ConfigVC extends IPSModule
         $this->RegisterPropertyString('url', '');
         $this->RegisterPropertyString('path', '');
 
-		$this->CreateVarProfile('ConfigVC.Duration', vtInteger, ' sec', 0, 0, 0, 0, '');
+        $this->CreateVarProfile('ConfigVC.Duration', vtInteger, ' sec', 0, 0, 0, 0, '');
     }
 
     public function ApplyChanges()
@@ -89,36 +89,38 @@ class ConfigVC extends IPSModule
 
     public function CloneRepository()
     {
-		$url = $this->ReadPropertyString('url');
-		$path = $this->ReadPropertyString('path');
-		$ipsPath = $path . '/' . basename($url, '.git');
+        $url = $this->ReadPropertyString('url');
+        $path = $this->ReadPropertyString('path');
+        $ipsPath = $path . '/' . basename($url, '.git');
 
         if (file_exists($ipsPath)) {
-			$directory = new RecursiveDirectoryIterator($ipsPath, FilesystemIterator::SKIP_DOTS);
-			$objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
-			foreach ($objects as $object) {
-				$fname = $object->getPathname();
-				if (is_dir($fname)) {
-					if (!rmdir($fname)) {
-						$this->SendDebug(__FUNCTION__, 'unable to delete firectory ' . $fname, 0);
-						return false;
-					}
-				} else {	
-					if (!unlink($fname)) {
-						$this->SendDebug(__FUNCTION__, 'unable to delete file ' . $fname, 0);
-						return false;
-					}
-				}
-			}
-			if (!rmdir($ipsPath)) {
-				$this->SendDebug(__FUNCTION__, 'unable to delete firectory ' . $ipsPath, 0);
-				return false;
-			}
-		}
-		if (!$this->changeDir($path))
-			return false;
-		if (!$this->execute('git clone ' . $url . ' 2>&1', $output))
-			return false;
+            $directory = new RecursiveDirectoryIterator($ipsPath, FilesystemIterator::SKIP_DOTS);
+            $objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
+            foreach ($objects as $object) {
+                $fname = $object->getPathname();
+                if (is_dir($fname)) {
+                    if (!rmdir($fname)) {
+                        $this->SendDebug(__FUNCTION__, 'unable to delete firectory ' . $fname, 0);
+                        return false;
+                    }
+                } else {
+                    if (!unlink($fname)) {
+                        $this->SendDebug(__FUNCTION__, 'unable to delete file ' . $fname, 0);
+                        return false;
+                    }
+                }
+            }
+            if (!rmdir($ipsPath)) {
+                $this->SendDebug(__FUNCTION__, 'unable to delete firectory ' . $ipsPath, 0);
+                return false;
+            }
+        }
+        if (!$this->changeDir($path)) {
+            return false;
+        }
+        if (!$this->execute('git clone ' . $url . ' 2>&1', $output)) {
+            return false;
+        }
 
         return true;
     }
@@ -126,27 +128,27 @@ class ConfigVC extends IPSModule
     public function PerformAdjustment()
     {
         $r = $this->adjustVC(false);
-		$state = $r['state'];
-		$msg = isset($r['msg']) ? $r['msg'] : '';
-		$duration = isset($r['duration']) ? $r['duration'] : 0;
-		if ($state) {
-			$log = 'status=ok, duration=' . $duration .' sec';
-			$summary = 'files: modified=' . $r['files']['modified']
-					. ', added=' . $r['files']['added']
-					. ', deleted=' . $r['files']['deleted']
-					. ', untracked=' . $r['files']['untracked']
-					. ', erroneous=' . $r['files']['erroneous'];
-		} else {
-			$log = 'status=fail';
-			$summary = $msg;
-		}
+        $state = $r['state'];
+        $msg = isset($r['msg']) ? $r['msg'] : '';
+        $duration = isset($r['duration']) ? $r['duration'] : 0;
+        if ($state) {
+            $log = 'status=ok, duration=' . $duration . ' sec';
+            $summary = 'files: modified=' . $r['files']['modified']
+                    . ', added=' . $r['files']['added']
+                    . ', deleted=' . $r['files']['deleted']
+                    . ', untracked=' . $r['files']['untracked']
+                    . ', erroneous=' . $r['files']['erroneous'];
+        } else {
+            $log = 'status=fail';
+            $summary = $msg;
+        }
 
-		IPS_LogMessage(__CLASS__ . __FUNCTION__, $log . PHP_EOL . $summary);
+        IPS_LogMessage(__CLASS__ . __FUNCTION__, $log . PHP_EOL . $summary);
 
-		$this->SetValue('State', $state);
-		$this->SetValue('Summary', $summary);
-		$this->SetValue('Duration', $duration);
-		$this->SetValue('Timestamp', time());
+        $this->SetValue('State', $state);
+        $this->SetValue('Summary', $summary);
+        $this->SetValue('Duration', $duration);
+        $this->SetValue('Timestamp', time());
     }
 
     private function loadFile($fname)
@@ -320,8 +322,8 @@ class ConfigVC extends IPSModule
         $pfxlen = strlen($dirname) + 1;
 
         $real_mtime = 0;
-		$directory = new RecursiveDirectoryIterator($sourcePath, FilesystemIterator::SKIP_DOTS);
-		$objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
+        $directory = new RecursiveDirectoryIterator($sourcePath, FilesystemIterator::SKIP_DOTS);
+        $objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
         foreach ($objects as $object) {
             $m = filemtime($object->getPathname());
             if ($m > $real_mtime) {
@@ -365,10 +367,10 @@ class ConfigVC extends IPSModule
 
     private function adjustVC($withModulesZip)
     {
-		$url = $this->ReadPropertyString('url');
-		$path = $this->ReadPropertyString('path');
+        $url = $this->ReadPropertyString('url');
+        $path = $this->ReadPropertyString('path');
 
-		$gitPath = $path . '/' . basename($url, '.git');
+        $gitPath = $path . '/' . basename($url, '.git');
 
         $msg = '';
 
@@ -395,27 +397,27 @@ class ConfigVC extends IPSModule
         $now = time();
 
         if (!$this->checkDir($gitPath, false)) {
-            return [ 'state' => false ];
+            return ['state' => false];
         }
 
         if (!$this->checkDir($gitScriptPath, true)) {
-            return [ 'state' => false ];
+            return ['state' => false];
         }
 
         if (!$this->checkDir($gitModulesPath, true)) {
-            return [ 'state' => false ];
+            return ['state' => false];
         }
 
         if (!$this->checkDir($gitSettingsPath, true)) {
-            return [ 'state' => false ];
+            return ['state' => false];
         }
 
         if (!$this->checkDir($gitObjectsPath, true)) {
-            return [ 'state' => false ];
+            return ['state' => false];
         }
 
         if (!$this->changeDir($gitPath)) {
-            return [ 'state' => false ];
+            return ['state' => false];
         }
 
         $time_start = microtime(true);
@@ -463,13 +465,13 @@ class ConfigVC extends IPSModule
                 echo "error saving file $dst\n";
                 continue;
             }
-/*
-            if (!$exists) {
-                if (!$this->execute('git add ' . $dst . ' 2>&1', $output)) {
-                    return [ 'state' => false ];
-                }
-            }
-*/
+            /*
+                        if (!$exists) {
+                            if (!$this->execute('git add ' . $dst . ' 2>&1', $output)) {
+                                return [ 'state' => false ];
+                            }
+                        }
+            */
         }
         foreach ($oldScripts as $filename) {
             if (in_array($filename, $newScripts)) {
@@ -481,7 +483,7 @@ class ConfigVC extends IPSModule
                 continue;
             }
             if (!$this->execute('git rm ' . $fname, $output)) {
-                return [ 'state' => false ];
+                return ['state' => false];
             }
         }
 
@@ -492,14 +494,14 @@ class ConfigVC extends IPSModule
         $time_start_settings = microtime(true);
 
         if (!$this->changeDir($gitPath)) {
-            return [ 'state' => false ];
+            return ['state' => false];
         }
 
         $data = file_get_contents($ipsSettingsPath);
         $r = $this->loadFile($ipsSettingsPath);
         if (!$r) {
             $this->SendDebug(__FUNCTION__, 'error loading file ' . $src, 0);
-            return [ 'state' => false ];
+            return ['state' => false];
         }
         $stat = $r['stat'];
         $data = $r['data'];
@@ -507,15 +509,15 @@ class ConfigVC extends IPSModule
         $exists = file_exists($gitSettingsName);
         if (!$this->saveFile($gitSettingsName, $data, $stat['mtime'], false)) {
             $this->SendDebug(__FUNCTION__, 'error saving file ' . $gitSettingsName, 0);
-            return [ 'state' => false ];
+            return ['state' => false];
         }
-/*
-        if (!$exists) {
-            if (!$this->execute('git add ' . $gitSettingsName . ' 2>&1', $output)) {
-                return [ 'state' => false ];
-            }
-        }
-*/
+        /*
+                if (!$exists) {
+                    if (!$this->execute('git add ' . $gitSettingsName . ' 2>&1', $output)) {
+                        return [ 'state' => false ];
+                    }
+                }
+        */
 
         $duration_settings = floor((microtime(true) - $time_start_settings) * 100) / 100;
 
@@ -524,7 +526,7 @@ class ConfigVC extends IPSModule
         $time_start_objects = microtime(true);
 
         if (!$this->changeDir($gitPath)) {
-            return [ 'state' => false ];
+            return ['state' => false];
         }
 
         $oldObjects = [];
@@ -550,15 +552,15 @@ class ConfigVC extends IPSModule
             $exists = file_exists($fname);
             if (!$this->saveFile($fname, $uelem, 0, true)) {
                 $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
-                return [ 'state' => false ];
+                return ['state' => false];
             }
-/*
-            if (!$exists) {
-                if (!$this->execute('git add ' . $fname . ' 2>&1', $output)) {
-                    return [ 'state' => false ];
-                }
-            }
-*/
+            /*
+                        if (!$exists) {
+                            if (!$this->execute('git add ' . $fname . ' 2>&1', $output)) {
+                                return [ 'state' => false ];
+                            }
+                        }
+            */
         }
 
         $newObjects = [];
@@ -618,15 +620,15 @@ class ConfigVC extends IPSModule
             $exists = file_exists($fname);
             if (!$this->saveFile($fname, $uobj, $mtime, true)) {
                 $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
-                return [ 'state' => false ];
+                return ['state' => false];
             }
-/*
-            if (!$exists) {
-                if (!$this->execute('git add ' . $fname . ' 2>&1', $output)) {
-                    return [ 'state' => false ];
-                }
-            }
-*/
+            /*
+                        if (!$exists) {
+                            if (!$this->execute('git add ' . $fname . ' 2>&1', $output)) {
+                                return [ 'state' => false ];
+                            }
+                        }
+            */
         }
 
         foreach ($oldObjects as $filename) {
@@ -639,7 +641,7 @@ class ConfigVC extends IPSModule
                 continue;
             }
             if (!$this->execute('git rm ' . $fname, $output)) {
-                return [ 'state' => false ];
+                return ['state' => false];
             }
         }
 
@@ -663,11 +665,11 @@ class ConfigVC extends IPSModule
             }
             $this->SendDebug(__FUNCTION__, 'check module "' . $dirname . '"', 0);
             if (!$this->changeDir($path)) {
-                return [ 'state' => false ];
+                return ['state' => false];
             }
 
             if (!$this->execute('git config --get remote.origin.url', $output)) {
-                return [ 'state' => false ];
+                return ['state' => false];
             }
             $url = '';
             foreach ($output as $s) {
@@ -680,7 +682,7 @@ class ConfigVC extends IPSModule
             }
 
             if (!$this->execute('git branch', $output)) {
-                return [ 'state' => false ];
+                return ['state' => false];
             }
             $branch = '';
             foreach ($output as $s) {
@@ -699,23 +701,23 @@ class ConfigVC extends IPSModule
             if ($withModulesZip) {
                 $time_start_zipfile = microtime(true);
                 if (!$this->changeDir($ipsModulesPath)) {
-                    return [ 'state' => false ];
+                    return ['state' => false];
                 }
                 $path = $gitModulesPath . DIRECTORY_SEPARATOR . $dirname . '.zip';
                 $exists = file_exists($path);
                 if (!$this->buildZip($dirname, $path)) {
-                    return [ 'state' => false ];
+                    return ['state' => false];
                 }
                 if (!$exists) {
                     if (!$this->changeDir($gitPath)) {
-                        return [ 'state' => false ];
+                        return ['state' => false];
                     }
                     $path = $gitModulesDir . DIRECTORY_SEPARATOR . $dirname . '.zip';
-/*
-                    if (!$this->execute('git add ' . $path . ' 2>&1', $output)) {
-                        return [ 'state' => false ];
-                    }
-*/
+                    /*
+                                        if (!$this->execute('git add ' . $path . ' 2>&1', $output)) {
+                                            return [ 'state' => false ];
+                                        }
+                    */
                 }
                 $duration_zipfile = floor((microtime(true) - $time_start_zipfile) * 100) / 100;
                 $duration_zipfiles += $duration_zipfile;
@@ -729,18 +731,18 @@ class ConfigVC extends IPSModule
         $exists = file_exists($fname);
         if (!$this->saveFile($fname, $data, 0, true)) {
             $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
-            return [ 'state' => false ];
+            return ['state' => false];
         }
         if (!$exists) {
             if (!$this->changeDir($gitPath)) {
-                return [ 'state' => false ];
+                return ['state' => false];
             }
             $fname = $gitModulesDir . DIRECTORY_SEPARATOR . $gitModulesList;
-/*
-            if (!$this->execute('git add ' . $fname . ' 2>&1', $output)) {
-                return [ 'state' => false ];
-            }
-*/
+            /*
+                        if (!$this->execute('git add ' . $fname . ' 2>&1', $output)) {
+                            return [ 'state' => false ];
+                        }
+            */
         }
 
         $duration_modules = floor((microtime(true) - $time_start_modules) * 100) / 100;
@@ -748,7 +750,7 @@ class ConfigVC extends IPSModule
         // final git-commands
 
         if (!$this->changeDir($gitPath)) {
-            return [ 'state' => false ];
+            return ['state' => false];
         }
 
         $n_modified = 0;
@@ -757,11 +759,11 @@ class ConfigVC extends IPSModule
         $n_untracked = 0;
         $n_erroneous = 0;
 
-		if (!$this->execute('git add . 2>&1', $output)) {
-			return [ 'state' => false ];
-		}
+        if (!$this->execute('git add . 2>&1', $output)) {
+            return ['state' => false];
+        }
         if (!$this->execute('git status --porcelain', $output)) {
-            return [ 'state' => false ];
+            return ['state' => false];
         }
         foreach ($output as $s) {
             $p = substr($s, 0, 2);
@@ -790,44 +792,46 @@ class ConfigVC extends IPSModule
         if ($n_commitable) {
             $m = 'Änderungen vom ' . date('d.m.Y H:i:s', $now);
             if (!$this->execute('git commit -a -m \'' . $m . '\'', $output)) {
-                return [ 'state' => false ];
+                return ['state' => false];
             }
             if (!$this->execute('git push 2>&1', $output)) {
-                return [ 'state' => false ];
+                return ['state' => false];
             }
         }
 
         $duration = floor((microtime(true) - $time_start) * 100) / 100;
 
-		$s = 'files: modified=' . $n_modified
+        $s = 'files: modified=' . $n_modified
             . ', added=' . $n_added
             . ', deleted=' . $n_deleted
             . ', untracked=' . $n_untracked
             . ', erroneous=' . $n_erroneous;
         $this->SendDebug(__FUNCTION__, $s, 0);
-		$s = 'duration: total=' . $duration . 's'
+        $s = 'duration: total=' . $duration . 's'
             . ', scripts=' . $duration_scripts . 's'
             . ', settings=' . $duration_settings . 's'
             . ', objects=' . $duration_objects . 's'
             . ', modules=' . $duration_modules . 's';
-		if ($duration_zipfiles)
-			$s .= ' (including zip-files=' . $duration_zipfiles . 's)';
-		$this->SendDebug(__FUNCTION__, $s, 0);
-		if ($msg != '')
-			$this->SendDebug(__FUNCTION__, 'msg=' . $msg, 0);
+        if ($duration_zipfiles) {
+            $s .= ' (including zip-files=' . $duration_zipfiles . 's)';
+        }
+        $this->SendDebug(__FUNCTION__, $s, 0);
+        if ($msg != '') {
+            $this->SendDebug(__FUNCTION__, 'msg=' . $msg, 0);
+        }
 
-		$r = [
-				'state'		=> true,
-				'msg'		=> $msg,
-				'duration'	=> $duration,
-				'files'		=> [
-					'modified'	=> $n_modified,
-					'added'		=> $n_added,
-					'deleted'	=> $n_deleted,
-					'untracked'	=> $n_untracked,
-					'erroneous'	=> $n_erroneous,
-				],
-			];
+        $r = [
+                'state'		  => true,
+                'msg'		    => $msg,
+                'duration'	=> $duration,
+                'files'		  => [
+                    'modified'	 => $n_modified,
+                    'added'		   => $n_added,
+                    'deleted'	  => $n_deleted,
+                    'untracked'	=> $n_untracked,
+                    'erroneous'	=> $n_erroneous,
+                ],
+            ];
         return $r;
     }
 
