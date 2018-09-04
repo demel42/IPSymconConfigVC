@@ -1,10 +1,19 @@
 {
 	"translations": {
 		"de": {
-			"Action takes up to 1 minute (depending on amount of data)": "Die Aktion dauert bis zu einer Minute (in Abhängigkeit von der Datenmenge)",
-			"Perform": "Durchführen",
+			"Git-Repository": "Git-Repository",
+			"local path: "lokales Verzeichnis",
+
+			"Action takes up several 1 minute (depending on amount of data)": "Die Aktion dauert bis zu einigen Minuten (in Abhängigkeit von der Datenmenge)",
+			"Perform adjustment": "Abgleich durchführen",
+			"Clone Repository": "Repository einrichten",
 
 			"Module description": "Modulbeschreibung",
+
+			"State": "Status",
+			"Summary of last adjustment": "Zusammenfassung des letzten Abgleichs",
+			"Duration of last adjustment": "Dauer des letzten Abgleichs",
+			"Timestamp of last adjustment": "Zeitpunkt des letzten Abgleichs",
 
 			"Instance getting created": "Instanz wird erstellt",
 			"Instance is active": "Instanz ist aktiv",
