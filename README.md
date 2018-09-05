@@ -55,6 +55,9 @@ In IP-Symcon nun _Instanz hinzufügen_ (_CTRL+1_) auswählen unter der Kategorie
 | Eigenschaft                     | Typ      | Standardwert | Beschreibung |
 | :-----------------------------: | :-----:  | :----------: | :----------------------------------------------------------------------------------------------------------: |
 | Git-Repository                  | string   |              | Pfad zu Git-Repository |
+| Benutzer                        | string   |              | Benutzer des Git-Repository (nur für https) |
+| Passwort                        | string   |              | Passwort (nur für https) |
+| lokales Verzeichnis             | string   |              | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
 
 ## 6. Anhang
 
@@ -68,3 +71,35 @@ GUIDs
 
 - 1.0 @ 01.09.2018<br>
   Initiale Version
+
+
+    https://git-scm.com/book/de/v1/Git-auf-dem-Server-Einrichten-des-Servers
+    https://www.linux.com/learn/how-run-your-own-git-server
+
+	# lokales git
+    sudo adduser git
+    <passwort eingeben und merken>
+    sudo mkdir -p ~git/repositories/ipsymcon.git
+    cd ~git/repositories/ipsymcon.git
+    sudo git init --bare
+    sudo chown -R git:users ~git/repositories
+
+	cd /tmp
+	git clone ssh://git@ips-dev.damsky.home/home/git/repositories/ipsymcon.git
+	cd ipsymcon
+	touch README.md
+	git add README.md
+	git commit -m "initial revision"
+	cd /tmp
+	/bin/rm -rf ipsymcon
+
+	# ssh-keys
+    ssh-keygen -t rsa -b 2048
+    ssh-copy-id git@ips-prod.damsky.home
+
+	ODER
+
+	Privates Repository auf github direkt mit README.md anlegen
+
+    mkdir <verzeichnis für lokales respoitory>
+	-> am besten auf einem usb-stick

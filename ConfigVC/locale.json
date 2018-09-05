@@ -2,9 +2,13 @@
 	"translations": {
 		"de": {
 			"Git-Repository": "Git-Repository",
-			"local path: "lokales Verzeichnis",
+			"Login-data (for https only)": "Login-Daten (nur für https)",
+			" ... User": " ... Benutzer",
+			" ... Password": " ... Passwort",
 
-			"Action takes up several 1 minute (depending on amount of data)": "Die Aktion dauert bis zu einigen Minuten (in Abhängigkeit von der Datenmenge)",
+			"local path": "lokales Verzeichnis",
+
+			"Action takes up several minutes (depending on amount of data)": "Die Aktion dauert bis zu einigen Minuten (in Abhängigkeit von der Datenmenge)",
 			"Perform adjustment": "Abgleich durchführen",
 			"Clone Repository": "Repository einrichten",
 

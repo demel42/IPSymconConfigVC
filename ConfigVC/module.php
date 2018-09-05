@@ -43,6 +43,8 @@ class ConfigVC extends IPSModule
         parent::Create();
 
         $this->RegisterPropertyString('url', '');
+        $this->RegisterPropertyString('user', '');
+        $this->RegisterPropertyString('password', '');
         $this->RegisterPropertyString('path', '');
 
         $this->CreateVarProfile('ConfigVC.Duration', vtInteger, ' sec', 0, 0, 0, 0, '');
@@ -65,10 +67,13 @@ class ConfigVC extends IPSModule
     {
         $formElements = [];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'url', 'caption' => 'Git-Repository'];
+        $formElements[] = ['type' => 'Label', 'label' => 'Login-data (for https only)'];
+        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'user', 'caption' => ' ... User'];
+        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'password', 'caption' => ' ... Password'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
 
         $formActions = [];
-        $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several 1 minute (depending on amount of data)'];
+        $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
         $formActions[] = ['type' => 'Button', 'label' => 'Perform adjustment', 'onClick' => 'CVC_PerformAdjustment($id);'];
         $formActions[] = ['type' => 'Button', 'label' => 'Clone Repository', 'onClick' => 'CVC_CloneRepository($id);'];
         $formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
@@ -90,6 +95,12 @@ class ConfigVC extends IPSModule
     public function CloneRepository()
     {
         $url = $this->ReadPropertyString('url');
+        $user = $this->ReadPropertyString('user');
+        $password = $this->ReadPropertyString('password');
+		if (substr($url, 0, 8) == 'https://') {
+			$url = 'https://' . rawurlencode($user) . ':' . rawurlencode($password) . '@' . substr($url, 8);
+		}
+
         $path = $this->ReadPropertyString('path');
         $ipsPath = $path . '/' . basename($url, '.git');
 
@@ -119,6 +130,15 @@ class ConfigVC extends IPSModule
             return false;
         }
         if (!$this->execute('git clone ' . $url . ' 2>&1', $output)) {
+            return false;
+        }
+
+		$name = 'IP-Symcon';
+        if (!$this->execute('git config --global user.name ' .  $name, $output)) {
+            return false;
+        }
+		$email = 'root@' . gethostname();
+        if (!$this->execute('git config --global user.email ' . $email, $output)) {
             return false;
         }
 
@@ -310,7 +330,7 @@ class ConfigVC extends IPSModule
         return true;
     }
 
-    private function buildZip($sourcePath, $zipFile)
+    private function buildZip($sourcePath, $zipFile, $real_mtime)
     {
         if (substr($sourcePath, 0, 1) != DIRECTORY_SEPARATOR) {
             $sourcePath = '.' . DIRECTORY_SEPARATOR . $sourcePath;
@@ -320,16 +340,6 @@ class ConfigVC extends IPSModule
         $basename = $pathInfo['basename'];
         $dirname = $pathInfo['dirname'];
         $pfxlen = strlen($dirname) + 1;
-
-        $real_mtime = 0;
-        $directory = new RecursiveDirectoryIterator($sourcePath, FilesystemIterator::SKIP_DOTS);
-        $objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
-        foreach ($objects as $object) {
-            $m = filemtime($object->getPathname());
-            if ($m > $real_mtime) {
-                $real_mtime = $m;
-            }
-        }
 
         if (file_exists($zipFile)) {
             $arch_mtime = filemtime($zipFile);
@@ -460,18 +470,10 @@ class ConfigVC extends IPSModule
             }
             $src_stat = $r['stat'];
             $src_data = $r['data'];
-            $exists = file_exists($dst);
             if (!$this->saveFile($dst, $src_data, $src_stat['mtime'], true)) {
                 echo "error saving file $dst\n";
                 continue;
             }
-            /*
-                        if (!$exists) {
-                            if (!$this->execute('git add ' . $dst . ' 2>&1', $output)) {
-                                return [ 'state' => false ];
-                            }
-                        }
-            */
         }
         foreach ($oldScripts as $filename) {
             if (in_array($filename, $newScripts)) {
@@ -506,18 +508,10 @@ class ConfigVC extends IPSModule
         $stat = $r['stat'];
         $data = $r['data'];
 
-        $exists = file_exists($gitSettingsName);
         if (!$this->saveFile($gitSettingsName, $data, $stat['mtime'], false)) {
             $this->SendDebug(__FUNCTION__, 'error saving file ' . $gitSettingsName, 0);
             return ['state' => false];
         }
-        /*
-                if (!$exists) {
-                    if (!$this->execute('git add ' . $gitSettingsName . ' 2>&1', $output)) {
-                        return [ 'state' => false ];
-                    }
-                }
-        */
 
         $duration_settings = floor((microtime(true) - $time_start_settings) * 100) / 100;
 
@@ -549,18 +543,10 @@ class ConfigVC extends IPSModule
             $selem = json_encode($elem, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             $uelem = utf8_decode($selem);
             $fname = $gitSettingsDir . DIRECTORY_SEPARATOR . $key . '.json';
-            $exists = file_exists($fname);
             if (!$this->saveFile($fname, $uelem, 0, true)) {
                 $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
                 return ['state' => false];
             }
-            /*
-                        if (!$exists) {
-                            if (!$this->execute('git add ' . $fname . ' 2>&1', $output)) {
-                                return [ 'state' => false ];
-                            }
-                        }
-            */
         }
 
         $newObjects = [];
@@ -617,18 +603,10 @@ class ConfigVC extends IPSModule
             $uobj = utf8_decode($sobj);
 
             $fname = $gitObjectsDir . DIRECTORY_SEPARATOR . $objID . '.json';
-            $exists = file_exists($fname);
             if (!$this->saveFile($fname, $uobj, $mtime, true)) {
                 $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
                 return ['state' => false];
             }
-            /*
-                        if (!$exists) {
-                            if (!$this->execute('git add ' . $fname . ' 2>&1', $output)) {
-                                return [ 'state' => false ];
-                            }
-                        }
-            */
         }
 
         foreach ($oldObjects as $filename) {
@@ -651,8 +629,6 @@ class ConfigVC extends IPSModule
 
         $time_start_modules = microtime(true);
         $duration_zipfiles = 0;
-
-        $modules = [];
 
         $dirnames = scandir($ipsModulesPath, 0);
         foreach ($dirnames as $dirname) {
@@ -696,7 +672,25 @@ class ConfigVC extends IPSModule
                 continue;
             }
 
-            $modules[] = ['name' => $dirname, 'url' => $url, 'branch' => $branch];
+			$mtime = 0;
+			$directory = new RecursiveDirectoryIterator('.', FilesystemIterator::SKIP_DOTS);
+			$objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
+			foreach ($objects as $object) {
+				$m = filemtime($object->getPathname());
+				if ($m > $mtime) {
+					$mtime = $m;
+				}
+			}
+
+            $jdata = [ 'name' => $dirname, 'url' => $url, 'branch' => $branch, 'mtime' => $mtime ];
+			$sdata = json_encode($jdata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+			$data = utf8_decode($sdata);
+
+			$fname = $gitModulesPath . DIRECTORY_SEPARATOR . $dirname . '.json';
+			if (!$this->saveFile($fname, $data, 0, true)) {
+				$this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
+				return ['state' => false];
+			}
 
             if ($withModulesZip) {
                 $time_start_zipfile = microtime(true);
@@ -704,45 +698,12 @@ class ConfigVC extends IPSModule
                     return ['state' => false];
                 }
                 $path = $gitModulesPath . DIRECTORY_SEPARATOR . $dirname . '.zip';
-                $exists = file_exists($path);
-                if (!$this->buildZip($dirname, $path)) {
+                if (!$this->buildZip($dirname, $path, $mtime)) {
                     return ['state' => false];
-                }
-                if (!$exists) {
-                    if (!$this->changeDir($gitPath)) {
-                        return ['state' => false];
-                    }
-                    $path = $gitModulesDir . DIRECTORY_SEPARATOR . $dirname . '.zip';
-                    /*
-                                        if (!$this->execute('git add ' . $path . ' 2>&1', $output)) {
-                                            return [ 'state' => false ];
-                                        }
-                    */
                 }
                 $duration_zipfile = floor((microtime(true) - $time_start_zipfile) * 100) / 100;
                 $duration_zipfiles += $duration_zipfile;
             }
-        }
-
-        $sdata = json_encode($modules, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $data = utf8_decode($sdata);
-
-        $fname = $gitModulesPath . DIRECTORY_SEPARATOR . $gitModulesList;
-        $exists = file_exists($fname);
-        if (!$this->saveFile($fname, $data, 0, true)) {
-            $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
-            return ['state' => false];
-        }
-        if (!$exists) {
-            if (!$this->changeDir($gitPath)) {
-                return ['state' => false];
-            }
-            $fname = $gitModulesDir . DIRECTORY_SEPARATOR . $gitModulesList;
-            /*
-                        if (!$this->execute('git add ' . $fname . ' 2>&1', $output)) {
-                            return [ 'state' => false ];
-                        }
-            */
         }
 
         $duration_modules = floor((microtime(true) - $time_start_modules) * 100) / 100;
@@ -753,11 +714,11 @@ class ConfigVC extends IPSModule
             return ['state' => false];
         }
 
-        $n_modified = 0;
-        $n_added = 0;
-        $n_deleted = 0;
-        $n_untracked = 0;
-        $n_erroneous = 0;
+        $fn_modified = [];
+        $fn_added = [];
+        $fn_deleted = [];
+        $fn_untracked = [];
+        $fn_erroneous = [];
 
         if (!$this->execute('git add . 2>&1', $output)) {
             return ['state' => false];
@@ -766,31 +727,65 @@ class ConfigVC extends IPSModule
             return ['state' => false];
         }
         foreach ($output as $s) {
-            $p = substr($s, 0, 2);
-            switch ($p) {
+            $st = substr($s, 0, 2);
+            $fn = substr($s, 3);
+            switch ($st) {
                 case ' M':
-                    $n_modified++;
+                case 'M ':
+                    $fn_modified[] = $fn;
                     break;
                 case 'A ':
                 case 'AM':
-                    $n_added++;
+                    $fn_added[] = $fn;
                     break;
                 case 'D ':
-                    $n_deleted++;
+                    $fn_deleted[] = $fn;
                     break;
                 case '??':
-                    $n_untracked++;
+                    $fn_untracked[] = $fn;
                     break;
                 default:
-                    $this->SendDebug(__FUNCTION__, 'erroneous status "' . $p . '"', 0);
-                    $n_erroneous++;
+                    $this->SendDebug(__FUNCTION__, 'erroneous status "' . $st . '"', 0);
+                    $fn_erroneous[] = $fn;
                     break;
             }
         }
 
+        $n_modified = count($fn_modified);
+        $n_added = count($fn_added);
+        $n_deleted = count($fn_deleted);
+        $n_untracked = count($fn_untracked);
+        $n_erroneous = count($fn_erroneous);
+
         $n_commitable = $n_modified + $n_added + $n_deleted;
         if ($n_commitable) {
             $m = 'Änderungen vom ' . date('d.m.Y H:i:s', $now);
+
+			$s = $m . "\n";
+			$s .= "\n";
+			$s .= 'betroffene Dateien:' . "\n";
+			$s .= "\n";
+			$s .= '- geändert: ' . $n_modified . '<br>' . PHP_EOL;
+			foreach ($fn_modified as $fn)
+				$s .= '  ' . $fn . '<br>' . PHP_EOL;
+			$s .= '- hinzugefügt: ' . $n_added . '<br>' . PHP_EOL;
+			foreach ($fn_added as $fn)
+				$s .= '  ' . $fn . '<br>' . PHP_EOL;
+			$s .= '- gelöscht: ' . $n_deleted . '<br>' . PHP_EOL;
+			foreach ($fn_deleted as $fn)
+				$s .= '  ' . $fn . '<br>' . PHP_EOL;
+			$s .= '- unversioniert: ' . $n_untracked . '<br>' . PHP_EOL;
+			foreach ($fn_untracked as $fn)
+				$s .= '  ' . $fn . '<br>' . PHP_EOL;
+			$s .= '- fehlerhaft: ' . $n_erroneous . '<br>' . PHP_EOL;
+			foreach ($fn_erroneous as $fn)
+				$s .= '  ' . $fn . '<br>' . PHP_EOL;
+
+			if (!$this->saveFile('README.md', $s, 0, false)) {
+				$this->SendDebug(__FUNCTION__, 'error saving file README.md' , 0);
+				return ['state' => false];
+			}
+
             if (!$this->execute('git commit -a -m \'' . $m . '\'', $output)) {
                 return ['state' => false];
             }
@@ -835,26 +830,4 @@ class ConfigVC extends IPSModule
         return $r;
     }
 
-    /*
-
-    https://git-scm.com/book/de/v1/Git-auf-dem-Server-Einrichten-des-Servers
-    https://www.linux.com/learn/how-run-your-own-git-server
-
-    sudo adduser git
-    <passwort eingeben und merken>
-    sudo mkdir -p ~git/repositories/ipsymcon.git
-    sudo cd ~git/repositories/ipsymcon.git
-    sudo git init --bare
-    sudo chown -R git:users  ~git/repositories
-
-
-    mkdir <verzeichnis für lokales respoitory>
-    cd  <verzeichnis für lokales respoitory>
-    git init
-    git clone ssh://git@ips-dev:/home/git/repositories/ipsymcon.git
-
-    ssh-keygen -t rsa -b 2048
-    ssh-copy-id git@ips-prod.damsky.home
-
-    */
 }
