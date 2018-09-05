@@ -97,9 +97,9 @@ class ConfigVC extends IPSModule
         $url = $this->ReadPropertyString('url');
         $user = $this->ReadPropertyString('user');
         $password = $this->ReadPropertyString('password');
-		if (substr($url, 0, 8) == 'https://') {
-			$url = 'https://' . rawurlencode($user) . ':' . rawurlencode($password) . '@' . substr($url, 8);
-		}
+        if (substr($url, 0, 8) == 'https://') {
+            $url = 'https://' . rawurlencode($user) . ':' . rawurlencode($password) . '@' . substr($url, 8);
+        }
 
         $path = $this->ReadPropertyString('path');
         $ipsPath = $path . '/' . basename($url, '.git');
@@ -133,11 +133,11 @@ class ConfigVC extends IPSModule
             return false;
         }
 
-		$name = 'IP-Symcon';
-        if (!$this->execute('git config --global user.name ' .  $name, $output)) {
+        $name = 'IP-Symcon';
+        if (!$this->execute('git config --global user.name ' . $name, $output)) {
             return false;
         }
-		$email = 'root@' . gethostname();
+        $email = 'root@' . gethostname();
         if (!$this->execute('git config --global user.email ' . $email, $output)) {
             return false;
         }
@@ -672,25 +672,25 @@ class ConfigVC extends IPSModule
                 continue;
             }
 
-			$mtime = 0;
-			$directory = new RecursiveDirectoryIterator('.', FilesystemIterator::SKIP_DOTS);
-			$objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
-			foreach ($objects as $object) {
-				$m = filemtime($object->getPathname());
-				if ($m > $mtime) {
-					$mtime = $m;
-				}
-			}
+            $mtime = 0;
+            $directory = new RecursiveDirectoryIterator('.', FilesystemIterator::SKIP_DOTS);
+            $objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
+            foreach ($objects as $object) {
+                $m = filemtime($object->getPathname());
+                if ($m > $mtime) {
+                    $mtime = $m;
+                }
+            }
 
-            $jdata = [ 'name' => $dirname, 'url' => $url, 'branch' => $branch, 'mtime' => $mtime ];
-			$sdata = json_encode($jdata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			$data = utf8_decode($sdata);
+            $jdata = ['name' => $dirname, 'url' => $url, 'branch' => $branch, 'mtime' => $mtime];
+            $sdata = json_encode($jdata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $data = utf8_decode($sdata);
 
-			$fname = $gitModulesPath . DIRECTORY_SEPARATOR . $dirname . '.json';
-			if (!$this->saveFile($fname, $data, 0, true)) {
-				$this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
-				return ['state' => false];
-			}
+            $fname = $gitModulesPath . DIRECTORY_SEPARATOR . $dirname . '.json';
+            if (!$this->saveFile($fname, $data, 0, true)) {
+                $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
+                return ['state' => false];
+            }
 
             if ($withModulesZip) {
                 $time_start_zipfile = microtime(true);
@@ -761,30 +761,35 @@ class ConfigVC extends IPSModule
         if ($n_commitable) {
             $m = 'Änderungen vom ' . date('d.m.Y H:i:s', $now);
 
-			$s = $m . "\n";
-			$s .= "\n";
-			$s .= 'betroffene Dateien:' . "\n";
-			$s .= "\n";
-			$s .= '- geändert: ' . $n_modified . '<br>' . PHP_EOL;
-			foreach ($fn_modified as $fn)
-				$s .= '  ' . $fn . '<br>' . PHP_EOL;
-			$s .= '- hinzugefügt: ' . $n_added . '<br>' . PHP_EOL;
-			foreach ($fn_added as $fn)
-				$s .= '  ' . $fn . '<br>' . PHP_EOL;
-			$s .= '- gelöscht: ' . $n_deleted . '<br>' . PHP_EOL;
-			foreach ($fn_deleted as $fn)
-				$s .= '  ' . $fn . '<br>' . PHP_EOL;
-			$s .= '- unversioniert: ' . $n_untracked . '<br>' . PHP_EOL;
-			foreach ($fn_untracked as $fn)
-				$s .= '  ' . $fn . '<br>' . PHP_EOL;
-			$s .= '- fehlerhaft: ' . $n_erroneous . '<br>' . PHP_EOL;
-			foreach ($fn_erroneous as $fn)
-				$s .= '  ' . $fn . '<br>' . PHP_EOL;
+            $s = $m . "\n";
+            $s .= "\n";
+            $s .= 'betroffene Dateien:' . "\n";
+            $s .= "\n";
+            $s .= '- geändert: ' . $n_modified . '<br>' . PHP_EOL;
+            foreach ($fn_modified as $fn) {
+                $s .= '  ' . $fn . '<br>' . PHP_EOL;
+            }
+            $s .= '- hinzugefügt: ' . $n_added . '<br>' . PHP_EOL;
+            foreach ($fn_added as $fn) {
+                $s .= '  ' . $fn . '<br>' . PHP_EOL;
+            }
+            $s .= '- gelöscht: ' . $n_deleted . '<br>' . PHP_EOL;
+            foreach ($fn_deleted as $fn) {
+                $s .= '  ' . $fn . '<br>' . PHP_EOL;
+            }
+            $s .= '- unversioniert: ' . $n_untracked . '<br>' . PHP_EOL;
+            foreach ($fn_untracked as $fn) {
+                $s .= '  ' . $fn . '<br>' . PHP_EOL;
+            }
+            $s .= '- fehlerhaft: ' . $n_erroneous . '<br>' . PHP_EOL;
+            foreach ($fn_erroneous as $fn) {
+                $s .= '  ' . $fn . '<br>' . PHP_EOL;
+            }
 
-			if (!$this->saveFile('README.md', $s, 0, false)) {
-				$this->SendDebug(__FUNCTION__, 'error saving file README.md' , 0);
-				return ['state' => false];
-			}
+            if (!$this->saveFile('README.md', $s, 0, false)) {
+                $this->SendDebug(__FUNCTION__, 'error saving file README.md', 0);
+                return ['state' => false];
+            }
 
             if (!$this->execute('git commit -a -m \'' . $m . '\'', $output)) {
                 return ['state' => false];
@@ -829,5 +834,4 @@ class ConfigVC extends IPSModule
             ];
         return $r;
     }
-
 }
