@@ -34,6 +34,16 @@ if (!defined('vtBoolean')) {
     define('vtObject', 9);
 }
 
+if (!defined('otCategory')) {
+    define('otCategory', 0);
+	define('otInstance', 1);
+	define('otVariable', 2);
+	define('otScript', 3);
+	define('otEvent', 4);
+	define('otMedia', 5);
+	define('otLink', 6);
+}
+
 class ConfigVC extends IPSModule
 {
     use ConfigVCCommon;
@@ -614,37 +624,37 @@ class ConfigVC extends IPSModule
             $mtime = 0;
             $obj = IPS_GetObject($objID);
             switch ($obj['ObjectType']) {
-                case '0':
+                case otCategory:
                     break;
-                case '1':
+                case otInstance:
                     $obj['data'] = IPS_GetInstance($objID);
                     $mtime = $obj['data']['InstanceChanged'];
                     $obj['data']['InstanceChanged'] = 0;
                     break;
-                case '2':
+                case otVariable:
                     $obj['data'] = IPS_GetVariable($objID);
                     $mtime = $obj['data']['VariableUpdated'];
                     $obj['data']['VariableChanged'] = 0;
                     $obj['data']['VariableUpdated'] = 0;
                     $obj['data']['VariableValue'] = '';
                     break;
-                case '3':
+                case otScript:
                     $obj['data'] = IPS_GetScript($objID);
                     $mtime = $obj['data']['ScriptExecuted'];
                     $obj['data']['ScriptExecuted'] = 0;
                     break;
-                case '4':
+                case otEvent:
                     $obj['data'] = IPS_GetEvent($objID);
                     $mtime = $obj['data']['LastRun'];
                     $obj['data']['LastRun'] = 0;
                     $obj['data']['NextRun'] = 0;
                     break;
-                case '5':
+                case otMedia:
                     $obj['data'] = IPS_GetMedia($objID);
                     $mtime = $obj['data']['MediaUpdated'];
                     $obj['data']['MediaUpdated'] = 0;
                     break;
-                case '6':
+                case otLink:
                     $obj['data'] = IPS_GetLink($objID);
                     break;
                 default:
