@@ -915,16 +915,16 @@ class ConfigVC extends IPSModule
         }
 
         $r = [
-                'state'		  => true,
-                'msg'		    => $msg,
-                'duration'	=> $duration,
-                'files'		  => [
-                    'modified'	 => $n_modified,
-                    'added'		   => $n_added,
-                    'renamed'	  => $n_renamed,
-                    'deleted'	  => $n_deleted,
-                    'untracked'	=> $n_untracked,
-                    'erroneous'	=> $n_erroneous,
+                'state'        => true,
+                'msg'          => $msg,
+                'duration'     => $duration,
+                'files'        => [
+                    'modified'     => $n_modified,
+                    'added'        => $n_added,
+                    'renamed'      => $n_renamed,
+                    'deleted'      => $n_deleted,
+                    'untracked'    => $n_untracked,
+                    'erroneous'    => $n_erroneous,
                 ],
             ];
         return $r;
