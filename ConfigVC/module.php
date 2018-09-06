@@ -101,41 +101,41 @@ class ConfigVC extends IPSModule
         $url = $this->ReadPropertyString('url');
         $user = $this->ReadPropertyString('user');
         $password = $this->ReadPropertyString('password');
-		if (substr($url, 0, 8) == 'https://' ) {
-			$s = substr($url, 8);
+        if (substr($url, 0, 8) == 'https://') {
+            $s = substr($url, 8);
 
-			$url = 'https://';
-			if ($user != '') {
-				$url .= rawurlencode($user);
-				if ($password != '') {
-					$url .= ':';
-					$url .= rawurlencode($password);
-				}
-				$url .= '@';
-			}
-			$url .= $s;
-		}
+            $url = 'https://';
+            if ($user != '') {
+                $url .= rawurlencode($user);
+                if ($password != '') {
+                    $url .= ':';
+                    $url .= rawurlencode($password);
+                }
+                $url .= '@';
+            }
+            $url .= $s;
+        }
         $port = $this->ReadPropertyString('port');
-		if (substr($url, 0, 6) == 'ssh://' && $port != '') {
-			$s = substr($url, 6);
-			$pos = strpos($s, '/');
-			$srv = substr($s, 0, $pos);
-			$path = substr($s, $pos);
+        if (substr($url, 0, 6) == 'ssh://' && $port != '') {
+            $s = substr($url, 6);
+            $pos = strpos($s, '/');
+            $srv = substr($s, 0, $pos);
+            $path = substr($s, $pos);
 
-			$url = 'ssh://';
-			if ($user != '') {
-				$url .= rawurlencode($user);
-				$url .= '@';
-			}
-			$url .= $srv;
-			if ($port != '') {
-				if ($port != '') {
-					$url .= ':';
-					$url .= $port;
-				}
-			}
-			$url .= $path;
-		}
+            $url = 'ssh://';
+            if ($user != '') {
+                $url .= rawurlencode($user);
+                $url .= '@';
+            }
+            $url .= $srv;
+            if ($port != '') {
+                if ($port != '') {
+                    $url .= ':';
+                    $url .= $port;
+                }
+            }
+            $url .= $path;
+        }
 
         $path = $this->ReadPropertyString('path');
         $ipsPath = $path . '/' . basename($url, '.git');
