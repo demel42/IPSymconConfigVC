@@ -2,9 +2,12 @@
 	"translations": {
 		"de": {
 			"Git-Repository": "Git-Repository",
-			"Login-data (for https only)": "Login-Daten (nur für https)",
+			"for https and ssh": "für https und ssh",
 			" ... User": " ... Benutzer",
+			"for https only": "nur für https",
 			" ... Password": " ... Passwort",
+			"for ssh only": "nur für ssh",
+			" ... Port": " ... Port",
 
 			"local path": "lokales Verzeichnis",
 

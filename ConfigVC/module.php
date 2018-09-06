@@ -45,6 +45,7 @@ class ConfigVC extends IPSModule
         $this->RegisterPropertyString('url', '');
         $this->RegisterPropertyString('user', '');
         $this->RegisterPropertyString('password', '');
+        $this->RegisterPropertyString('port', '');
         $this->RegisterPropertyString('path', '');
 
         $this->CreateVarProfile('ConfigVC.Duration', vtInteger, ' sec', 0, 0, 0, 0, '');
@@ -67,9 +68,12 @@ class ConfigVC extends IPSModule
     {
         $formElements = [];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'url', 'caption' => 'Git-Repository'];
-        $formElements[] = ['type' => 'Label', 'label' => 'Login-data (for https only)'];
+        $formElements[] = ['type' => 'Label', 'label' => 'for https and ssh'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'user', 'caption' => ' ... User'];
+        $formElements[] = ['type' => 'Label', 'label' => 'for https only'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'password', 'caption' => ' ... Password'];
+        $formElements[] = ['type' => 'Label', 'label' => 'for ssh only'];
+        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'port', 'caption' => ' ... Port'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
 
         $formActions = [];
@@ -97,8 +101,40 @@ class ConfigVC extends IPSModule
         $url = $this->ReadPropertyString('url');
         $user = $this->ReadPropertyString('user');
         $password = $this->ReadPropertyString('password');
-		if (substr($url, 0, 8) == 'https://') {
-			$url = 'https://' . rawurlencode($user) . ':' . rawurlencode($password) . '@' . substr($url, 8);
+		if (substr($url, 0, 8) == 'https://' ) {
+			$s = substr($url, 8);
+
+			$url = 'https://';
+			if ($user != '') {
+				$url .= rawurlencode($user);
+				if ($password != '') {
+					$url .= ':';
+					$url .= rawurlencode($password);
+				}
+				$url .= '@';
+			}
+			$url .= $s;
+		}
+        $port = $this->ReadPropertyString('port');
+		if (substr($url, 0, 6) == 'ssh://' && $port != '') {
+			$s = substr($url, 6);
+			$pos = strpos($s, '/');
+			$srv = substr($s, 0, $pos);
+			$path = substr($s, $pos);
+
+			$url = 'ssh://';
+			if ($user != '') {
+				$url .= rawurlencode($user);
+				$url .= '@';
+			}
+			$url .= $srv;
+			if ($port != '') {
+				if ($port != '') {
+					$url .= ':';
+					$url .= $port;
+				}
+			}
+			$url .= $path;
 		}
 
         $path = $this->ReadPropertyString('path');

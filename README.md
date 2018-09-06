@@ -55,8 +55,9 @@ In IP-Symcon nun _Instanz hinzufügen_ (_CTRL+1_) auswählen unter der Kategorie
 | Eigenschaft                     | Typ      | Standardwert | Beschreibung |
 | :-----------------------------: | :-----:  | :----------: | :----------------------------------------------------------------------------------------------------------: |
 | Git-Repository                  | string   |              | Pfad zu Git-Repository |
-| Benutzer                        | string   |              | Benutzer des Git-Repository (nur für https) |
+| Benutzer                        | string   |              | Benutzer des Git-Repository (für https und ssh) |
 | Passwort                        | string   |              | Passwort (nur für https) |
+| Port                            | string   |              | SSH-Port (nur für ssh) |
 | lokales Verzeichnis             | string   |              | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
 
 ## 6. Anhang
