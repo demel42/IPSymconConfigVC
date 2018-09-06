@@ -91,6 +91,7 @@ GUIDs
 	touch README.md
 	git add README.md
 	git commit -m "initial revision"
+	git push
 	cd /tmp
 	/bin/rm -rf ipsymcon
 

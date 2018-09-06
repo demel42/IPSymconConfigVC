@@ -189,11 +189,22 @@ class ConfigVC extends IPSModule
         $duration = isset($r['duration']) ? $r['duration'] : 0;
         if ($state) {
             $log = 'status=ok, duration=' . $duration . ' sec';
-            $summary = 'files: modified=' . $r['files']['modified']
-                    . ', added=' . $r['files']['added']
-                    . ', deleted=' . $r['files']['deleted']
-                    . ', untracked=' . $r['files']['untracked']
-                    . ', erroneous=' . $r['files']['erroneous'];
+
+			$n_modified =  $r['files']['modified'];
+			$n_added =  $r['files']['added'];
+			$n_renamed =  $r['files']['renamed'];
+			$n_deleted =  $r['files']['deleted'];
+			$n_untracked =  $r['files']['untracked'];
+			$n_erroneous =  $r['files']['erroneous'];
+
+			$s = '';
+			if ($n_modified) { $s .= ($s != '' ? ', ': '' ) . $n_modified . ' modified'; }
+			if ($n_added) { $s .= ($s != '' ? ', ': '' ) . $n_added . ' added'; }
+			if ($n_renamed) { $s .= ($s != '' ? ', ': '' ) . $n_renamed . ' renamed'; }
+			if ($n_deleted) { $s .= ($s != '' ? ', ': '' ) . $n_deleted . ' deleted'; }
+			if ($n_untracked) { $s .= ($s != '' ? ', ': '' ) . $n_untracked . ' untracked'; }
+			if ($n_erroneous) { $s .= ($s != '' ? ', ': '' ) . $n_erroneous . ' erroneous'; }
+			$summary = 'affected files: ' . ( $s != '' ? $s : 'no changes' );
         } else {
             $log = 'status=fail';
             $summary = $msg;
@@ -752,6 +763,7 @@ class ConfigVC extends IPSModule
 
         $fn_modified = [];
         $fn_added = [];
+        $fn_renamed = [];
         $fn_deleted = [];
         $fn_untracked = [];
         $fn_erroneous = [];
@@ -774,6 +786,9 @@ class ConfigVC extends IPSModule
                 case 'AM':
                     $fn_added[] = $fn;
                     break;
+                case 'R ':
+					$fn_renamed[] = $fn;
+					break;
                 case 'D ':
                     $fn_deleted[] = $fn;
                     break;
@@ -789,11 +804,12 @@ class ConfigVC extends IPSModule
 
         $n_modified = count($fn_modified);
         $n_added = count($fn_added);
+        $n_renamed = count($fn_renamed);
         $n_deleted = count($fn_deleted);
         $n_untracked = count($fn_untracked);
         $n_erroneous = count($fn_erroneous);
 
-        $n_commitable = $n_modified + $n_added + $n_deleted;
+        $n_commitable = $n_modified + $n_added + $n_renamed + $n_deleted;
         if ($n_commitable) {
             $m = 'Änderungen vom ' . date('d.m.Y H:i:s', $now);
 
@@ -801,26 +817,42 @@ class ConfigVC extends IPSModule
             $s .= "\n";
             $s .= 'betroffene Dateien:' . "\n";
             $s .= "\n";
+		if ($n_modified) {
             $s .= '- geändert: ' . $n_modified . '<br>' . PHP_EOL;
             foreach ($fn_modified as $fn) {
                 $s .= '  ' . $fn . '<br>' . PHP_EOL;
             }
+			}
+		if ($n_added) {
             $s .= '- hinzugefügt: ' . $n_added . '<br>' . PHP_EOL;
             foreach ($fn_added as $fn) {
                 $s .= '  ' . $fn . '<br>' . PHP_EOL;
             }
+			}
+		if ($n_renamed) {
+            $s .= '- umbenannt: ' . $n_renamed . '<br>' . PHP_EOL;
+            foreach ($fn_renamed as $fn) {
+                $s .= '  ' . $fn . '<br>' . PHP_EOL;
+            }
+			}
+		if ($n_deleted) {
             $s .= '- gelöscht: ' . $n_deleted . '<br>' . PHP_EOL;
             foreach ($fn_deleted as $fn) {
                 $s .= '  ' . $fn . '<br>' . PHP_EOL;
             }
+			}
+		if ($n_untracked) {
             $s .= '- unversioniert: ' . $n_untracked . '<br>' . PHP_EOL;
             foreach ($fn_untracked as $fn) {
                 $s .= '  ' . $fn . '<br>' . PHP_EOL;
             }
+			}
+		if ($n_erroneous) {
             $s .= '- fehlerhaft: ' . $n_erroneous . '<br>' . PHP_EOL;
             foreach ($fn_erroneous as $fn) {
                 $s .= '  ' . $fn . '<br>' . PHP_EOL;
             }
+			}
 
             if (!$this->saveFile('README.md', $s, 0, false)) {
                 $this->SendDebug(__FUNCTION__, 'error saving file README.md', 0);
@@ -837,33 +869,48 @@ class ConfigVC extends IPSModule
 
         $duration = floor((microtime(true) - $time_start) * 100) / 100;
 
-        $s = 'files: modified=' . $n_modified
-            . ', added=' . $n_added
-            . ', deleted=' . $n_deleted
-            . ', untracked=' . $n_untracked
-            . ', erroneous=' . $n_erroneous;
+        $s = 'files: '
+			. 'modified=' . $n_modified
+			. ', '
+			. 'added=' . $n_added
+			. ', '
+			. 'renamed=' . $n_renamed
+			. ', '
+			. 'deleted=' . $n_deleted
+			. ', '
+			. 'untracked=' . $n_untracked
+			. ', '
+			. 'erroneous=' . $n_erroneous;
         $this->SendDebug(__FUNCTION__, $s, 0);
-        $s = 'duration: total=' . $duration . 's'
-            . ', scripts=' . $duration_scripts . 's'
-            . ', settings=' . $duration_settings . 's'
-            . ', objects=' . $duration_objects . 's'
-            . ', modules=' . $duration_modules . 's';
+
+        $s = 'duration: '
+			. 'total=' . $duration . 's'
+            . ', '
+			. 'scripts=' . $duration_scripts . 's'
+            . ', '
+			. 'settings=' . $duration_settings . 's'
+            . ', '
+			. 'objects=' . $duration_objects . 's'
+            . ', '
+			. 'modules=' . $duration_modules . 's';
         if ($duration_zipfiles) {
             $s .= ' (including zip-files=' . $duration_zipfiles . 's)';
         }
         $this->SendDebug(__FUNCTION__, $s, 0);
+
         if ($msg != '') {
             $this->SendDebug(__FUNCTION__, 'msg=' . $msg, 0);
         }
 
         $r = [
-                'state'		  => true,
-                'msg'		    => $msg,
+                'state'		=> true,
+                'msg'		=> $msg,
                 'duration'	=> $duration,
-                'files'		  => [
-                    'modified'	 => $n_modified,
-                    'added'		   => $n_added,
-                    'deleted'	  => $n_deleted,
+                'files'		=> [
+                    'modified'	=> $n_modified,
+                    'added'		=> $n_added,
+                    'renamed'	=> $n_renamed,
+                    'deleted'	=> $n_deleted,
                     'untracked'	=> $n_untracked,
                     'erroneous'	=> $n_erroneous,
                 ],
