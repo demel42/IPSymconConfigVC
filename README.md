@@ -20,6 +20,25 @@
 
 ## 1. Funktionsumfang
 
+Es werden verschiedene Dateien und Daten aus dem IP-Symcon-Verzeichnis in Git gesichert und versioniert.
+
+Die Daten sind
+1. Scripte<br>
+die Scripte aus dem Scriptverzeichnis werden, falls geändert, übernommen. Neue Dateien werden hinzugefügt, zwischenzeitlich gelöschte Dateien werden auch im Repository gelöscht.
+2. Module<br>
+Die installierten Module werden untersucht. Es wird pro Modul eine Datei _<Modul-Verzeichnis>.json_ angelegt, die die  _Url_, den _Branch_ und den zeitpunkt der letzten Modifikation einer Datei aus dem Modul-Verzeichnis enthält.
+Die Datei ändert sich somit nur, wenn sich auch in dem Modul etwas geändet hat.
+Zusätzlich gibt es die Möglichkeit, das Modul als solches auch als Zip-Archiv zu sichern. Aufgrund der Größe mancher Module funtioniert das aber nicht unbedingt mit öffentlichen Git-Servern (_GitHup_ hat z.B. zur Zeit eine Grenze von 100 MB pro Datei).
+3. Setting<br>
+Die Settigs wird als Ganzes gesichert.
+Da sich der Inhat von _settings.json_ sehr dynamisch ändert und ein vorher/nachher-Vergleich sehr unübersichtlich ist, wird noch folgendes gemacht:
+a) aus _settings.json_ werden alle Bereiche außer _objects_ als eigene _.json_-Datei gesichert (also _profiles.json_ und _options.json_). Diese Dateien werden nur geschrieben, wenn sich am Inhalt etwas geändert hat.
+b) Objekte<br>
+alle Objekte werden aus dem IPS heraus (also nicht aus der _settings.json_) gesichert, dabei wir pro Objekt eine Datei angelegt. Diese Datei enthält die json-Strukturen die von den jeweiligen IPS-Aufrufen (_IPS_GetObject()_ sowie _IPS_GetInstance()_ etc) geliefert werden. Um nur relevante Änderungen zu sehen werden eventuelle Zeitstempel oder die Werte der Variablen entfernt. Da die Datei nur geschrieben wird, wenn sich etwas geändert hat.
+4. README.md
+In dieser Datei wird ein Protokoll der Änderungen des letzten Abgleichs dargetsellt. Man sieht als sehr schnell, an welcher Stelle der Konfiguration seit dem letzten Lauf sich etwas geändert hat.
+Die Änderungenselber kann man dann auch leicht im git darstellen.
+
 ## 2. Voraussetzungen
 
  - IP-Symcon ab Version 5
@@ -63,7 +82,7 @@ git init --bare
 chown -R git:users ~git/repositories
 ```
 
-**auf dem IPS-Server**
+**auf dem IPS-Server**<br>
 Hintergrund: damit es richtig funktioniert muss mindestens eine Datei im Git-Repository vorhanden sein.
 
 ```
@@ -78,7 +97,7 @@ cd /tmp
 /bin/rm -rf /tmp/ipsymcon
 ```
 
-##### Git-Server auf Synology DIskStation
+#### Git-Server auf Synology DiskStation
 
 **auf der Synology DiskStation**
 
@@ -94,7 +113,7 @@ git init --bare
 
 **auf dem IPS-Server**
 
-Der User für git kann aber muss nicht _admin_ sein. Der ssh-Port ist typsucherweisen nicht _22_, sondern z.B. _5002_.
+Der Git-User kann aber muss nicht _admin_ sein. Der ssh-Port ist typischerweise nicht _22_, sondern z.B. _5002_.
 
 ```
 cd /tmp
@@ -121,17 +140,18 @@ Bei der Anlage des Repository sollte die Option gewählt werden, direkt ein leer
 
 Sowohl als User _pi_ als auch als User _root_ (IPS läuft ja als _root).
 
-- falls kein ~/.ssh/authorized_keys vorhanden ist
+- falls keine Datei _~/.ssh/authorized_keys_ vorhanden ist
 ```
 ssh-keygen -t rsa -b 2048
 ```
 Die Fragen alle mit <return> beantworten.
 
+Verteilen des ssh-Key auf den Git-Server:
 ```
 ssh-copy-id git@git-server
 ```
 
-Als User den oben gewählten Git-User nehmen.
+Als User den oben gewählten Git-User verwenden.
 
 
 
@@ -156,8 +176,9 @@ mkdir <Verzeichnis für lokales respoitory>
 | Git-Repository                  | string   |              | Pfad zu Git-Repository |
 | Benutzer                        | string   |              | Benutzer des Git-Repository (für https und ssh) |
 | Passwort                        | string   |              | Passwort (nur für https) |
-| Port                            | string   |              | SSH-Port (nur für ssh) |
+| Port                            | integer  | 22           | SSH-Port (nur für ssh) |
 | lokales Verzeichnis             | string   |              | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
+| Module als Zip                  | boolean  | false        | Sichern der Module als Zip-Archiv. Achtung: Größe beachten! |
 
 ## 6. Anhang
 
