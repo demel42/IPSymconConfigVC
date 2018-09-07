@@ -38,9 +38,91 @@ und mit _OK_ bestätigen.
 
 Anschließend erscheint ein Eintrag für das Modul in der Liste der Instanz _Modules_
 
-### c. Einrichtung in IPS
+### Einrichtung in IPS
 
 In IP-Symcon nun _Instanz hinzufügen_ (_CTRL+1_) auswählen unter der Kategorie, unter der man die Instanz hinzufügen will, und Hersteller _(sonstiges)_ und als Gerät _Configuration Version-Control_ auswählen.
+
+### Einrichtung des Git-Repositories
+
+    `https://git-scm.com/book/de/v1/Git-auf-dem-Server-Einrichten-des-Servers`
+    `https://www.linux.com/learn/how-run-your-own-git-server`
+
+##### lokaler git-server auf raspbian und ubuntu
+
+# auf eigenem Git-Server einrichten
+
+```
+sudo -i
+adduser git
+<passwort eingeben und merken>
+mkdir -p ~git/repositories/ipsymcon.git
+cd ~git/repositories/ipsymcon.git
+git init --bare
+chown -R git:users ~git/repositories
+```
+
+	# auf dem IPS-Server
+	cd /tmp
+	git clone ssh://git@<git-server>/home/git/repositories/ipsymcon.git
+	cd ipsymcon
+	touch README.md
+	git add README.md
+	git commit -m "initial revision"
+	git push
+	cd /tmp
+	/bin/rm -rf /tmp/ipsymcon
+
+	ODER
+
+	# lokaler git-server auf Synology
+
+	# auf der synology
+	Paket 'Git Server' installieren
+	<Login als 'admin'>
+	cd /volume1/git
+	mkdir ipsymcon.git
+	git init --bare
+
+
+	# auf dem IPS-Server
+	cd /tmp
+	git clone ssh://admin@<git-server>:5002/home/git/repositories/ipsymcon.git
+	cd ipsymcon
+	touch README.md
+	git add README.md
+	git commit -m "initial revision"
+	git push
+	cd /tmp
+	/bin/rm -rf /tmp/ipsymcon
+
+	ODER
+
+	privates Repository auf github direkt mit README.md anlegen
+
+	# ssh-keys einrichten für lokale ssh-repositories
+
+	auf dem IPS-Server
+	
+	als user 'pi'
+	< falls kein ~/.ssh/authorized_keys vorhanden ist >
+    ssh-keygen -t rsa -b 2048
+	< Fragen alle mit <return> beantworten >
+
+    ssh-copy-id git@<git-server>
+
+	bzw für Synology statt user 'git' den user 'admin' verwenden
+
+	das gleiche wiederholen für user 'root' (symcon läuft als root)
+
+	sudo -i
+
+    ssh-copy-id git@<git-server>
+
+	# auf dem IPS-Server
+
+    mkdir <Verzeichnis für lokales respoitory>
+	-> auf einem Raspberry statt auf der SD-Karte besser auf einem USB-Stick
+
 
 ## 4. Funktionsreferenz
 
@@ -72,36 +154,3 @@ GUIDs
 
 - 1.0 @ 01.09.2018<br>
   Initiale Version
-
-
-    https://git-scm.com/book/de/v1/Git-auf-dem-Server-Einrichten-des-Servers
-    https://www.linux.com/learn/how-run-your-own-git-server
-
-	# lokales git
-    sudo adduser git
-    <passwort eingeben und merken>
-    sudo mkdir -p ~git/repositories/ipsymcon.git
-    cd ~git/repositories/ipsymcon.git
-    sudo git init --bare
-    sudo chown -R git:users ~git/repositories
-
-	cd /tmp
-	git clone ssh://git@ips-dev.damsky.home/home/git/repositories/ipsymcon.git
-	cd ipsymcon
-	touch README.md
-	git add README.md
-	git commit -m "initial revision"
-	git push
-	cd /tmp
-	/bin/rm -rf ipsymcon
-
-	# ssh-keys
-    ssh-keygen -t rsa -b 2048
-    ssh-copy-id git@ips-prod.damsky.home
-
-	ODER
-
-	Privates Repository auf github direkt mit README.md anlegen
-
-    mkdir <verzeichnis für lokales respoitory>
-	-> am besten auf einem usb-stick
