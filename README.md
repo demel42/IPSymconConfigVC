@@ -44,13 +44,15 @@ In IP-Symcon nun _Instanz hinzufügen_ (_CTRL+1_) auswählen unter der Kategorie
 
 ### Einrichtung des Git-Repositories
 
-    `https://git-scm.com/book/de/v1/Git-auf-dem-Server-Einrichten-des-Servers`
-    `https://www.linux.com/learn/how-run-your-own-git-server`
+##### lokaler Git-Server auf raspbian und ubuntu
 
-##### lokaler git-server auf raspbian und ubuntu
+siehe auch `https://git-scm.com/book/de/v1/Git-auf-dem-Server-Einrichten-des-Servers` und `https://www.linux.com/learn/how-run-your-own-git-server`.
 
-# auf eigenem Git-Server einrichten
+Der User _git_ ist Platzhalter, ebenso _git-server_ oder _ipsymcon.git_ bzw _ipsymcon_. Die Namen bzw Pfad können natürlich nach Bedarf angepasst werden.
 
+Bei einem Raspberry sollte man vielleicht den Git-Server-Repository also auch das geclone Git-Repository nicht auf der internen SD-Karte anlegen.
+
+**auf dem Git-ServerGit-Server**
 ```
 sudo -i
 adduser git
@@ -61,67 +63,82 @@ git init --bare
 chown -R git:users ~git/repositories
 ```
 
-	# auf dem IPS-Server
-	cd /tmp
-	git clone ssh://git@<git-server>/home/git/repositories/ipsymcon.git
-	cd ipsymcon
-	touch README.md
-	git add README.md
-	git commit -m "initial revision"
-	git push
-	cd /tmp
-	/bin/rm -rf /tmp/ipsymcon
+**auf dem IPS-Server**
+Hintergrund: damit es richtig funktioniert muss mindestens eine Datei im Git-Repository vorhanden sein.
 
-	ODER
+```
+cd /tmp
+git clone ssh://git@git-server/home/git/repositories/ipsymcon.git
+cd ipsymcon
+touch README.md
+git add README.md
+git commit -m "initial revision"
+git push
+cd /tmp
+/bin/rm -rf /tmp/ipsymcon
+```
 
-	# lokaler git-server auf Synology
+##### Git-Server auf Synology DIskStation
 
-	# auf der synology
-	Paket 'Git Server' installieren
-	<Login als 'admin'>
-	cd /volume1/git
-	mkdir ipsymcon.git
-	git init --bare
+**auf der Synology DiskStation**
+
+Paket 'Git Server' installieren
+
+Login als User _admin_
+```
+cd /volume1/git
+mkdir ipsymcon.git
+cd ipsymcon.git
+git init --bare
+```
+
+**auf dem IPS-Server**
+
+Der User für git kann aber muss nicht _admin_ sein. Der ssh-Port ist typsucherweisen nicht _22_, sondern z.B. _5002_.
+
+```
+cd /tmp
+git clone ssh://admin@git-server:5002/home/git/repositories/ipsymcon.git
+cd ipsymcon
+touch README.md
+git add README.md
+git commit -m "initial revision"
+git push
+cd /tmp
+/bin/rm -rf /tmp/ipsymcon
+```
+
+#### Git-Repository auf öffentlichen Git-Server (wie _GtHub_)
+
+Wichtig: das Repository muss auf jeden Fall als **_privat_** eingerichtet werden! Ein lokaler Git-Server ist natürlich zu bevorzugen.
+
+Bei der Anlage des Repository sollte die Option gewählt werden, direkt ein leeres _README.md_ anzulegen.
 
 
-	# auf dem IPS-Server
-	cd /tmp
-	git clone ssh://admin@<git-server>:5002/home/git/repositories/ipsymcon.git
-	cd ipsymcon
-	touch README.md
-	git add README.md
-	git commit -m "initial revision"
-	git push
-	cd /tmp
-	/bin/rm -rf /tmp/ipsymcon
+#### ssh-Keys einrichten für lokale ssh-basierte Repositories
 
-	ODER
+**auf dem IPS-Server**
 
-	privates Repository auf github direkt mit README.md anlegen
+Sowohl als User _pi_ als auch als User _root_ (IPS läuft ja als _root).
 
-	# ssh-keys einrichten für lokale ssh-repositories
+- falls kein ~/.ssh/authorized_keys vorhanden ist
+```
+ssh-keygen -t rsa -b 2048
+```
+Die Fragen alle mit <return> beantworten.
 
-	auf dem IPS-Server
-	
-	als user 'pi'
-	< falls kein ~/.ssh/authorized_keys vorhanden ist >
-    ssh-keygen -t rsa -b 2048
-	< Fragen alle mit <return> beantworten >
+```
+ssh-copy-id git@git-server
+```
 
-    ssh-copy-id git@<git-server>
+Als User den oben gewählten Git-User nehmen.
 
-	bzw für Synology statt user 'git' den user 'admin' verwenden
 
-	das gleiche wiederholen für user 'root' (symcon läuft als root)
 
-	sudo -i
-
-    ssh-copy-id git@<git-server>
-
-	# auf dem IPS-Server
-
-    mkdir <Verzeichnis für lokales respoitory>
-	-> auf einem Raspberry statt auf der SD-Karte besser auf einem USB-Stick
+#### Einrichtung auf dem IPS-Server
+```
+mkdir <Verzeichnis für lokales respoitory>
+```
 
 
 ## 4. Funktionsreferenz
