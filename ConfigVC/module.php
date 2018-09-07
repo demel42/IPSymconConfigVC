@@ -448,7 +448,7 @@ class ConfigVC extends IPSModule
 
     private function adjustVC()
     {
-		$withModulesZip = $this->ReadPropertyBoolean('with_modules_zip');
+        $withModulesZip = $this->ReadPropertyBoolean('with_modules_zip');
 
         $url = $this->ReadPropertyString('url');
         $path = $this->ReadPropertyString('path');
