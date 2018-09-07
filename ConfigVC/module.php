@@ -86,7 +86,7 @@ class ConfigVC extends IPSModule
         $formElements[] = ['type' => 'Label', 'label' => 'for ssh only'];
         $formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
-        $formElements[] = ['type' => 'CheckBox', 'name' => 'with_modules_zip', 'caption' => 'modules as zip'];
+        $formElements[] = ['type' => 'CheckBox', 'name' => 'with_modules_zip', 'caption' => 'save modules as zip-archive'];
 
         $formActions = [];
         $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
