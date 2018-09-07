@@ -2,6 +2,7 @@
 	"translations": {
 		"de": {
 			"Git-Repository": "Git-Repository",
+
 			"for https and ssh": "für https und ssh",
 			" ... User": " ... Benutzer",
 			"for https only": "nur für https",
@@ -10,6 +11,8 @@
 			" ... Port": " ... Port",
 
 			"local path": "lokales Verzeichnis",
+
+			"modules as zip": "Module als Zip",
 
 			"Action takes up several minutes (depending on amount of data)": "Die Aktion dauert bis zu einigen Minuten (in Abhängigkeit von der Datenmenge)",
 			"Perform adjustment": "Abgleich durchführen",
