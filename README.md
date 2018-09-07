@@ -37,7 +37,11 @@ b) Objekte<br>
 alle Objekte werden aus dem IPS heraus (also nicht aus der _settings.json_) gesichert, dabei wir pro Objekt eine Datei angelegt. Diese Datei enthält die json-Strukturen die von den jeweiligen IPS-Aufrufen (_IPS_GetObject()_ sowie _IPS_GetInstance()_ etc) geliefert werden. Um nur relevante Änderungen zu sehen werden eventuelle Zeitstempel oder die Werte der Variablen entfernt. Da die Datei nur geschrieben wird, wenn sich etwas geändert hat.
 4. README.md
 In dieser Datei wird ein Protokoll der Änderungen des letzten Abgleichs dargetsellt. Man sieht als sehr schnell, an welcher Stelle der Konfiguration seit dem letzten Lauf sich etwas geändert hat.
-Die Änderungenselber kann man dann auch leicht im git darstellen.
+Die Änderungen selber kann man dann auch leicht im git darstellen.
+
+Die Dauer eines Abgleich ist naturgemäß schwierig allgemeingültig darzustellen. Ein Anhaltswert: auf einem Raspberry 3B+ auf SD-Karte mit ca. 30 Scripten, 2000 Variablen und 20 Modulen dauert ohne Erstellen von Zip-Archiven ca. 20 Sekunden, jeder weiterer Abgleich ca. 2-3 Sekunden. Mit Erstellen von Zip-Archiven wächst die Zeit initial auf 150 Sekunden.
+
+Da alle Änderungen von IPS bei Abgleich in das lokale Repository übertragen und direkt an das zentrale Repository übertragen werden, ist dieses Verzeichnis nur von temporärem Interesse und kann jderzeit neu erstellt werden.
 
 ## 2. Voraussetzungen
 
@@ -165,7 +169,11 @@ mkdir <Verzeichnis für lokales respoitory>
 
 ### zentrale Funktion
 
-`boolean CVC_Perform(integer $InstanzID)`<br>
+`boolean CVC_CloneRepository(integer $InstanzID)`<br>
+legt ein frischen Clone des Repositories an. Dabei wird, wenn erforderlich, ein vorhænderen Clone gelöscht. Das angegebene lokale Verzeichnis muss vorhanden sein.<br>
+
+`boolean CVC_PerformAdjustment(integer $InstanzID, boolean $with_zip)`<br>
+führt einen Abgleich durch. Durch _with_zip_ kann bei manuellem Aufruf gesteuert werden, ob überhaupt Zip-Archive gebildet werden oder nicht (wirkt nur, _Module als Zip_ gesetzt ist).
 
 ## 5. Konfiguration:
 
@@ -178,7 +186,14 @@ mkdir <Verzeichnis für lokales respoitory>
 | Passwort                        | string   |              | Passwort (nur für https) |
 | Port                            | integer  | 22           | SSH-Port (nur für ssh) |
 | lokales Verzeichnis             | string   |              | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
-| Module als Zip                  | boolean  | false        | Sichern der Module als Zip-Archiv. Achtung: Größe beachten! |
+| Module als Zip-Archiv sichern   | boolean  | false        | Sichern der Module als Zip-Archiv. Achtung: Größe beachten! |
+
+#### Schaltflächen
+
+| Bezeichnung                  | Beschreibung |
+| :--------------------------: | :-------------------------------------------------: |
+| Abgleich durchführen         | führt einen Abgleich durch |
+| Repository einrichten        | erzeugt einen aktuelle Clone des Repositories |
 
 ## 6. Anhang
 

@@ -90,7 +90,7 @@ class ConfigVC extends IPSModule
 
         $formActions = [];
         $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
-        $formActions[] = ['type' => 'Button', 'label' => 'Perform adjustment', 'onClick' => 'CVC_PerformAdjustment($id);'];
+        $formActions[] = ['type' => 'Button', 'label' => 'Perform adjustment', 'onClick' => 'CVC_CallAdjustment($id, true);'];
         $formActions[] = ['type' => 'Button', 'label' => 'Clone Repository', 'onClick' => 'CVC_CloneRepository($id);'];
         $formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
         $formActions[] = [
@@ -193,9 +193,9 @@ class ConfigVC extends IPSModule
         return true;
     }
 
-    public function PerformAdjustment()
+    public function CallAdjustment(bool $with_zip)
     {
-        $r = $this->adjustVC();
+        $r = $this->performAdjustment($with_zip);
         $state = $r['state'];
         $msg = isset($r['msg']) ? $r['msg'] : '';
         $duration = isset($r['duration']) ? $r['duration'] : 0;
@@ -446,9 +446,9 @@ class ConfigVC extends IPSModule
         return true;
     }
 
-    private function adjustVC()
+    private function performAdjustment($with_zip)
     {
-        $withModulesZip = $this->ReadPropertyBoolean('with_modules_zip');
+        $with_modules_zip = $this->ReadPropertyBoolean('with_modules_zip');
 
         $url = $this->ReadPropertyString('url');
         $path = $this->ReadPropertyString('path');
@@ -765,7 +765,7 @@ class ConfigVC extends IPSModule
                 return ['state' => false];
             }
 
-            if ($withModulesZip) {
+            if ($with_zip && $with_modules_zip) {
                 $time_start_zipfile = microtime(true);
                 if (!$this->changeDir($ipsModulesPath)) {
                     return ['state' => false];
