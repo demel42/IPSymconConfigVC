@@ -39,7 +39,7 @@ alle Objekte werden aus dem IPS heraus (also nicht aus der _settings.json_) gesi
 In dieser Datei wird ein Protokoll der Änderungen des letzten Abgleichs dargetsellt. Man sieht als sehr schnell, an welcher Stelle der Konfiguration seit dem letzten Lauf sich etwas geändert hat.
 Die Änderungen selber kann man dann auch leicht im git darstellen.
 
-Die Dauer eines Abgleich ist naturgemäß schwierig allgemeingültig darzustellen. Ein Anhaltswert: auf einem Raspberry 3B+ auf SD-Karte mit ca. 30 Scripten, 2000 Variablen und 20 Modulen dauert ohne Erstellen von Zip-Archiven ca. 20 Sekunden, jeder weiterer Abgleich ca. 2-3 Sekunden. Mit Erstellen von Zip-Archiven wächst die Zeit initial auf 150 Sekunden.
+Die Dauer eines Abgleich ist naturgemäß schwierig allgemeingültig darzustellen. Ein Anhaltswert: auf einem Raspberry 3B+ auf SD-Karte mit ca. 30 Scripten, 2000 Variablen und 20 Modulen dauert der initiale Abgleich ohne Erstellen von Zip-Archiven ca. 20 Sekunden, jeder weiterer Abgleich ca. 2-3 Sekunden. Mit Erstellen von Zip-Archiven wächst die Zeit initial auf 150 Sekunden.
 
 Da alle Änderungen von IPS bei Abgleich in das lokale Repository übertragen und direkt an das zentrale Repository übertragen werden, ist dieses Verzeichnis nur von temporärem Interesse und kann jderzeit neu erstellt werden.
 
