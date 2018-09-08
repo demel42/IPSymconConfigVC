@@ -195,6 +195,8 @@ class ConfigVC extends IPSModule
 
     public function CallAdjustment(bool $with_zip)
     {
+        $this->SendDebug(__FUNCTION__, 'with_zip=' . ($with_zip ? 'true' : 'false'), 0);
+
         $r = $this->performAdjustment($with_zip);
         $state = $r['state'];
         $msg = isset($r['msg']) ? $r['msg'] : '';
