@@ -133,9 +133,9 @@ cd /tmp
 
 #### Git-Repository auf öffentlichen Git-Server (wie _GtHub_)
 
-Wichtig: das Repository muss auf jeden Fall als **_privat_** eingerichtet werden! Ein lokaler Git-Server ist natürlich zu bevorzugen.
+Wichtig: das Repository muss auf jeden Fall als **_privat_** eingerichtet werden! Ein lokaler Git-Server ist auf jeden Fall zu bevorzugen.
 
-Bei der Anlage des Repository sollte die Option gewählt werden, direkt ein leeres _README.md_ anzulegen.
+Bei der Anlage des Repository sollte die Option gewählt werden, direkt ein leeres _README.md_ anzulegen; alternativ muss eine leere Datei wie oben beschrieben angelegt werden.
 
 
 #### ssh-Keys einrichten für lokale ssh-basierte Repositories
