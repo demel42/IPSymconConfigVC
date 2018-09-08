@@ -55,8 +55,9 @@ class ConfigVC extends IPSModule
         $this->RegisterPropertyString('url', '');
         $this->RegisterPropertyString('user', '');
         $this->RegisterPropertyString('password', '');
-        $this->RegisterPropertyString('port', '');
+        $this->RegisterPropertyInteger('port', '22');
         $this->RegisterPropertyString('path', '');
+        $this->RegisterPropertyBoolean('with_modules_zip', false);
 
         $this->CreateVarProfile('ConfigVC.Duration', vtInteger, ' sec', 0, 0, 0, 0, '');
     }
@@ -83,12 +84,13 @@ class ConfigVC extends IPSModule
         $formElements[] = ['type' => 'Label', 'label' => 'for https only'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'password', 'caption' => ' ... Password'];
         $formElements[] = ['type' => 'Label', 'label' => 'for ssh only'];
-        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'port', 'caption' => ' ... Port'];
+        $formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
+        $formElements[] = ['type' => 'CheckBox', 'name' => 'with_modules_zip', 'caption' => 'save modules as zip-archive'];
 
         $formActions = [];
         $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
-        $formActions[] = ['type' => 'Button', 'label' => 'Perform adjustment', 'onClick' => 'CVC_PerformAdjustment($id);'];
+        $formActions[] = ['type' => 'Button', 'label' => 'Perform adjustment', 'onClick' => 'CVC_CallAdjustment($id, true);'];
         $formActions[] = ['type' => 'Button', 'label' => 'Clone Repository', 'onClick' => 'CVC_CloneRepository($id);'];
         $formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
         $formActions[] = [
@@ -191,9 +193,9 @@ class ConfigVC extends IPSModule
         return true;
     }
 
-    public function PerformAdjustment()
+    public function CallAdjustment(bool $with_zip)
     {
-        $r = $this->adjustVC(false);
+        $r = $this->performAdjustment($with_zip);
         $state = $r['state'];
         $msg = isset($r['msg']) ? $r['msg'] : '';
         $duration = isset($r['duration']) ? $r['duration'] : 0;
@@ -444,8 +446,10 @@ class ConfigVC extends IPSModule
         return true;
     }
 
-    private function adjustVC($withModulesZip)
+    private function performAdjustment($with_zip)
     {
+        $with_modules_zip = $this->ReadPropertyBoolean('with_modules_zip');
+
         $url = $this->ReadPropertyString('url');
         $path = $this->ReadPropertyString('path');
 
@@ -763,7 +767,7 @@ class ConfigVC extends IPSModule
                 return ['state' => false];
             }
 
-            if ($withModulesZip) {
+            if ($with_zip && $with_modules_zip) {
                 $time_start_zipfile = microtime(true);
                 if (!$this->changeDir($ipsModulesPath)) {
                     return ['state' => false];
