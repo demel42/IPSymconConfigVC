@@ -664,8 +664,9 @@ class ConfigVC extends IPSModule
                 default:
                     break;
             }
-			if (isset($obj['ChildrenIDs']))
-				$obj['ChildrenIDs'] = [];
+            if (isset($obj['ChildrenIDs'])) {
+                $obj['ChildrenIDs'] = [];
+            }
 
             $newObjects[] = $objID . '.json';
 
