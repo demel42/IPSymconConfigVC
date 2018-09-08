@@ -75,7 +75,7 @@ Der User _git_ ist Platzhalter, ebenso _git-server_ oder _ipsymcon.git_ bzw _ips
 
 Bei einem Raspberry sollte man vielleicht den Git-Server-Repository also auch das geclone Git-Repository nicht auf der internen SD-Karte anlegen.
 
-**auf dem Git-ServerGit-Server**
+**auf dem Git-Server**
 ```
 sudo -i
 adduser git
@@ -135,7 +135,7 @@ cd /tmp
 
 Wichtig: das Repository muss auf jeden Fall als **_privat_** eingerichtet werden! Ein lokaler Git-Server ist auf jeden Fall zu bevorzugen. Immerhin sind in diesem Git-Repository alle internen Informationen, Zugangsdaten u.s.w. enthalten.
 
-Für die Ansicht des Git-Repositories (ähnlich der Web-Oberfläche von GitHub) stehen verschiedene Programme zur Verfügung. 
+Für die Ansicht des Git-Repositories (ähnlich der Web-Oberfläche von GitHub) stehen verschiedene Programme zur Verfügung.
 
 Bei der Anlage des Repository sollte die Option gewählt werden, direkt ein leeres _README.md_ anzulegen; alternativ muss eine leere Datei wie oben beschrieben angelegt werden.
 
@@ -152,13 +152,16 @@ ssh-keygen -t rsa -b 2048
 ```
 Die Fragen alle mit <return> beantworten.
 
-Verteilen des ssh-Key auf den Git-Server:
+- Verteilen des ssh-Key auf den Git-Server:
 ```
 ssh-copy-id git@git-server
 ```
+Bei nicht-Standard ssh-Port
+```
+ssh-copy-id -p 5002 git@git-server
+```
 
 Als User den oben gewählten Git-User verwenden.
-
 
 
 #### Einrichtung auf dem IPS-Server
@@ -166,6 +169,26 @@ Als User den oben gewählten Git-User verwenden.
 mkdir <Verzeichnis für lokales respoitory>
 ```
 
+### Einrichtung in IP-Symcon
+
+Der Abgleich wird nicht automatisch aufgerufen. Hierzu muss man ein kleines Script erstellen:
+
+```
+<?
+
+CVC_CallAdjustment(4711 /*[System\Configuration Version-Control*/, true);
+```
+und dieses dann im gewünschten Zeitmuster aufrufen.<b>
+Der Wert _true_ besagt, das, wenn in der Konfiguration so eingestellt, die Zip-Archive erstellt werden, _false_ bedeutet, das das nicht gemacht wird.
+
+Mit diesem Script werden (bei stündlichem Aufruf) die Zip-Archvie nur um 0 Uhr abgelichen, sonst nur die anderen Dateien/Objekte.
+
+```
+<?
+
+$with_zip = date("H", time()) == 0 ? true : false;
+CVC_CallAdjustment(17889 /*[System\Configuration Version-Control (ssh)]*/, $with_zip);
+```
 
 ## 4. Funktionsreferenz
 
