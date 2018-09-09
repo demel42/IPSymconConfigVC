@@ -43,6 +43,8 @@ Die Dauer eines Abgleich ist naturgemäß schwierig allgemeingültig darzustelle
 
 Da alle Änderungen von IPS bei Abgleich in das lokale Repository übertragen und direkt an das zentrale Repository übertragen werden, ist dieses Verzeichnis nur von temporärem Interesse und kann jderzeit neu erstellt werden.
 
+Wichtig: dieses Modul ersetzt auf keinen Fall eine regelmässige Datensicherung! Es ist gedacht als Unterstützung bei einer Suche danach, wann eventuell Änderungen durchgeführt wurden und wenn ja, welche.
+
 ## 2. Voraussetzungen
 
  - IP-Symcon ab Version 5
