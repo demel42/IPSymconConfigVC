@@ -25,21 +25,27 @@ Es werden verschiedene Dateien und Daten aus dem IP-Symcon-Verzeichnis in Git ge
 Die Daten sind
 1. Scripte<br>
 die Scripte aus dem Scriptverzeichnis werden, falls geändert, übernommen. Neue Dateien werden hinzugefügt, zwischenzeitlich gelöschte Dateien werden auch im Repository gelöscht.
+
 2. Module<br>
-Die installierten Module werden untersucht. Es wird pro Modul eine Datei _<Modul-Verzeichnis>.json_ angelegt, die die  _Url_, den _Branch_ und den zeitpunkt der letzten Modifikation einer Datei aus dem Modul-Verzeichnis enthält.
+Die installierten Module werden untersucht. Es wird pro Modul eine Datei _<Modul-Verzeichnis>.json_ angelegt, die die Repository-URL (_url_), den Branch (_branch_), die den altuellen Versionsstand (_commitID_) und den Zeitpunkt der letzten Modifikation einer Datei (_mtime_) aus dem Modul-Verzeichnis enthält.
 Die Datei ändert sich somit nur, wenn sich auch in dem Modul etwas geändet hat.
-Zusätzlich gibt es die Möglichkeit, das Modul als solches auch als Zip-Archiv zu sichern. Aufgrund der Größe mancher Module funtioniert das aber nicht unbedingt mit öffentlichen Git-Servern (_GitHup_ hat z.B. zur Zeit eine Grenze von 100 MB pro Datei).
+Anhand dieser Daten kann auch eine bestimmte Version des Moduls wieder hergestellt werden; hierzu geht man wie folgt vor:
+- Modul in der Modulverwaltung löschen (іnicht die installierte Instanz des Modules!)
+- Modul neu anlegen, jedoch nicht (nur) die Url angeben sondern: _<url>/commit/<commitID>_. SO kann man wieder zurück auf einen früheren Stand zurück gehen.
+Wenn man wieder auf den aktuellen Stand zurückgehen möchte, muss man das analog durchführen: löschen und dann wieder die Original-URL angeben und ggfs den passenden Branch auswählen.
+
 3. Setting<br>
 Die Settigs wird als Ganzes gesichert.
 Da sich der Inhat von _settings.json_ sehr dynamisch ändert und ein vorher/nachher-Vergleich sehr unübersichtlich ist, wird noch folgendes gemacht:
 a) aus _settings.json_ werden alle Bereiche außer _objects_ als eigene _.json_-Datei gesichert (also _profiles.json_ und _options.json_). Diese Dateien werden nur geschrieben, wenn sich am Inhalt etwas geändert hat.
 b) Objekte<br>
 alle Objekte werden aus dem IPS heraus (also nicht aus der _settings.json_) gesichert, dabei wir pro Objekt eine Datei angelegt. Diese Datei enthält die json-Strukturen die von den jeweiligen IPS-Aufrufen (_IPS_GetObject()_ sowie _IPS_GetInstance()_ etc) geliefert werden. Um nur relevante Änderungen zu sehen werden eventuelle Zeitstempel oder die Werte der Variablen entfernt. Da die Datei nur geschrieben wird, wenn sich etwas geändert hat.
+
 4. README.md
 In dieser Datei wird ein Protokoll der Änderungen des letzten Abgleichs dargetsellt. Man sieht als sehr schnell, an welcher Stelle der Konfiguration seit dem letzten Lauf sich etwas geändert hat.
 Die Änderungen selber kann man dann auch leicht im git darstellen.
 
-Die Dauer eines Abgleich ist naturgemäß schwierig allgemeingültig darzustellen. Ein Anhaltswert: auf einem Raspberry 3B+ auf SD-Karte mit ca. 30 Scripten, 2000 Variablen und 20 Modulen dauert der initiale Abgleich ohne Erstellen von Zip-Archiven ca. 20 Sekunden, jeder weiterer Abgleich ca. 2-3 Sekunden. Mit Erstellen von Zip-Archiven wächst die Zeit initial auf 150 Sekunden.
+Die Dauer eines Abgleich ist naturgemäß schwierig allgemeingültig darzustellen. Ein Anhaltswert: auf einem Raspberry 3B+ auf SD-Karte mit ca. 30 Scripten, 2000 Variablen und 20 Modulen dauert der initiale Abgleich ohne Erstellen von Zip-Archiven ca. 20 Sekunden, jeder weiterer Abgleich ca. 2-3 Sekunden. Mit Erstellen von Zip-Archiven wächst die Zeit initial auf 150 Sekunden (dіese Zeit ist aber sehr individuell).
 
 Da alle Änderungen von IPS bei Abgleich in das lokale Repository übertragen und direkt an das zentrale Repository übertragen werden, ist dieses Verzeichnis nur von temporärem Interesse und kann jderzeit neu erstellt werden.
 
@@ -188,7 +194,9 @@ Mit diesem Script werden (bei stündlichem Aufruf) die Zip-Archvie nur um 0 Uhr 
 
 $with_zip = date("H", time()) == 0 ? true : false;
 CVC_CallAdjustment(17889 /*[System\Configuration Version-Control (ssh)]*/, $with_zip);
+
 ```
+Bei Bedarf kann man natürlich jederzeit einen Abgleich manuell über die Schaltfläche _Abgleich durchführen_ durchführen.
 
 ## 4. Funktionsreferenz
 
@@ -204,14 +212,14 @@ führt einen Abgleich durch. Durch _with_zip_ kann bei manuellem Aufruf gesteuer
 
 ### Variablen
 
-| Eigenschaft                     | Typ      | Standardwert | Beschreibung |
-| :-----------------------------: | :-----:  | :----------: | :----------------------------------------------------------------------------------------------------------: |
-| Git-Repository                  | string   |              | Pfad zu Git-Repository |
-| Benutzer                        | string   |              | Benutzer des Git-Repository (für https und ssh) |
-| Passwort                        | string   |              | Passwort (nur für https) |
-| Port                            | integer  | 22           | SSH-Port (nur für ssh) |
-| lokales Verzeichnis             | string   |              | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
-| Module als Zip-Archiv sichern   | boolean  | false        | Sichern der Module als Zip-Archiv. Achtung: Größe beachten! |
+| Eigenschaft                          | Typ      | Standardwert | Beschreibung |
+| :----------------------------------: | :-----:  | :----------: | :----------------------------------------------------------------------------------------------------------: |
+| Git-Repository                       | string   |              | Pfad zu Git-Repository |
+| Benutzer                             | string   |              | Benutzer des Git-Repository (für https und ssh) |
+| Passwort                             | string   |              | Passwort (nur für https) |
+| Port                                 | integer  | 22           | SSH-Port (nur für ssh) |
+| lokales Verzeichnis                  | string   |              | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
+| Webfront/user als Zip-Archiv sichern | boolean  | false        | Sichern von Webfront/user als Zip-Archiv. Achtung: Größe beachten! |
 
 #### Schaltflächen
 
@@ -230,5 +238,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.0 @ 01.09.2018<br>
+- 1.1 @ 10.09.2018 10:14<br>
+  - Commit-ID der Module in den <modules>.json-Datein gesichert, Dokumentation ergänzt
+  - keine Zip-Archiv mehr für Module
+  - optional Zip-Archiv für Verzeichnis webfront/user
+
+- 1.0 @ 01.09.2018 10:12<br>
   Initiale Version
