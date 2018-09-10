@@ -427,10 +427,10 @@ class ConfigVC extends IPSModule
 
     private function stripFilename($fname)
     {
-		$fname = str_replace(DIRECTORY_SEPARATOR, '_', $fname);
-		$fname = str_replace('.', '_', $fname);
-		return $fname;
-	}
+        $fname = str_replace(DIRECTORY_SEPARATOR, '_', $fname);
+        $fname = str_replace('.', '_', $fname);
+        return $fname;
+    }
 
     private function performAdjustment($with_zip)
     {
@@ -609,29 +609,28 @@ class ConfigVC extends IPSModule
             return ['state' => false];
         }
 
-		$r = IPS_GetSnapshot();
-		$snapshot = json_decode($r, true);
+        $r = IPS_GetSnapshot();
+        $snapshot = json_decode($r, true);
 
-		// global optiones
-		$options = $snapshot['options'];
-		$soptions = json_encode($options, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-		$uoptions = utf8_decode($soptions);
-		$fname = $gitSettingsDir . DIRECTORY_SEPARATOR . 'options.json';
-		if (!$this->saveFile($fname, $uoptions, 0, true)) {
-			$this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
-			return ['state' => false];
-		}
+        // global optiones
+        $options = $snapshot['options'];
+        $soptions = json_encode($options, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $uoptions = utf8_decode($soptions);
+        $fname = $gitSettingsDir . DIRECTORY_SEPARATOR . 'options.json';
+        if (!$this->saveFile($fname, $uoptions, 0, true)) {
+            $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
+            return ['state' => false];
+        }
 
-
-		// profiles
-		$profiles = $snapshot['profiles'];
-		$sprofiles = json_encode($profiles, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-		$uprofiles = utf8_decode($sprofiles);
-		$fname = $gitSettingsDir . DIRECTORY_SEPARATOR . 'profiles.json';
-		if (!$this->saveFile($fname, $uprofiles, 0, true)) {
-			$this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
-			return ['state' => false];
-		}
+        // profiles
+        $profiles = $snapshot['profiles'];
+        $sprofiles = json_encode($profiles, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $uprofiles = utf8_decode($sprofiles);
+        $fname = $gitSettingsDir . DIRECTORY_SEPARATOR . 'profiles.json';
+        if (!$this->saveFile($fname, $uprofiles, 0, true)) {
+            $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
+            return ['state' => false];
+        }
 
         $oldProfiles = [];
         $filenames = scandir($gitProfilesPath, 0);
@@ -643,23 +642,23 @@ class ConfigVC extends IPSModule
             $oldProfiles[] = $filename;
         }
 
-		$newProfiles = [];
+        $newProfiles = [];
 
-		$profiles = $snapshot['profiles'];
-		foreach ($profiles as $key => $profile) {
-			$profile['name'] = $key;
+        $profiles = $snapshot['profiles'];
+        foreach ($profiles as $key => $profile) {
+            $profile['name'] = $key;
             $fname = $this->stripFilename($key);
             $newProfiles[] = $fname . '.json';
 
-			$sprofile = json_encode($profile, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			$uprofile = utf8_decode($sprofile);
-			$fname = $gitProfilesDir . DIRECTORY_SEPARATOR . $fname . '.json';
+            $sprofile = json_encode($profile, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $uprofile = utf8_decode($sprofile);
+            $fname = $gitProfilesDir . DIRECTORY_SEPARATOR . $fname . '.json';
 
-			if (!$this->saveFile($fname, $uprofile, 0, true)) {
-				$this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
-				return ['state' => false];
-			}
-		}
+            if (!$this->saveFile($fname, $uprofile, 0, true)) {
+                $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
+                return ['state' => false];
+            }
+        }
 
         foreach ($oldProfiles as $filename) {
             if (in_array($filename, $newProfiles)) {
@@ -687,11 +686,11 @@ class ConfigVC extends IPSModule
 
         $newObjects = [];
 
-		$objects = $snapshot['objects'];
-		foreach ($objects as $key => $object) {
-			$objID = substr($key, 2);
+        $objects = $snapshot['objects'];
+        foreach ($objects as $key => $object) {
+            $objID = substr($key, 2);
             $mtime = 0;
-			$objType = $object['type'];
+            $objType = $object['type'];
             switch ($objType) {
                 case otCategory:
                     break;
@@ -881,65 +880,65 @@ class ConfigVC extends IPSModule
         if ($with_zip && $with_webfront_user_zip) {
             $time_start_webfront_user = microtime(true);
 
-			$oldWebfrontUserDirs = [];
-			$filenames = scandir($gitWebfrontUserPath, 0);
-			foreach ($filenames as $filename) {
-				$path = $gitWebfrontUserPath . DIRECTORY_SEPARATOR . $filename;
-				if (is_dir($path)) {
-					continue;
-				}
-				$oldWebfrontUserDirs[] = $filename;
-			}
+            $oldWebfrontUserDirs = [];
+            $filenames = scandir($gitWebfrontUserPath, 0);
+            foreach ($filenames as $filename) {
+                $path = $gitWebfrontUserPath . DIRECTORY_SEPARATOR . $filename;
+                if (is_dir($path)) {
+                    continue;
+                }
+                $oldWebfrontUserDirs[] = $filename;
+            }
 
-			$newWebfrontUserDirs = [];
+            $newWebfrontUserDirs = [];
 
-			$dirnames = scandir($ipsWebfrontUserPath, 0);
-			foreach ($dirnames as $dirname) {
-				if ($dirname == '.' || $dirname == '..') {
-					continue;
-				}
-				$path = $ipsWebfrontUserPath . DIRECTORY_SEPARATOR . $dirname;
-				if (!is_dir($path)) {
-					continue;
-				}
-				if (!$this->changeDir($ipsWebfrontUserPath)) {
-					return ['state' => false];
-				}
-				$mtime = 0;
-				$directory = new RecursiveDirectoryIterator($dirname, FilesystemIterator::SKIP_DOTS);
-				$objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
-				foreach ($objects as $object) {
-					$m = filemtime($object->getPathname());
-					if ($m > $mtime) {
-						$mtime = $m;
-					}
-				}
-				$path = $gitWebfrontUserPath . DIRECTORY_SEPARATOR . $dirname . '.zip';
-				$time_start_zipfile = microtime(true);
-				if (!$this->buildZip($dirname, $path, $mtime)) {
-					return ['state' => false];
-				}
-				$newWebfrontUserDirs[] = $dirname . '.zip';
-				$duration_zipfile = floor((microtime(true) - $time_start_zipfile) * 100) / 100;
-				$duration_zipfiles += $duration_zipfile;
-			}
+            $dirnames = scandir($ipsWebfrontUserPath, 0);
+            foreach ($dirnames as $dirname) {
+                if ($dirname == '.' || $dirname == '..') {
+                    continue;
+                }
+                $path = $ipsWebfrontUserPath . DIRECTORY_SEPARATOR . $dirname;
+                if (!is_dir($path)) {
+                    continue;
+                }
+                if (!$this->changeDir($ipsWebfrontUserPath)) {
+                    return ['state' => false];
+                }
+                $mtime = 0;
+                $directory = new RecursiveDirectoryIterator($dirname, FilesystemIterator::SKIP_DOTS);
+                $objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
+                foreach ($objects as $object) {
+                    $m = filemtime($object->getPathname());
+                    if ($m > $mtime) {
+                        $mtime = $m;
+                    }
+                }
+                $path = $gitWebfrontUserPath . DIRECTORY_SEPARATOR . $dirname . '.zip';
+                $time_start_zipfile = microtime(true);
+                if (!$this->buildZip($dirname, $path, $mtime)) {
+                    return ['state' => false];
+                }
+                $newWebfrontUserDirs[] = $dirname . '.zip';
+                $duration_zipfile = floor((microtime(true) - $time_start_zipfile) * 100) / 100;
+                $duration_zipfiles += $duration_zipfile;
+            }
 
-			if (!$this->changeDir($gitPath)) {
-				return ['state' => false];
-			}
-			foreach ($oldWebfrontUserDirs as $filename) {
-				if (in_array($filename, $newWebfrontUserDirs)) {
-					continue;
-				}
-				$fname = $gitWebfrontUserDir . DIRECTORY_SEPARATOR . $filename;
-				if (!unlink($fname)) {
-					$this->SendDebug(__FUNCTION__, 'unable to delete file ' . $fname, 0);
-					continue;
-				}
-				if (!$this->execute('git rm ' . $fname, $output)) {
-					return ['state' => false];
-				}
-			}
+            if (!$this->changeDir($gitPath)) {
+                return ['state' => false];
+            }
+            foreach ($oldWebfrontUserDirs as $filename) {
+                if (in_array($filename, $newWebfrontUserDirs)) {
+                    continue;
+                }
+                $fname = $gitWebfrontUserDir . DIRECTORY_SEPARATOR . $filename;
+                if (!unlink($fname)) {
+                    $this->SendDebug(__FUNCTION__, 'unable to delete file ' . $fname, 0);
+                    continue;
+                }
+                if (!$this->execute('git rm ' . $fname, $output)) {
+                    return ['state' => false];
+                }
+            }
 
             $duration_webfront_user = floor((microtime(true) - $time_start_webfront_user) * 100) / 100;
         } else {
