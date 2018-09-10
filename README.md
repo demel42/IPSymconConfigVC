@@ -260,7 +260,7 @@ GUIDs
 
 - 1.1 @ 10.09.2018 10:14<br>
   - Commit-ID der Module in den <modules>.json-Dateien gesichert, Dokumentation ergänzt
-  - keine Zip-Archiv mehr für Module
+  - keine Zip-Archive mehr für Module
   - optional Zip-Archive für Verzeichnisse unterhalb von _webfront/user_
   - Sicherung der Informationen zu _webfront/skins_ (analog zu Modulen)
   - Sicherung von php.ini
