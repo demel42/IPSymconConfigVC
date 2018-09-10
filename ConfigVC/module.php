@@ -443,7 +443,6 @@ class ConfigVC extends IPSModule
         $ipsWebfrontUserDir = 'user';
         $ipsWebfrontUserPath = $ipsWebfrontPath . DIRECTORY_SEPARATOR . $ipsWebfrontUserDir;
 
-
         $gitScriptDir = 'scripts';
         $gitScriptPath = $gitPath . DIRECTORY_SEPARATOR . $gitScriptDir;
 
@@ -772,13 +771,13 @@ class ConfigVC extends IPSModule
             }
 
             $jdata = [
-					'name'     => $dirname,
-					'url'      => $url,
-					'branch'   => $branch,
-					'commitID' => $commitID,
-					'mtime'    => $mtime
-				];
-			
+                    'name'     => $dirname,
+                    'url'      => $url,
+                    'branch'   => $branch,
+                    'commitID' => $commitID,
+                    'mtime'    => $mtime
+                ];
+
             $sdata = json_encode($jdata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             $data = utf8_decode($sdata);
 
@@ -810,34 +809,33 @@ class ConfigVC extends IPSModule
 
         $duration_modules = floor((microtime(true) - $time_start_modules) * 100) / 100;
 
-		// .../webfront/user
+        // .../webfront/user
 
-		if ($with_zip && $with_webfront_user_zip) {
-			$time_start_webfront_user = microtime(true);
-			$time_start_zipfile = microtime(true);
-			if (!$this->changeDir($ipsWebfrontPath)) {
-				return ['state' => false];
-			}
-			$mtime = 0;
-			$directory = new RecursiveDirectoryIterator($ipsWebfrontUserDir, FilesystemIterator::SKIP_DOTS);
-			$objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
-			foreach ($objects as $object) {
-				$m = filemtime($object->getPathname());
-				if ($m > $mtime) {
-					$mtime = $m;
-				}
-			}
-			$path = $gitWebfrontPath . DIRECTORY_SEPARATOR . $ipsWebfrontUserDir . '.zip';
-			if (!$this->buildZip($ipsWebfrontUserDir, $path, $mtime)) {
-				return ['state' => false];
-			}
-			$duration_zipfile = floor((microtime(true) - $time_start_zipfile) * 100) / 100;
-			$duration_zipfiles += $duration_zipfile;
-			$duration_webfront_user = floor((microtime(true) - $time_start_webfront_user) * 100) / 100;
-		} else {
-			$duration_webfront_user = 0;
-		}
-
+        if ($with_zip && $with_webfront_user_zip) {
+            $time_start_webfront_user = microtime(true);
+            $time_start_zipfile = microtime(true);
+            if (!$this->changeDir($ipsWebfrontPath)) {
+                return ['state' => false];
+            }
+            $mtime = 0;
+            $directory = new RecursiveDirectoryIterator($ipsWebfrontUserDir, FilesystemIterator::SKIP_DOTS);
+            $objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
+            foreach ($objects as $object) {
+                $m = filemtime($object->getPathname());
+                if ($m > $mtime) {
+                    $mtime = $m;
+                }
+            }
+            $path = $gitWebfrontPath . DIRECTORY_SEPARATOR . $ipsWebfrontUserDir . '.zip';
+            if (!$this->buildZip($ipsWebfrontUserDir, $path, $mtime)) {
+                return ['state' => false];
+            }
+            $duration_zipfile = floor((microtime(true) - $time_start_zipfile) * 100) / 100;
+            $duration_zipfiles += $duration_zipfile;
+            $duration_webfront_user = floor((microtime(true) - $time_start_webfront_user) * 100) / 100;
+        } else {
+            $duration_webfront_user = 0;
+        }
 
         // final git-commands
 
@@ -979,7 +977,7 @@ class ConfigVC extends IPSModule
             . 'modules=' . $duration_modules . 's';
         if ($duration_webfront_user) {
             $s .= ', webfron_user=' . $duration_webfront_user . 's';
-		}
+        }
         if ($duration_zipfiles) {
             $s .= ' (including zip-files=' . $duration_zipfiles . 's)';
         }
