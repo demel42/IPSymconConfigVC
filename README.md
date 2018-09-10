@@ -259,10 +259,10 @@ GUIDs
 ## 7. Versions-Historie
 
 - 1.1 @ 10.09.2018 10:14<br>
-  - Commit-ID der Module in den <modules>.json-Datein gesichert, Dokumentation ergänzt
+  - Commit-ID der Module in den <modules>.json-Dateien gesichert, Dokumentation ergänzt
   - keine Zip-Archiv mehr für Module
   - optional Zip-Archive für Verzeichnisse unterhalb von _webfront/user_
-  - SIcherung der _webfront/skins_
+  - Sicherung der Informationen zu _webfront/skins_
 
 - 1.0 @ 01.09.2018 10:12<br>
   Initiale Version
