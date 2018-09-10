@@ -2,29 +2,6 @@
 
 require_once __DIR__ . '/../libs/common.php';  // globale Funktionen
 
-if (@constant('IPS_BASE') == null) {
-    // --- BASE MESSAGE
-    define('IPS_BASE', 10000);							// Base Message
-    define('IPS_KERNELSHUTDOWN', IPS_BASE + 1);			// Pre Shutdown Message, Runlevel UNINIT Follows
-    define('IPS_KERNELSTARTED', IPS_BASE + 2);			// Post Ready Message
-    // --- KERNEL
-    define('IPS_KERNELMESSAGE', IPS_BASE + 100);		// Kernel Message
-    define('KR_CREATE', IPS_KERNELMESSAGE + 1);			// Kernel is beeing created
-    define('KR_INIT', IPS_KERNELMESSAGE + 2);			// Kernel Components are beeing initialised, Modules loaded, Settings read
-    define('KR_READY', IPS_KERNELMESSAGE + 3);			// Kernel is ready and running
-    define('KR_UNINIT', IPS_KERNELMESSAGE + 4);			// Got Shutdown Message, unloading all stuff
-    define('KR_SHUTDOWN', IPS_KERNELMESSAGE + 5);		// Uninit Complete, Destroying Kernel Inteface
-    // --- KERNEL LOGMESSAGE
-    define('IPS_LOGMESSAGE', IPS_BASE + 200);			// Logmessage Message
-    define('KL_MESSAGE', IPS_LOGMESSAGE + 1);			// Normal Message
-    define('KL_SUCCESS', IPS_LOGMESSAGE + 2);			// Success Message
-    define('KL_NOTIFY', IPS_LOGMESSAGE + 3);			// Notiy about Changes
-    define('KL_WARNING', IPS_LOGMESSAGE + 4);			// Warnings
-    define('KL_ERROR', IPS_LOGMESSAGE + 5);				// Error Message
-    define('KL_DEBUG', IPS_LOGMESSAGE + 6);				// Debug Informations + Script Results
-    define('KL_CUSTOM', IPS_LOGMESSAGE + 7);			// User Message
-}
-
 if (!defined('vtBoolean')) {
     define('vtBoolean', 0);
     define('vtInteger', 1);
@@ -57,7 +34,7 @@ class ConfigVC extends IPSModule
         $this->RegisterPropertyString('password', '');
         $this->RegisterPropertyInteger('port', '22');
         $this->RegisterPropertyString('path', '');
-        $this->RegisterPropertyBoolean('with_modules_zip', false);
+        $this->RegisterPropertyBoolean('with_webfront_user_zip', false);
 
         $this->CreateVarProfile('ConfigVC.Duration', vtInteger, ' sec', 0, 0, 0, 0, '');
     }
@@ -86,7 +63,7 @@ class ConfigVC extends IPSModule
         $formElements[] = ['type' => 'Label', 'label' => 'for ssh only'];
         $formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
-        $formElements[] = ['type' => 'CheckBox', 'name' => 'with_modules_zip', 'caption' => 'save modules as zip-archive'];
+        $formElements[] = ['type' => 'CheckBox', 'name' => 'with_webfront_user_zip', 'caption' => 'save webfront/user as zip-archive'];
 
         $formActions = [];
         $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
@@ -450,7 +427,7 @@ class ConfigVC extends IPSModule
 
     private function performAdjustment($with_zip)
     {
-        $with_modules_zip = $this->ReadPropertyBoolean('with_modules_zip');
+        $with_webfront_user_zip = $this->ReadPropertyBoolean('with_webfront_user_zip');
 
         $url = $this->ReadPropertyString('url');
         $path = $this->ReadPropertyString('path');
@@ -462,11 +439,18 @@ class ConfigVC extends IPSModule
         $ipsScriptPath = IPS_GetKernelDir() . 'scripts';
         $ipsSettingsPath = IPS_GetKernelDir() . 'settings.json';
         $ipsModulesPath = IPS_GetKernelDir() . 'modules';
+        $ipsWebfrontPath = IPS_GetKernelDir() . 'webfront';
+        $ipsWebfrontUserDir = 'user';
+        $ipsWebfrontUserPath = $ipsWebfrontPath . DIRECTORY_SEPARATOR . $ipsWebfrontUserDir;
+
 
         $gitScriptDir = 'scripts';
         $gitScriptPath = $gitPath . DIRECTORY_SEPARATOR . $gitScriptDir;
 
         $gitSettingsName = 'settings.json';
+
+        $gitModulesDir = 'modules';
+        $gitModulesPath = $gitPath . DIRECTORY_SEPARATOR . $gitModulesDir;
 
         $gitSettingsDir = 'settings';
         $gitSettingsPath = $gitPath . DIRECTORY_SEPARATOR . $gitSettingsDir;
@@ -474,10 +458,8 @@ class ConfigVC extends IPSModule
         $gitObjectsDir = $gitSettingsDir . DIRECTORY_SEPARATOR . 'objects';
         $gitObjectsPath = $gitPath . DIRECTORY_SEPARATOR . $gitObjectsDir;
 
-        $gitModulesDir = 'modules';
-        $gitModulesPath = $gitPath . DIRECTORY_SEPARATOR . $gitModulesDir;
-
-        $gitModulesList = 'modules.json';
+        $gitWebfrontDir = 'webfront';
+        $gitWebfrontPath = $gitPath . DIRECTORY_SEPARATOR . $gitWebfrontDir;
 
         $now = time();
 
@@ -501,11 +483,17 @@ class ConfigVC extends IPSModule
             return ['state' => false];
         }
 
+        if (!$this->checkDir($gitWebfrontPath, true)) {
+            return ['state' => false];
+        }
+
         if (!$this->changeDir($gitPath)) {
             return ['state' => false];
         }
 
         $time_start = microtime(true);
+
+        $duration_zipfiles = 0;
 
         // .../symcon/scripts
 
@@ -706,8 +694,18 @@ class ConfigVC extends IPSModule
         // .../symcon/modules
 
         $time_start_modules = microtime(true);
-        $duration_zipfiles = 0;
 
+        $oldModules = [];
+        $filenames = scandir($gitModulesPath, 0);
+        foreach ($filenames as $filename) {
+            $path = $gitScriptPath . DIRECTORY_SEPARATOR . $filename;
+            if (is_dir($path)) {
+                continue;
+            }
+            $oldModules[] = $filename;
+        }
+
+        $newModules = [];
         $dirnames = scandir($ipsModulesPath, 0);
         foreach ($dirnames as $dirname) {
             if ($dirname == '.' || $dirname == '..') {
@@ -750,6 +748,19 @@ class ConfigVC extends IPSModule
                 continue;
             }
 
+            if (!$this->execute('git rev-parse --verify HEAD', $output)) {
+                return ['state' => false];
+            }
+            $commitID = '';
+            foreach ($output as $s) {
+                $commitID = $s;
+                break;
+            }
+            if ($commitID == '') {
+                $this->SendDebug(__FUNCTION__, '  ... no git-commitID-information - ignore', 0);
+                continue;
+            }
+
             $mtime = 0;
             $directory = new RecursiveDirectoryIterator('.', FilesystemIterator::SKIP_DOTS);
             $objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
@@ -760,7 +771,14 @@ class ConfigVC extends IPSModule
                 }
             }
 
-            $jdata = ['name' => $dirname, 'url' => $url, 'branch' => $branch, 'mtime' => $mtime];
+            $jdata = [
+					'name'     => $dirname,
+					'url'      => $url,
+					'branch'   => $branch,
+					'commitID' => $commitID,
+					'mtime'    => $mtime
+				];
+			
             $sdata = json_encode($jdata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             $data = utf8_decode($sdata);
 
@@ -770,21 +788,56 @@ class ConfigVC extends IPSModule
                 return ['state' => false];
             }
 
-            if ($with_zip && $with_modules_zip) {
-                $time_start_zipfile = microtime(true);
-                if (!$this->changeDir($ipsModulesPath)) {
-                    return ['state' => false];
-                }
-                $path = $gitModulesPath . DIRECTORY_SEPARATOR . $dirname . '.zip';
-                if (!$this->buildZip($dirname, $path, $mtime)) {
-                    return ['state' => false];
-                }
-                $duration_zipfile = floor((microtime(true) - $time_start_zipfile) * 100) / 100;
-                $duration_zipfiles += $duration_zipfile;
+            $newModules[] = $dirname . '.json';
+        }
+
+        if (!$this->changeDir($gitPath)) {
+            return ['state' => false];
+        }
+        foreach ($oldModules as $filename) {
+            if (in_array($filename, $newModules)) {
+                continue;
+            }
+            $fname = $gitModulesDir . DIRECTORY_SEPARATOR . $filename;
+            if (!unlink($fname)) {
+                $this->SendDebug(__FUNCTION__, 'unable to delete file ' . $fname, 0);
+                continue;
+            }
+            if (!$this->execute('git rm ' . $fname, $output)) {
+                return ['state' => false];
             }
         }
 
         $duration_modules = floor((microtime(true) - $time_start_modules) * 100) / 100;
+
+		// .../webfront/user
+
+		if ($with_zip && $with_webfront_user_zip) {
+			$time_start_webfront_user = microtime(true);
+			$time_start_zipfile = microtime(true);
+			if (!$this->changeDir($ipsWebfrontPath)) {
+				return ['state' => false];
+			}
+			$mtime = 0;
+			$directory = new RecursiveDirectoryIterator($ipsWebfrontUserDir, FilesystemIterator::SKIP_DOTS);
+			$objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
+			foreach ($objects as $object) {
+				$m = filemtime($object->getPathname());
+				if ($m > $mtime) {
+					$mtime = $m;
+				}
+			}
+			$path = $gitWebfrontPath . DIRECTORY_SEPARATOR . $ipsWebfrontUserDir . '.zip';
+			if (!$this->buildZip($ipsWebfrontUserDir, $path, $mtime)) {
+				return ['state' => false];
+			}
+			$duration_zipfile = floor((microtime(true) - $time_start_zipfile) * 100) / 100;
+			$duration_zipfiles += $duration_zipfile;
+			$duration_webfront_user = floor((microtime(true) - $time_start_webfront_user) * 100) / 100;
+		} else {
+			$duration_webfront_user = 0;
+		}
+
 
         // final git-commands
 
@@ -924,6 +977,9 @@ class ConfigVC extends IPSModule
             . 'objects=' . $duration_objects . 's'
             . ', '
             . 'modules=' . $duration_modules . 's';
+        if ($duration_webfront_user) {
+            $s .= ', webfron_user=' . $duration_webfront_user . 's';
+		}
         if ($duration_zipfiles) {
             $s .= ' (including zip-files=' . $duration_zipfiles . 's)';
         }

@@ -12,7 +12,7 @@
 
 			"local path": "lokales Verzeichnis",
 
-			"save modules as zip-archive": "Module als Zip-Archiv sichern",
+			"save webfront/user as zip-archive": "Verzeichnis webfront/user als Zip-Archiv sichern",
 
 			"Action takes up several minutes (depending on amount of data)": "Die Aktion dauert bis zu einigen Minuten (in Abhängigkeit von der Datenmenge)",
 			"Perform adjustment": "Abgleich durchführen",
