@@ -35,17 +35,28 @@ Anhand dieser Daten kann auch eine bestimmte Version des Moduls wieder hergestel
 Wenn man wieder auf den aktuellen Stand zurückgehen möchte, muss man das analog durchführen: löschen und dann wieder die Original-URL angeben und ggfs den passenden Branch auswählen.
 
 3. Setting<br>
-Die Settigs wird als Ganzes gesichert.
+Die Datei _setting.json_ wird im Original gesichert.
+
 Da sich der Inhat von _settings.json_ sehr dynamisch ändert und ein vorher/nachher-Vergleich sehr unübersichtlich ist, wird noch folgendes gemacht:
-a) aus _settings.json_ werden alle Bereiche außer _objects_ als eigene _.json_-Datei gesichert (also _profiles.json_ und _options.json_). Diese Dateien werden nur geschrieben, wenn sich am Inhalt etwas geändert hat.
+
+es wird per IPS_GetSnapshot()_ der aktuelle Zustand geholt. Hieraus wird exportiert
+
+a) _options.json_ (_Spezialschalter_) wird im Verzeichnis _settings_ gesichert.
+
 b) Objekte<br>
-alle Objekte werden aus dem IPS heraus (also nicht aus der _settings.json_) gesichert, dabei wir pro Objekt eine Datei angelegt. Diese Datei enthält die json-Strukturen die von den jeweiligen IPS-Aufrufen (_IPS_GetObject()_ sowie _IPS_GetInstance()_ etc) geliefert werden. Um nur relevante Änderungen zu sehen werden eventuelle Zeitstempel oder die Werte der Variablen entfernt. Da die Datei nur geschrieben wird, wenn sich etwas geändert hat.
+alle Objekte werden aus dem Snapshot heraus (also auf aktuellem STand) gesichert, dabei wird pro Objekt eine Datei im Unterverzeichnis _settings/objects_ angelegt. Diese Datei enthält die json-Struktur des jeweiligen Objekts. Um nur relevante Änderungen zu sehen werden eventuelle Zeitstempel oder die Werte der Variablen entfernt. Da die Datei nur geschrieben wird, wenn sich etwas geändert hat.
+
+c) Profile<br>
+die Profile werden als Ganzes in der Datei _profile.json_ im Verzeichnis _settings_ und noch einmal jedes Profil einzeln in _settings/profiles_ unter dem Profilnamen. <br>
+Hinweis: es werden einige spezielle Zeichen im Dateinamen durch ein Unterstrich ersetzt.
+
+Auch diese Dateien werden grundsätzlich nur geschrieben, wenn sich etwas geändert hat, damit ist das leicht am Zeitstempel der Datei zu erkennen.
 
 4. README.md
 In dieser Datei wird ein Protokoll der Änderungen des letzten Abgleichs dargetsellt. Man sieht als sehr schnell, an welcher Stelle der Konfiguration seit dem letzten Lauf sich etwas geändert hat.
-Die Änderungen selber kann man dann auch leicht im git darstellen.
+Die Änderungen selber kann man dann auch leicht im Git darstellen.
 
-Die Dauer eines Abgleich ist naturgemäß schwierig allgemeingültig darzustellen. Ein Anhaltswert: auf einem Raspberry 3B+ auf SD-Karte mit ca. 30 Scripten, 2000 Variablen und 20 Modulen dauert der initiale Abgleich ohne Erstellen von Zip-Archiven ca. 20 Sekunden, jeder weiterer Abgleich ca. 2-3 Sekunden. Mit Erstellen von Zip-Archiven wächst die Zeit initial auf 150 Sekunden (dіese Zeit ist aber sehr individuell).
+Die Dauer eines Abgleich ist naturgemäß schwierig allgemeingültig darzustellen. Ein Anhaltswert: auf einem Raspberry 3B+ auf SD-Karte mit ca. 30 Scripten, 2000 Variablen und 20 Modulen dauert der initiale Abgleich ohne Erstellen von Zip-Archiven ca. 20 Sekunden, jeder weiterer Abgleich ca. 2-3 Sekunden. Die Zeit für das Erstellen von Zip-Archiven (_webfront/user_) ist sehr individuell, dürfte aber im Bereich einiger Minuten liegen.
 
 Da alle Änderungen von IPS bei Abgleich in das lokale Repository übertragen und direkt an das zentrale Repository übertragen werden, ist dieses Verzeichnis nur von temporärem Interesse und kann jderzeit neu erstellt werden.
 
@@ -195,7 +206,7 @@ Mit diesem Script werden (bei stündlichem Aufruf) die Zip-Archvie nur um 0 Uhr 
 <?
 
 $with_zip = date("H", time()) == 0 ? true : false;
-CVC_CallAdjustment(17889 /*[System\Configuration Version-Control (ssh)]*/, $with_zip);
+CVC_CallAdjustment(4711 /*[System\Configuration Version-Control*/, $with_zip);
 
 ```
 Bei Bedarf kann man natürlich jederzeit einen Abgleich manuell über die Schaltfläche _Abgleich durchführen_ durchführen.
