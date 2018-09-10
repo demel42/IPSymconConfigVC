@@ -38,7 +38,7 @@ Anhand dieser Daten kann auch eine bestimmte Version des Moduls wieder hergestel
 Wenn man wieder auf den aktuellen Stand zurückgehen möchte, muss man das analog durchführen: löschen und dann wieder die Original-URL angeben und ggfs den passenden Branch auswählen.
 
 - Skins<br>
-Analog zu den Modules werden die unter _webfront/skins_ installierten Skins gesichert.
+Analog zu den Modulen werden die unter _webfront/skins_ installierten Skins gesichert.
 
 - IPS-Objekte & co
 Da sich der Inhat von _settings.json_ sehr dynamisch ändert und ein vorher/nachher-Vergleich sehr unübersichtlich ist, wird noch folgendes gemacht:
@@ -262,7 +262,8 @@ GUIDs
   - Commit-ID der Module in den <modules>.json-Dateien gesichert, Dokumentation ergänzt
   - keine Zip-Archiv mehr für Module
   - optional Zip-Archive für Verzeichnisse unterhalb von _webfront/user_
-  - Sicherung der Informationen zu _webfront/skins_
+  - Sicherung der Informationen zu _webfront/skins_ (analog zu Modulen)
+  - Sicherung von php.ini
 
 - 1.0 @ 01.09.2018 10:12<br>
   Initiale Version
