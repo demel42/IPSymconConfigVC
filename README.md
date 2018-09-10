@@ -148,7 +148,7 @@ Der Git-User kann aber muss nicht _admin_ sein. Der ssh-Port ist typischerweise 
 
 ```
 cd /tmp
-git clone ssh://admin@git-server:5002/home/git/repositories/ipsymcon.git
+git clone ssh://admin@git-server:5002/volume1/git/ipsymcon.git
 cd ipsymcon
 touch README.md
 git add README.md
