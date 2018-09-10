@@ -265,6 +265,7 @@ GUIDs
   - optional Zip-Archive für Verzeichnisse unterhalb von _webfront/user_
   - Sicherung der Informationen zu _webfront/skins_ (analog zu Modulen)
   - Sicherung von php.ini
+  - Umgang mit nicht-uft8-Daten bei _IPS_Snapshot()_
 
 - 1.0 @ 01.09.2018 10:12<br>
   Initiale Version

@@ -617,8 +617,9 @@ class ConfigVC extends IPSModule
             return ['state' => false];
         }
 
-        $r = IPS_GetSnapshot();
-        $snapshot = json_decode($r, true);
+        $sdata = IPS_GetSnapshot();
+		$udata = utf8_encode($sdata);
+        $snapshot = json_decode($udata, true);
 
         // global optiones
         $options = $snapshot['options'];
