@@ -23,13 +23,13 @@
 Es werden verschiedene Dateien und Daten aus dem IP-Symcon-Verzeichnis in Git gesichert und versioniert.
 
 Die Daten sind
-1. Globale Dateien<br>
+- Globale Dateien<br>
 Die Datei _setting.json_ wird gesichert sowie die Datei _php.ini_.
 
-2. Scripte<br>
+- Scripte<br>
 die Scripte aus dem Scriptverzeichnis werden, falls geändert, übernommen. Neue Dateien werden hinzugefügt, zwischenzeitlich gelöschte Dateien werden auch im Repository gelöscht.
 
-3. Module<br>
+- Module<br>
 Die installierten Module werden untersucht. Es wird pro Modul eine Datei _<Modul-Verzeichnis>.json_ angelegt, die die Repository-URL (_url_), den Branch (_branch_), die den altuellen Versionsstand (_commitID_) und den Zeitpunkt der letzten Modifikation einer Datei (_mtime_) aus dem Modul-Verzeichnis enthält.
 Die Datei ändert sich somit nur, wenn sich auch in dem Modul etwas geändet hat.
 Anhand dieser Daten kann auch eine bestimmte Version des Moduls wieder hergestellt werden; hierzu geht man wie folgt vor:
@@ -37,7 +37,10 @@ Anhand dieser Daten kann auch eine bestimmte Version des Moduls wieder hergestel
 - Modul neu anlegen, jedoch nicht (nur) die Url angeben sondern: _<url>/commit/<commitID>_. SO kann man wieder zurück auf einen früheren Stand zurück gehen.
 Wenn man wieder auf den aktuellen Stand zurückgehen möchte, muss man das analog durchführen: löschen und dann wieder die Original-URL angeben und ggfs den passenden Branch auswählen.
 
-4. weitere Einstellungen
+- Skins<br>
+Analog zu den Modules werden die unter _webfront/skins_ installierten Skins gesichert.
+
+- IPS-Objekte & co
 Da sich der Inhat von _settings.json_ sehr dynamisch ändert und ein vorher/nachher-Vergleich sehr unübersichtlich ist, wird noch folgendes gemacht:
 
 es wird per IPS_GetSnapshot()_ der aktuelle Zustand geholt. Hieraus wird exportiert
@@ -53,7 +56,10 @@ Hinweis: es werden einige spezielle Zeichen im Dateinamen durch ein Unterstrich 
 
 Auch diese Dateien werden grundsätzlich nur geschrieben, wenn sich etwas geändert hat, damit ist das leicht am Zeitstempel der Datei zu erkennen.
 
-4. README.md
+- Webfront<br>
+Verzeichnisse unterhalb von _webfront/user_ werden optional als Zip-Arcchiv gesichert.
+
+- README.md
 In dieser Datei wird ein Protokoll der Änderungen des letzten Abgleichs dargetsellt. Man sieht als sehr schnell, an welcher Stelle der Konfiguration seit dem letzten Lauf sich etwas geändert hat.
 Die Änderungen selber kann man dann auch leicht im Git darstellen.
 
@@ -255,7 +261,8 @@ GUIDs
 - 1.1 @ 10.09.2018 10:14<br>
   - Commit-ID der Module in den <modules>.json-Datein gesichert, Dokumentation ergänzt
   - keine Zip-Archiv mehr für Module
-  - optional Zip-Archiv für Verzeichnis webfront/user
+  - optional Zip-Archive für Verzeichnisse unterhalb von _webfront/user_
+  - SIcherung der _webfront/skins_
 
 - 1.0 @ 01.09.2018 10:12<br>
   Initiale Version

@@ -449,6 +449,7 @@ class ConfigVC extends IPSModule
         $ipsModulesPath = $ipsBasePath . 'modules';
         $ipsWebfrontPath = $ipsBasePath . 'webfront';
         $ipsWebfrontUserPath = $ipsWebfrontPath . DIRECTORY_SEPARATOR . 'user';
+        $ipsWebfrontSkinsPath = $ipsWebfrontPath . DIRECTORY_SEPARATOR . 'skins';
 
         $gitScriptDir = 'scripts';
         $gitScriptPath = $gitPath . DIRECTORY_SEPARATOR . $gitScriptDir;
@@ -472,6 +473,9 @@ class ConfigVC extends IPSModule
 
         $gitWebfrontUserDir = $gitWebfrontDir . DIRECTORY_SEPARATOR . 'user';
         $gitWebfrontUserPath = $gitPath . DIRECTORY_SEPARATOR . $gitWebfrontUserDir;
+
+        $gitWebfrontSkinsDir = $gitWebfrontDir . DIRECTORY_SEPARATOR . 'skins';
+        $gitWebfrontSkinsPath = $gitPath . DIRECTORY_SEPARATOR . $gitWebfrontSkinsDir;
 
         $now = time();
 
@@ -500,6 +504,10 @@ class ConfigVC extends IPSModule
         }
 
         if (!$this->checkDir($gitWebfrontPath, true)) {
+            return ['state' => false];
+        }
+
+        if (!$this->checkDir($gitWebfrontSkinsPath, true)) {
             return ['state' => false];
         }
 
@@ -875,6 +883,125 @@ class ConfigVC extends IPSModule
 
         $duration_modules = floor((microtime(true) - $time_start_modules) * 100) / 100;
 
+        // .../symcon/webfront/skins
+
+        $time_start_skins = microtime(true);
+
+        $oldSkins = [];
+        $filenames = scandir($gitWebfrontSkinsPath, 0);
+        foreach ($filenames as $filename) {
+            $path = $gitScriptPath . DIRECTORY_SEPARATOR . $filename;
+            if (is_dir($path)) {
+                continue;
+            }
+            $oldSkins[] = $filename;
+        }
+
+        $newSkins = [];
+        $dirnames = scandir($ipsWebfrontSkinsPath, 0);
+        foreach ($dirnames as $dirname) {
+            if ($dirname == '.' || $dirname == '..') {
+                continue;
+            }
+            $path = $ipsWebfrontSkinsPath . DIRECTORY_SEPARATOR . $dirname;
+            if (!is_dir($path)) {
+                continue;
+            }
+            $this->SendDebug(__FUNCTION__, 'check module "' . $dirname . '"', 0);
+            if (!$this->changeDir($path)) {
+                return ['state' => false];
+            }
+
+            if (!$this->execute('git config --get remote.origin.url', $output)) {
+                return ['state' => false];
+            }
+            $url = '';
+            foreach ($output as $s) {
+                $url = $s;
+                break;
+            }
+            if ($url == '') {
+                $this->SendDebug(__FUNCTION__, '  ... no git-repository-information - ignore', 0);
+                continue;
+            }
+
+            if (!$this->execute('git branch', $output)) {
+                return ['state' => false];
+            }
+            $branch = '';
+            foreach ($output as $s) {
+                if (substr($s, 0, 1) == '*') {
+                    $branch = substr($s, 2);
+                    break;
+                }
+            }
+            if ($branch == '') {
+                $this->SendDebug(__FUNCTION__, '  ... no git-branch-information - ignore', 0);
+                continue;
+            }
+
+            if (!$this->execute('git rev-parse --verify HEAD', $output)) {
+                return ['state' => false];
+            }
+            $commitID = '';
+            foreach ($output as $s) {
+                $commitID = $s;
+                break;
+            }
+            if ($commitID == '') {
+                $this->SendDebug(__FUNCTION__, '  ... no git-commitID-information - ignore', 0);
+                continue;
+            }
+
+            $mtime = 0;
+            $directory = new RecursiveDirectoryIterator('.', FilesystemIterator::SKIP_DOTS);
+            $objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
+            foreach ($objects as $object) {
+                $m = filemtime($object->getPathname());
+                if ($m > $mtime) {
+                    $mtime = $m;
+                }
+            }
+
+            $jdata = [
+                    'name'     => $dirname,
+                    'url'      => $url,
+                    'branch'   => $branch,
+                    'commitID' => $commitID,
+                    'mtime'    => $mtime
+                ];
+
+            $sdata = json_encode($jdata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $data = utf8_decode($sdata);
+
+            $fname = $gitWebfrontSkinsPath . DIRECTORY_SEPARATOR . $dirname . '.json';
+            if (!$this->saveFile($fname, $data, 0, true)) {
+                $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
+                return ['state' => false];
+            }
+
+            $newSkins[] = $dirname . '.json';
+        }
+
+        if (!$this->changeDir($gitPath)) {
+            return ['state' => false];
+        }
+        foreach ($oldSkins as $filename) {
+            if (in_array($filename, $newSkins)) {
+                continue;
+            }
+            $fname = $gitSkinsDir . DIRECTORY_SEPARATOR . $filename;
+            if (!unlink($fname)) {
+                $this->SendDebug(__FUNCTION__, 'unable to delete file ' . $fname, 0);
+                continue;
+            }
+            if (!$this->execute('git rm ' . $fname, $output)) {
+                return ['state' => false];
+            }
+        }
+
+        $duration_skins = floor((microtime(true) - $time_start_skins) * 100) / 100;
+
         // .../webfront/user
 
         if ($with_zip && $with_webfront_user_zip) {
@@ -1082,7 +1209,9 @@ class ConfigVC extends IPSModule
             . ', '
             . 'objects=' . $duration_objects . 's'
             . ', '
-            . 'modules=' . $duration_modules . 's';
+            . 'modules=' . $duration_modules . 's'
+            . ', '
+            . 'skins=' . $duration_skins . 's';
         if ($duration_webfront_user) {
             $s .= ', webfron_user=' . $duration_webfront_user . 's';
         }
