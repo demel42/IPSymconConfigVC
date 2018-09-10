@@ -443,12 +443,12 @@ class ConfigVC extends IPSModule
 
         $msg = '';
 
-        $ipsScriptPath = IPS_GetKernelDir() . 'scripts';
-        $ipsSettingsPath = IPS_GetKernelDir() . 'settings.json';
-        $ipsModulesPath = IPS_GetKernelDir() . 'modules';
-        $ipsWebfrontPath = IPS_GetKernelDir() . 'webfront';
-        $ipsWebfrontUserDir = 'user';
-        $ipsWebfrontUserPath = $ipsWebfrontPath . DIRECTORY_SEPARATOR . $ipsWebfrontUserDir;
+        $ipsAdditionalFiles = [ 'settings.json', 'php.ini' ];
+        $ipsBasePath = IPS_GetKernelDir();
+        $ipsScriptPath = $ipsBasePath . 'scripts';
+        $ipsModulesPath = $ipsBasePath . 'modules';
+        $ipsWebfrontPath = $ipsBasePath . 'webfront';
+        $ipsWebfrontUserPath = $ipsWebfrontPath . DIRECTORY_SEPARATOR . 'user';
 
         $gitScriptDir = 'scripts';
         $gitScriptPath = $gitPath . DIRECTORY_SEPARATOR . $gitScriptDir;
@@ -515,6 +515,33 @@ class ConfigVC extends IPSModule
 
         $duration_zipfiles = 0;
 
+		// global files
+
+        $time_start_global = microtime(true);
+
+		if (!$this->changeDir($gitPath)) {
+			return ['state' => false];
+		}
+
+		foreach ($ipsAdditionalFiles as $filename) {
+			$path = $ipsBasePath . DIRECTORY_SEPARATOR . $filename;
+
+			$r = $this->loadFile($path);
+			if (!$r) {
+				$this->SendDebug(__FUNCTION__, 'error loading file ' . $path, 0);
+				return ['state' => false];
+			}
+			$stat = $r['stat'];
+			$data = $r['data'];
+
+			if (!$this->saveFile($filename, $data, $stat['mtime'], false)) {
+				$this->SendDebug(__FUNCTION__, 'error saving file ' . $filename, 0);
+				return ['state' => false];
+			}
+		}
+
+        $duration_global = floor((microtime(true) - $time_start_global) * 100) / 100;
+
         // .../symcon/scripts
 
         $time_start_scripts = microtime(true);
@@ -573,30 +600,6 @@ class ConfigVC extends IPSModule
         }
 
         $duration_scripts = floor((microtime(true) - $time_start_scripts) * 100) / 100;
-
-        // .../symcon/settings.json
-
-        $time_start_settings = microtime(true);
-
-        if (!$this->changeDir($gitPath)) {
-            return ['state' => false];
-        }
-
-        $data = file_get_contents($ipsSettingsPath);
-        $r = $this->loadFile($ipsSettingsPath);
-        if (!$r) {
-            $this->SendDebug(__FUNCTION__, 'error loading file ' . $src, 0);
-            return ['state' => false];
-        }
-        $stat = $r['stat'];
-        $data = $r['data'];
-
-        if (!$this->saveFile($gitSettingsName, $data, $stat['mtime'], false)) {
-            $this->SendDebug(__FUNCTION__, 'error saving file ' . $gitSettingsName, 0);
-            return ['state' => false];
-        }
-
-        $duration_settings = floor((microtime(true) - $time_start_settings) * 100) / 100;
 
         // Objects
 
@@ -1074,9 +1077,9 @@ class ConfigVC extends IPSModule
         $s = 'duration: '
             . 'total=' . $duration . 's'
             . ', '
-            . 'scripts=' . $duration_scripts . 's'
+            . 'global=' . $duration_global . 's'
             . ', '
-            . 'settings=' . $duration_settings . 's'
+            . 'scripts=' . $duration_scripts . 's'
             . ', '
             . 'objects=' . $duration_objects . 's'
             . ', '
