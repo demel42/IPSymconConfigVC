@@ -23,44 +23,45 @@
 Es werden verschiedene Dateien und Daten aus dem IP-Symcon-Verzeichnis in Git gesichert und versioniert.
 
 Die Daten sind
-- Globale Dateien<br>
+#### Globale Dateien
 Die Datei _setting.json_ wird gesichert sowie die Datei _php.ini_.
 
-- Scripte<br>
+#### Scripte
 die Scripte aus dem Scriptverzeichnis werden, falls geändert, übernommen. Neue Dateien werden hinzugefügt, zwischenzeitlich gelöschte Dateien werden auch im Repository gelöscht.
 
-- Module<br>
+#### Module
 Die installierten Module werden untersucht. Es wird pro Modul eine Datei _<Modul-Verzeichnis>.json_ angelegt, die die Repository-URL (_url_), den Branch (_branch_), die den altuellen Versionsstand (_commitID_) und den Zeitpunkt der letzten Modifikation einer Datei (_mtime_) aus dem Modul-Verzeichnis enthält.
 Die Datei ändert sich somit nur, wenn sich auch in dem Modul etwas geändet hat.
 Anhand dieser Daten kann auch eine bestimmte Version des Moduls wieder hergestellt werden; hierzu geht man wie folgt vor:
 - Modul in der Modulverwaltung löschen (іnicht die installierte Instanz des Modules!)
-- Modul neu anlegen, jedoch nicht (nur) die Url angeben sondern: _<url>/commit/<commitID>_. SO kann man wieder zurück auf einen früheren Stand zurück gehen.
+- Modul neu anlegen, jedoch nicht (nur) die Url angeben sondern so: _**url**/commit/**commitID**_ (z.B. _https://github.com/demel42/IPSymconConfigVC/commit/3434195d8ea0b745d92e707a186c0bff03c5884d_). Damit ist man wieder zurück auf dem früheren Stand.
+
 Wenn man wieder auf den aktuellen Stand zurückgehen möchte, muss man das analog durchführen: löschen und dann wieder die Original-URL angeben und ggfs den passenden Branch auswählen.
 
-- Skins<br>
+#### Skins
 Analog zu den Modulen werden die unter _webfront/skins_ installierten Skins gesichert.
 
-- IPS-Objekte & co
+#### IPS-Objekte & co
 Da sich der Inhat von _settings.json_ sehr dynamisch ändert und ein vorher/nachher-Vergleich sehr unübersichtlich ist, wird noch folgendes gemacht:
 
 es wird per IPS_GetSnapshot()_ der aktuelle Zustand geholt. Hieraus wird exportiert
 
-a) _options.json_ (_Spezialschalter_) wird im Verzeichnis _settings_ gesichert.
+- _options.json_ (_Spezialschalter_) wird im Verzeichnis _settings_ gesichert.
 
-b) Objekte<br>
-alle Objekte werden aus dem Snapshot heraus (also auf aktuellem STand) gesichert, dabei wird pro Objekt eine Datei im Unterverzeichnis _settings/objects_ angelegt. Diese Datei enthält die json-Struktur des jeweiligen Objekts. Um nur relevante Änderungen zu sehen werden eventuelle Zeitstempel oder die Werte der Variablen entfernt. Da die Datei nur geschrieben wird, wenn sich etwas geändert hat.
+- Objekte<br>
+alle Objekte werden aus dem Snapshot heraus (also auf aktuellem Stand) gesichert, dabei wird pro Objekt eine Datei im Unterverzeichnis _settings/objects_ angelegt. Diese Datei enthält die json-Struktur des jeweiligen Objekts. Um nur relevante Änderungen zu sehen werden eventuelle Zeitstempel oder die Werte der Variablen entfernt. Da die Datei nur geschrieben wird, wenn sich etwas geändert hat.
 
-c) Profile<br>
+- Profile<br>
 die Profile werden als Ganzes in der Datei _profile.json_ im Verzeichnis _settings_ und noch einmal jedes Profil einzeln in _settings/profiles_ unter dem Profilnamen. <br>
 Hinweis: es werden einige spezielle Zeichen im Dateinamen durch ein Unterstrich ersetzt.
 
 Auch diese Dateien werden grundsätzlich nur geschrieben, wenn sich etwas geändert hat, damit ist das leicht am Zeitstempel der Datei zu erkennen.
 
-- Webfront<br>
+#### Webfront
 Verzeichnisse unterhalb von _webfront/user_ werden optional als Zip-Arcchiv gesichert.
 
-- README.md
-In dieser Datei wird ein Protokoll der Änderungen des letzten Abgleichs dargetsellt. Man sieht als sehr schnell, an welcher Stelle der Konfiguration seit dem letzten Lauf sich etwas geändert hat.
+#### README.md
+In dieser Datei wird ein Protokoll der Änderungen des letzten Abgleichs dargestellt. Man sieht als sehr schnell, an welcher Stelle der Konfiguration seit dem letzten Lauf sich etwas geändert hat.
 Die Änderungen selber kann man dann auch leicht im Git darstellen.
 
 Die Dauer eines Abgleich ist naturgemäß schwierig allgemeingültig darzustellen. Ein Anhaltswert: auf einem Raspberry 3B+ auf SD-Karte mit ca. 30 Scripten, 2000 Variablen und 20 Modulen dauert der initiale Abgleich ohne Erstellen von Zip-Archiven ca. 20 Sekunden, jeder weiterer Abgleich ca. 2-3 Sekunden. Die Zeit für das Erstellen von Zip-Archiven (_webfront/user_) ist sehr individuell, dürfte aber im Bereich einiger Minuten liegen.
