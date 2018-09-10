@@ -104,7 +104,7 @@ class ConfigVC extends IPSModule
             }
             $url .= $s;
         }
-        $port = $this->ReadPropertyString('port');
+        $port = $this->ReadPropertyInteger('port');
         if (substr($url, 0, 6) == 'ssh://' && $port != '') {
             $s = substr($url, 6);
             $pos = strpos($s, '/');
@@ -425,6 +425,13 @@ class ConfigVC extends IPSModule
         return true;
     }
 
+    private function stripFilename($fname)
+    {
+		$fname = str_replace(DIRECTORY_SEPARATOR, '_', $fname);
+		$fname = str_replace('.', '_', $fname);
+		return $fname;
+	}
+
     private function performAdjustment($with_zip)
     {
         $with_webfront_user_zip = $this->ReadPropertyBoolean('with_webfront_user_zip');
@@ -457,8 +464,14 @@ class ConfigVC extends IPSModule
         $gitObjectsDir = $gitSettingsDir . DIRECTORY_SEPARATOR . 'objects';
         $gitObjectsPath = $gitPath . DIRECTORY_SEPARATOR . $gitObjectsDir;
 
+        $gitProfilesDir = $gitSettingsDir . DIRECTORY_SEPARATOR . 'profiles';
+        $gitProfilesPath = $gitPath . DIRECTORY_SEPARATOR . $gitProfilesDir;
+
         $gitWebfrontDir = 'webfront';
         $gitWebfrontPath = $gitPath . DIRECTORY_SEPARATOR . $gitWebfrontDir;
+
+        $gitWebfrontUserDir = $gitWebfrontDir . DIRECTORY_SEPARATOR . 'user';
+        $gitWebfrontUserPath = $gitPath . DIRECTORY_SEPARATOR . $gitWebfrontUserDir;
 
         $now = time();
 
@@ -482,7 +495,15 @@ class ConfigVC extends IPSModule
             return ['state' => false];
         }
 
+        if (!$this->checkDir($gitProfilesPath, true)) {
+            return ['state' => false];
+        }
+
         if (!$this->checkDir($gitWebfrontPath, true)) {
+            return ['state' => false];
+        }
+
+        if (!$this->checkDir($gitWebfrontUserPath, true)) {
             return ['state' => false];
         }
 
@@ -585,6 +606,72 @@ class ConfigVC extends IPSModule
             return ['state' => false];
         }
 
+		$r = IPS_GetSnapshot();
+		$snapshot = json_decode($r, true);
+
+		// global optiones
+		$options = $snapshot['options'];
+		$soptions = json_encode($options, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		$uoptions = utf8_decode($soptions);
+		$fname = $gitSettingsDir . DIRECTORY_SEPARATOR . 'options.json';
+		if (!$this->saveFile($fname, $uoptions, 0, true)) {
+			$this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
+			return ['state' => false];
+		}
+
+
+		// profiles
+		$profiles = $snapshot['profiles'];
+		$sprofiles = json_encode($profiles, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		$uprofiles = utf8_decode($sprofiles);
+		$fname = $gitSettingsDir . DIRECTORY_SEPARATOR . 'profiles.json';
+		if (!$this->saveFile($fname, $uprofiles, 0, true)) {
+			$this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
+			return ['state' => false];
+		}
+
+        $oldProfiles = [];
+        $filenames = scandir($gitProfilesPath, 0);
+        foreach ($filenames as $filename) {
+            $path = $gitProfilesPath . DIRECTORY_SEPARATOR . $filename;
+            if (is_dir($path)) {
+                continue;
+            }
+            $oldProfiles[] = $filename;
+        }
+
+		$newProfiles = [];
+
+		$profiles = $snapshot['profiles'];
+		foreach ($profiles as $key => $profile) {
+			$profile['name'] = $key;
+            $fname = $this->stripFilename($key);
+            $newProfiles[] = $fname . '.json';
+
+			$sprofile = json_encode($profile, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+			$uprofile = utf8_decode($sprofile);
+			$fname = $gitProfilesDir . DIRECTORY_SEPARATOR . $fname . '.json';
+
+			if (!$this->saveFile($fname, $uprofile, 0, true)) {
+				$this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
+				return ['state' => false];
+			}
+		}
+
+        foreach ($oldProfiles as $filename) {
+            if (in_array($filename, $newProfiles)) {
+                continue;
+            }
+            $fname = $gitProfilesDir . DIRECTORY_SEPARATOR . $filename;
+            if (!unlink($fname)) {
+                $this->SendDebug(__FUNCTION__, 'unable to delete file ' . $fname, 0);
+                continue;
+            }
+            if (!$this->execute('git rm ' . $fname, $output)) {
+                return ['state' => false];
+            }
+        }
+
         $oldObjects = [];
         $filenames = scandir($gitObjectsPath, 0);
         foreach ($filenames as $filename) {
@@ -595,80 +682,57 @@ class ConfigVC extends IPSModule
             $oldObjects[] = $filename;
         }
 
-        $data = file_get_contents($ipsSettingsPath);
-        $udata = utf8_encode($data);
-        $jdata = json_decode($udata, true);
-        foreach ($jdata as $key => $elem) {
-            if ($key == 'objects') {
-                continue;
-            }
-            $selem = json_encode($elem, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            $uelem = utf8_decode($selem);
-            $fname = $gitSettingsDir . DIRECTORY_SEPARATOR . $key . '.json';
-            if (!$this->saveFile($fname, $uelem, 0, true)) {
-                $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
-                return ['state' => false];
-            }
-        }
-
         $newObjects = [];
-        $objIDs = IPS_GetObjectList();
-        foreach ($objIDs as $objID) {
+
+		$objects = $snapshot['objects'];
+		foreach ($objects as $key => $object) {
+			$objID = substr($key, 2);
             $mtime = 0;
-            $obj = IPS_GetObject($objID);
-            switch ($obj['ObjectType']) {
+			$objType = $object['type'];
+            switch ($objType) {
                 case otCategory:
                     break;
                 case otInstance:
-                    $obj['data'] = IPS_GetInstance($objID);
-                    $mtime = $obj['data']['InstanceChanged'];
-                    $obj['data']['InstanceChanged'] = 0;
+                    $mtime = $object['data']['lastChange'];
+                    $object['data']['lastChange'] = 0;
                     break;
                 case otVariable:
-                    $obj['data'] = IPS_GetVariable($objID);
-                    $mtime = $obj['data']['VariableUpdated'];
-                    $obj['data']['VariableChanged'] = 0;
-                    $obj['data']['VariableUpdated'] = 0;
-                    $obj['data']['VariableValue'] = '';
+                    $mtime = $object['data']['lastUpdate'];
+                    $object['data']['lastChange'] = 0;
+                    $object['data']['lastUpdate'] = 0;
+                    $object['data']['value'] = '';
                     break;
                 case otScript:
-                    $obj['data'] = IPS_GetScript($objID);
-                    $mtime = $obj['data']['ScriptExecuted'];
-                    $obj['data']['ScriptExecuted'] = 0;
+                    $mtime = $object['data']['lastExecute'];
+                    $object['data']['lastExecute'] = 0;
                     break;
                 case otEvent:
-                    $obj['data'] = IPS_GetEvent($objID);
-                    $mtime = $obj['data']['LastRun'];
-                    $obj['data']['LastRun'] = 0;
-                    $obj['data']['NextRun'] = 0;
+                    $mtime = $object['data']['lastRun'];
+                    $object['data']['lastRun'] = 0;
+                    $object['data']['nextRun'] = 0;
                     break;
                 case otMedia:
-                    $obj['data'] = IPS_GetMedia($objID);
-                    $mtime = $obj['data']['MediaUpdated'];
-                    $obj['data']['MediaUpdated'] = 0;
+                    $mtime = $object['data']['lastUpdate'];
+                    $object['data']['lastUpdate'] = 0;
                     break;
                 case otLink:
-                    $obj['data'] = IPS_GetLink($objID);
                     break;
                 default:
                     break;
             }
-            if (isset($obj['ChildrenIDs'])) {
-                $obj['ChildrenIDs'] = [];
-            }
 
             $newObjects[] = $objID . '.json';
 
-            $sobj = json_encode($obj, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            if ($sobj == '') {
+            $sobject = json_encode($object, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            if ($sobject == '') {
                 $err = json_last_error();
                 $this->SendDebug(__FUNCTION__, 'unable to json-encode object ' . $objID . '(error=' . $err . ')', 0);
                 continue;
             }
-            $uobj = utf8_decode($sobj);
+            $uobject = utf8_decode($sobject);
 
             $fname = $gitObjectsDir . DIRECTORY_SEPARATOR . $objID . '.json';
-            if (!$this->saveFile($fname, $uobj, $mtime, true)) {
+            if (!$this->saveFile($fname, $uobject, $mtime, true)) {
                 $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
                 return ['state' => false];
             }
@@ -813,25 +877,67 @@ class ConfigVC extends IPSModule
 
         if ($with_zip && $with_webfront_user_zip) {
             $time_start_webfront_user = microtime(true);
-            $time_start_zipfile = microtime(true);
-            if (!$this->changeDir($ipsWebfrontPath)) {
-                return ['state' => false];
-            }
-            $mtime = 0;
-            $directory = new RecursiveDirectoryIterator($ipsWebfrontUserDir, FilesystemIterator::SKIP_DOTS);
-            $objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
-            foreach ($objects as $object) {
-                $m = filemtime($object->getPathname());
-                if ($m > $mtime) {
-                    $mtime = $m;
-                }
-            }
-            $path = $gitWebfrontPath . DIRECTORY_SEPARATOR . $ipsWebfrontUserDir . '.zip';
-            if (!$this->buildZip($ipsWebfrontUserDir, $path, $mtime)) {
-                return ['state' => false];
-            }
-            $duration_zipfile = floor((microtime(true) - $time_start_zipfile) * 100) / 100;
-            $duration_zipfiles += $duration_zipfile;
+
+			$oldWebfrontUserDirs = [];
+			$filenames = scandir($gitWebfrontUserPath, 0);
+			foreach ($filenames as $filename) {
+				$path = $gitWebfrontUserPath . DIRECTORY_SEPARATOR . $filename;
+				if (is_dir($path)) {
+					continue;
+				}
+				$oldWebfrontUserDirs[] = $filename;
+			}
+
+			$newWebfrontUserDirs = [];
+
+			$dirnames = scandir($ipsWebfrontUserPath, 0);
+			foreach ($dirnames as $dirname) {
+				if ($dirname == '.' || $dirname == '..') {
+					continue;
+				}
+				$path = $ipsWebfrontUserPath . DIRECTORY_SEPARATOR . $dirname;
+				if (!is_dir($path)) {
+					continue;
+				}
+				if (!$this->changeDir($ipsWebfrontUserPath)) {
+					return ['state' => false];
+				}
+				$mtime = 0;
+				$directory = new RecursiveDirectoryIterator($dirname, FilesystemIterator::SKIP_DOTS);
+				$objects = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
+				foreach ($objects as $object) {
+					$m = filemtime($object->getPathname());
+					if ($m > $mtime) {
+						$mtime = $m;
+					}
+				}
+				$path = $gitWebfrontUserPath . DIRECTORY_SEPARATOR . $dirname . '.zip';
+				$time_start_zipfile = microtime(true);
+				if (!$this->buildZip($dirname, $path, $mtime)) {
+					return ['state' => false];
+				}
+				$newWebfrontUserDirs[] = $dirname . '.zip';
+				$duration_zipfile = floor((microtime(true) - $time_start_zipfile) * 100) / 100;
+				$duration_zipfiles += $duration_zipfile;
+			}
+
+			if (!$this->changeDir($gitPath)) {
+				return ['state' => false];
+			}
+			foreach ($oldWebfrontUserDirs as $filename) {
+				if (in_array($filename, $newWebfrontUserDirs)) {
+					continue;
+				}
+				$fname = $gitWebfrontUserDir . DIRECTORY_SEPARATOR . $filename;
+				if (!unlink($fname)) {
+					$this->SendDebug(__FUNCTION__, 'unable to delete file ' . $fname, 0);
+					continue;
+				}
+				if (!$this->execute('git rm ' . $fname, $output)) {
+					return ['state' => false];
+				}
+			}
+
             $duration_webfront_user = floor((microtime(true) - $time_start_webfront_user) * 100) / 100;
         } else {
             $duration_webfront_user = 0;
