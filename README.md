@@ -23,10 +23,13 @@
 Es werden verschiedene Dateien und Daten aus dem IP-Symcon-Verzeichnis in Git gesichert und versioniert.
 
 Die Daten sind
-1. Scripte<br>
+1. Globale Dateien<br>
+Die Datei _setting.json_ wird gesichert sowie die Datei _php.ini_.
+
+2. Scripte<br>
 die Scripte aus dem Scriptverzeichnis werden, falls geändert, übernommen. Neue Dateien werden hinzugefügt, zwischenzeitlich gelöschte Dateien werden auch im Repository gelöscht.
 
-2. Module<br>
+3. Module<br>
 Die installierten Module werden untersucht. Es wird pro Modul eine Datei _<Modul-Verzeichnis>.json_ angelegt, die die Repository-URL (_url_), den Branch (_branch_), die den altuellen Versionsstand (_commitID_) und den Zeitpunkt der letzten Modifikation einer Datei (_mtime_) aus dem Modul-Verzeichnis enthält.
 Die Datei ändert sich somit nur, wenn sich auch in dem Modul etwas geändet hat.
 Anhand dieser Daten kann auch eine bestimmte Version des Moduls wieder hergestellt werden; hierzu geht man wie folgt vor:
@@ -34,9 +37,7 @@ Anhand dieser Daten kann auch eine bestimmte Version des Moduls wieder hergestel
 - Modul neu anlegen, jedoch nicht (nur) die Url angeben sondern: _<url>/commit/<commitID>_. SO kann man wieder zurück auf einen früheren Stand zurück gehen.
 Wenn man wieder auf den aktuellen Stand zurückgehen möchte, muss man das analog durchführen: löschen und dann wieder die Original-URL angeben und ggfs den passenden Branch auswählen.
 
-3. Setting<br>
-Die Datei _setting.json_ wird im Original gesichert.
-
+4. weitere Einstellungen
 Da sich der Inhat von _settings.json_ sehr dynamisch ändert und ein vorher/nachher-Vergleich sehr unübersichtlich ist, wird noch folgendes gemacht:
 
 es wird per IPS_GetSnapshot()_ der aktuelle Zustand geholt. Hieraus wird exportiert
