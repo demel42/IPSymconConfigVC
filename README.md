@@ -63,7 +63,7 @@ Verzeichnisse unterhalb von _webfront/user_ werden optional als Zip-Arcchiv gesi
 #### README.md
 In dieser Datei wird ein Protokoll der Änderungen des letzten Abgleichs dargestellt. Man sieht als sehr schnell, an welcher Stelle der Konfiguration seit dem letzten Lauf sich etwas geändert hat.
 Die Änderungen selber kann man dann auch leicht im Git darstellen.
-
+<br><br>
 Die Dauer eines Abgleich ist naturgemäß schwierig allgemeingültig darzustellen. Ein Anhaltswert: auf einem Raspberry 3B+ auf SD-Karte mit ca. 30 Scripten, 2000 Variablen und 20 Modulen dauert der initiale Abgleich ohne Erstellen von Zip-Archiven ca. 20 Sekunden, jeder weiterer Abgleich ca. 2-3 Sekunden. Die Zeit für das Erstellen von Zip-Archiven (_webfront/user_) ist sehr individuell, dürfte aber im Bereich einiger Minuten liegen.
 
 Da alle Änderungen von IPS bei Abgleich in das lokale Repository übertragen und direkt an das zentrale Repository übertragen werden, ist dieses Verzeichnis nur von temporärem Interesse und kann jderzeit neu erstellt werden.
