@@ -1,7 +1,7 @@
 # IPSymconConfigVC
 
 [![IPS-Version](https://img.shields.io/badge/Symcon_Version-5.0-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-![Module-Version](https://img.shields.io/badge/Modul_Version-1.1-blue.svg)
+![Module-Version](https://img.shields.io/badge/Modul_Version-1.2-blue.svg)
 ![Code](https://img.shields.io/badge/Code-PHP-blue.svg)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![StyleCI](https://github.styleci.io/repos/126683101/shield?branch=master)](https://github.styleci.io/repos/146979798)
@@ -35,11 +35,13 @@ Die Datei ändert sich somit nur, wenn sich auch in dem Modul etwas geändet hat
 Anhand dieser Daten kann auch eine bestimmte Version des Moduls wieder hergestellt werden; hierzu geht man wie folgt vor:
 - Modul in der Modulverwaltung löschen (іnicht die installierte Instanz des Modules!)
 - Modul neu anlegen, jedoch nicht (nur) die Url angeben sondern so: _**url**/commit/**commitID**_ (z.B. _https://github.com/demel42/IPSymconConfigVC/commit/3434195d8ea0b745d92e707a186c0bff03c5884d_). Damit ist man wieder zurück auf dem früheren Stand.
+Module, die nicht unter Git-Kontrolle stehen, werden als Zip-Archiv gesichert (nur wenn _with_zip_ = _true_ - siehe unten).
 
 Wenn man wieder auf den aktuellen Stand zurückgehen möchte, muss man das analog durchführen: löschen und dann wieder die Original-URL angeben und ggfs den passenden Branch auswählen.
 
 #### Skins
 Analog zu den Modulen werden die unter _webfront/skins_ installierten Skins gesichert.
+Skins, die nicht unter Git-Kontrolle stehen, werden als Zip-Archiv gesichert (nur wenn _with_zip_ = _true_ - siehe unten).
 
 #### IPS-Objekte & co
 Da sich der Inhat von _settings.json_ sehr dynamisch ändert und ein vorher/nachher-Vergleich sehr unübersichtlich ist, wird noch folgendes gemacht:
@@ -258,6 +260,10 @@ GUIDs
   - ConfigVC: `{396EA137-2E5F-413A-A996-D662158EA481}`
 
 ## 7. Versions-Historie
+
+- 1.2 @ 12.09.2018 08:05<br>
+  - Modules und Skins, die nicht unter Git-Kontrolle stehen werden als Zip-Archiv gesichert
+  - Code aufgeräumt
 
 - 1.1 @ 10.09.2018 10:14<br>
   - Commit-ID der Module in den <modules>.json-Dateien gesichert, Dokumentation ergänzt
