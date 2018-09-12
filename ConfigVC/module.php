@@ -720,7 +720,7 @@ class ConfigVC extends IPSModule
         }
 
         $sdata = IPS_GetSnapshot();
-		$udata = utf8_encode($sdata);
+        $udata = utf8_encode($sdata);
         $snapshot = json_decode($udata, true);
 
         // global optiones
