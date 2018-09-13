@@ -237,7 +237,7 @@ class ConfigVC extends IPSModule
                 return false;
             }
             $pre_stat = fstat($fp);
-			// $this->SendDebug(__FUNCTION__, 'fname=' . $fname . ', stat=' . print_r($pre_stat, true), 0);
+            // $this->SendDebug(__FUNCTION__, 'fname=' . $fname . ', stat=' . print_r($pre_stat, true), 0);
             $n = $pre_stat['size'];
             $data = $n > 0 ? fread($fp, $n) : '';
             if ($n != strlen($data)) {
@@ -299,20 +299,20 @@ class ConfigVC extends IPSModule
 
     private function copyFile($src, $dst, $onlyChanged)
     {
-		$r = $this->loadFile($src);
-		if (!$r) {
-			$this->SendDebug(__FUNCTION__, 'error loading file ' . $src, 0);
-			return false;
-		}
-		$stat = $r['stat'];
-		$data = $r['data'];
-		if (!$this->saveFile($dst, $data, $stat['mtime'], $onlyChanged)) {
-			$this->SendDebug(__FUNCTION__, 'error saving file ' . $dst, 0);
-			return false;
-		}
+        $r = $this->loadFile($src);
+        if (!$r) {
+            $this->SendDebug(__FUNCTION__, 'error loading file ' . $src, 0);
+            return false;
+        }
+        $stat = $r['stat'];
+        $data = $r['data'];
+        if (!$this->saveFile($dst, $data, $stat['mtime'], $onlyChanged)) {
+            $this->SendDebug(__FUNCTION__, 'error saving file ' . $dst, 0);
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     private function checkDir($path, $autoCreate)
     {
@@ -632,7 +632,7 @@ class ConfigVC extends IPSModule
         $ipsWebfrontPath = $ipsBasePath . 'webfront';
         $ipsWebfrontUserPath = $ipsWebfrontPath . DIRECTORY_SEPARATOR . 'user';
         $ipsWebfrontSkinsPath = $ipsWebfrontPath . DIRECTORY_SEPARATOR . 'skins';
-		$ipsDbPath =  $ipsBasePath . DIRECTORY_SEPARATOR . 'db';
+        $ipsDbPath = $ipsBasePath . DIRECTORY_SEPARATOR . 'db';
 
         $gitScriptDir = 'scripts';
         $gitScriptPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitScriptDir;
@@ -663,8 +663,8 @@ class ConfigVC extends IPSModule
         $gitWebfrontSkinsDir = $gitWebfrontDir . DIRECTORY_SEPARATOR . 'skins';
         $gitWebfrontSkinsPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitWebfrontSkinsDir;
 
-		$gitDbDir = 'db';
-		$gitDbPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitDbDir;
+        $gitDbDir = 'db';
+        $gitDbPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitDbDir;
 
         $now = time();
 
@@ -712,8 +712,8 @@ class ConfigVC extends IPSModule
             }
             $dst = $gitScriptDir . DIRECTORY_SEPARATOR . $filename;
             if (!$this->copyFile($src, $dst, true)) {
-				return ['state' => false];
-			}
+                return ['state' => false];
+            }
             $newScripts[] = $filename;
         }
 
@@ -856,66 +856,66 @@ class ConfigVC extends IPSModule
 
         // .../symcon/media
 
-		$oldMedia = $this->scanDir($ipsMediaPath);
-		$newMedia = [];
-		$filenames = scandir($ipsMediaPath, 0);
-		foreach ($filenames as $filename) {
-			if (substr($filename, 0, 1) == '.') {
-				continue;
-			}
+        $oldMedia = $this->scanDir($ipsMediaPath);
+        $newMedia = [];
+        $filenames = scandir($ipsMediaPath, 0);
+        foreach ($filenames as $filename) {
+            if (substr($filename, 0, 1) == '.') {
+                continue;
+            }
             $src = $ipsMediaPath . DIRECTORY_SEPARATOR . $filename;
             $dst = $gitMediaPath . DIRECTORY_SEPARATOR . $filename;
             if (!$this->copyFile($src, $dst, true)) {
                 $this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
                 return ['state' => false];
             }
-			$newMedia[] = $filename;
-		}
-		if (!$this->cleanupDir($gitMediaPath, $oldMedia, $newMedia)) {
-			return ['state' => false];
-		}
+            $newMedia[] = $filename;
+        }
+        if (!$this->cleanupDir($gitMediaPath, $oldMedia, $newMedia)) {
+            return ['state' => false];
+        }
 
-		// .../symcon/db
+        // .../symcon/db
 
-		if ($with_zip && $with_db_zip) {
-			$parentDirs = scandir($ipsDbPath, 0);
-			foreach ($parentDirs as $parentDir) {
-				if ($parentDir == '.' || $parentDir == '..') {
-					continue;
-				}
-				$path = $ipsDbPath . DIRECTORY_SEPARATOR . $parentDir;
-				if (!is_dir($path)) {
-					continue;
-				}
-				$dbDir = $gitDbPath . DIRECTORY_SEPARATOR . $parentDir;
-				if (!$this->checkDir($dbDir, true)) {
-					return ['state' => false];
-				}
+        if ($with_zip && $with_db_zip) {
+            $parentDirs = scandir($ipsDbPath, 0);
+            foreach ($parentDirs as $parentDir) {
+                if ($parentDir == '.' || $parentDir == '..') {
+                    continue;
+                }
+                $path = $ipsDbPath . DIRECTORY_SEPARATOR . $parentDir;
+                if (!is_dir($path)) {
+                    continue;
+                }
+                $dbDir = $gitDbPath . DIRECTORY_SEPARATOR . $parentDir;
+                if (!$this->checkDir($dbDir, true)) {
+                    return ['state' => false];
+                }
 
-				$oldDbDirs = $this->scanDir($dbDir);
-				$newDbDirs = [];
-				$parentpath = $ipsDbPath . DIRECTORY_SEPARATOR . $parentDir;
-				$childDirs = scandir($parentpath, 0);
-				foreach ($childDirs as $childDir) {
-					if ($childDir == '.' || $childDir == '..') {
-						continue;
-					}
-					if (!$this->changeDir($parentpath)) {
-						return ['state' => false];
-					}
-					$mtime = $this->mtime4dir($childDir);
-					$path = $gitDbPath . DIRECTORY_SEPARATOR . $parentDir . DIRECTORY_SEPARATOR . $childDir . '.zip';
-					if (!$this->buildZip($childDir, $path, $mtime)) {
-						return ['state' => false];
-					}
-					$newDbDirs[] = $childDir . '.zip';
-				}
-			}
-		}
+                $oldDbDirs = $this->scanDir($dbDir);
+                $newDbDirs = [];
+                $parentpath = $ipsDbPath . DIRECTORY_SEPARATOR . $parentDir;
+                $childDirs = scandir($parentpath, 0);
+                foreach ($childDirs as $childDir) {
+                    if ($childDir == '.' || $childDir == '..') {
+                        continue;
+                    }
+                    if (!$this->changeDir($parentpath)) {
+                        return ['state' => false];
+                    }
+                    $mtime = $this->mtime4dir($childDir);
+                    $path = $gitDbPath . DIRECTORY_SEPARATOR . $parentDir . DIRECTORY_SEPARATOR . $childDir . '.zip';
+                    if (!$this->buildZip($childDir, $path, $mtime)) {
+                        return ['state' => false];
+                    }
+                    $newDbDirs[] = $childDir . '.zip';
+                }
+            }
+        }
 
-		if (!$this->cleanupDir($gitDbPath, $oldDbDirs, $newDbDirs)) {
-			return ['state' => false];
-		}
+        if (!$this->cleanupDir($gitDbPath, $oldDbDirs, $newDbDirs)) {
+            return ['state' => false];
+        }
 
         // final git-commands
 
