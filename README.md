@@ -271,6 +271,7 @@ GUIDs
 - 1.3 @ 13.09.2018 09:08<br>
   - optional Datenbank monatsweise als Zip-Archiv sichern
   - Verzeichnis _media_ sichern
+  - Fix für den Umgang mit leeren Dateien
 
 - 1.2 @ 12.09.2018 08:05<br>
   - Modules und Skins, die nicht unter Git-Kontrolle stehen werden als Zip-Archiv gesichert
