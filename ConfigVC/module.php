@@ -35,6 +35,7 @@ class ConfigVC extends IPSModule
         $this->RegisterPropertyInteger('port', '22');
         $this->RegisterPropertyString('path', '');
         $this->RegisterPropertyBoolean('with_webfront_user_zip', false);
+        $this->RegisterPropertyBoolean('with_db_zip', false);
 
         $this->CreateVarProfile('ConfigVC.Duration', vtInteger, ' sec', 0, 0, 0, 0, '');
     }
@@ -64,6 +65,7 @@ class ConfigVC extends IPSModule
         $formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
         $formElements[] = ['type' => 'CheckBox', 'name' => 'with_webfront_user_zip', 'caption' => 'save webfront/user as zip-archive'];
+        $formElements[] = ['type' => 'CheckBox', 'name' => 'with_db_zip', 'caption' => 'save db as monthly zip-archive'];
 
         $formActions = [];
         $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
@@ -235,8 +237,9 @@ class ConfigVC extends IPSModule
                 return false;
             }
             $pre_stat = fstat($fp);
+			// $this->SendDebug(__FUNCTION__, 'fname=' . $fname . ', stat=' . print_r($pre_stat, true), 0);
             $n = $pre_stat['size'];
-            $data = fread($fp, $n);
+            $data = $n > 0 ? fread($fp, $n) : '';
             if ($n != strlen($data)) {
                 $this->SendDebug(__FUNCTION__, 'unable to read ' . $n . ' bytes to file ' . $fname, 0);
                 return false;
@@ -278,7 +281,7 @@ class ConfigVC extends IPSModule
             $this->SendDebug(__FUNCTION__, 'unable to create file ' . $fname, 0);
             return false;
         }
-        if (!fwrite($fp, $data)) {
+        if (strlen($data) > 0 && !fwrite($fp, $data)) {
             $this->SendDebug(__FUNCTION__, 'unable to write ' . strlen($data) . ' bytes to file ' . $fname, 0);
             return false;
         }
@@ -293,6 +296,23 @@ class ConfigVC extends IPSModule
         $this->SendDebug(__FUNCTION__, 'fname=' . $fname, 0);
         return true;
     }
+
+    private function copyFile($src, $dst, $onlyChanged)
+    {
+		$r = $this->loadFile($src);
+		if (!$r) {
+			$this->SendDebug(__FUNCTION__, 'error loading file ' . $src, 0);
+			return false;
+		}
+		$stat = $r['stat'];
+		$data = $r['data'];
+		if (!$this->saveFile($dst, $data, $stat['mtime'], $onlyChanged)) {
+			$this->SendDebug(__FUNCTION__, 'error saving file ' . $dst, 0);
+			return false;
+		}
+
+		return true;
+	}
 
     private function checkDir($path, $autoCreate)
     {
@@ -483,7 +503,6 @@ class ConfigVC extends IPSModule
     private function saveDir($ipsPath, $gitPath, $gitDir, $with_zip, $check4git)
     {
         $oldFiles = $this->scanDir($gitPath);
-
         $newFiles = [];
         $dirnames = scandir($ipsPath, 0);
         foreach ($dirnames as $dirname) {
@@ -596,6 +615,7 @@ class ConfigVC extends IPSModule
     private function performAdjustment($with_zip)
     {
         $with_webfront_user_zip = $this->ReadPropertyBoolean('with_webfront_user_zip');
+        $with_db_zip = $this->ReadPropertyBoolean('with_db_zip');
 
         $url = $this->ReadPropertyString('url');
         $path = $this->ReadPropertyString('path');
@@ -608,9 +628,11 @@ class ConfigVC extends IPSModule
         $ipsBasePath = IPS_GetKernelDir();
         $ipsScriptPath = $ipsBasePath . 'scripts';
         $ipsModulesPath = $ipsBasePath . 'modules';
+        $ipsMediaPath = $ipsBasePath . 'media';
         $ipsWebfrontPath = $ipsBasePath . 'webfront';
         $ipsWebfrontUserPath = $ipsWebfrontPath . DIRECTORY_SEPARATOR . 'user';
         $ipsWebfrontSkinsPath = $ipsWebfrontPath . DIRECTORY_SEPARATOR . 'skins';
+		$ipsDbPath =  $ipsBasePath . DIRECTORY_SEPARATOR . 'db';
 
         $gitScriptDir = 'scripts';
         $gitScriptPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitScriptDir;
@@ -629,6 +651,9 @@ class ConfigVC extends IPSModule
         $gitProfilesDir = $gitSettingsDir . DIRECTORY_SEPARATOR . 'profiles';
         $gitProfilesPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitProfilesDir;
 
+        $gitMediaDir = 'media';
+        $gitMediaPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitMediaDir;
+
         $gitWebfrontDir = 'webfront';
         $gitWebfrontPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitWebfrontDir;
 
@@ -638,13 +663,16 @@ class ConfigVC extends IPSModule
         $gitWebfrontSkinsDir = $gitWebfrontDir . DIRECTORY_SEPARATOR . 'skins';
         $gitWebfrontSkinsPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitWebfrontSkinsDir;
 
+		$gitDbDir = 'db';
+		$gitDbPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitDbDir;
+
         $now = time();
 
         if (!$this->checkDir($gitBasePathh, false)) {
             return ['state' => false];
         }
 
-        $dirs = [$gitScriptPath, $gitModulesPath, $gitSettingsPath, $gitObjectsPath, $gitProfilesPath, $gitWebfrontPath, $gitWebfrontSkinsPath, $gitWebfrontUserPath];
+        $dirs = [$gitScriptPath, $gitModulesPath, $gitSettingsPath, $gitObjectsPath, $gitProfilesPath, $gitMediaPath, $gitWebfrontPath, $gitWebfrontSkinsPath, $gitWebfrontUserPath, $gitDbPath];
         foreach ($dirs as $dir) {
             if (!$this->checkDir($dir, true)) {
                 return ['state' => false];
@@ -660,18 +688,10 @@ class ConfigVC extends IPSModule
         }
 
         foreach ($ipsAdditionalFiles as $filename) {
-            $path = $ipsBasePath . DIRECTORY_SEPARATOR . $filename;
-
-            $r = $this->loadFile($path);
-            if (!$r) {
-                $this->SendDebug(__FUNCTION__, 'error loading file ' . $path, 0);
-                return ['state' => false];
-            }
-            $stat = $r['stat'];
-            $data = $r['data'];
-
-            if (!$this->saveFile($filename, $data, $stat['mtime'], false)) {
-                $this->SendDebug(__FUNCTION__, 'error saving file ' . $filename, 0);
+            $src = $ipsBasePath . DIRECTORY_SEPARATOR . $filename;
+            $dst = $gitBasePathh . DIRECTORY_SEPARATOR . $filename;
+            if (!$this->copyFile($src, $dst, true)) {
+                $this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
                 return ['state' => false];
             }
         }
@@ -679,34 +699,22 @@ class ConfigVC extends IPSModule
         // .../symcon/scripts
 
         $oldScripts = $this->scanDir($gitScriptDir);
-
         $newScripts = [];
         $filenames = scandir($ipsScriptPath, 0);
         foreach ($filenames as $filename) {
-            $path = $ipsScriptPath . DIRECTORY_SEPARATOR . $filename;
-            if (is_dir($path)) {
-                continue;
-            }
             if ($filename == '__generated.inc.php') {
                 continue;
             }
-            $newScripts[] = $filename;
-        }
-        foreach ($newScripts as $filename) {
-            $src = $ipsScriptPath . DIRECTORY_SEPARATOR . $filename;
-            $dst = $gitScriptDir . DIRECTORY_SEPARATOR . $filename;
 
-            $r = $this->loadFile($src);
-            if (!$r) {
-                $this->SendDebug(__FUNCTION__, 'error loading file ' . $src, 0);
+            $src = $ipsScriptPath . DIRECTORY_SEPARATOR . $filename;
+            if (is_dir($src)) {
                 continue;
             }
-            $src_stat = $r['stat'];
-            $src_data = $r['data'];
-            if (!$this->saveFile($dst, $src_data, $src_stat['mtime'], true)) {
-                echo "error saving file $dst\n";
-                continue;
-            }
+            $dst = $gitScriptDir . DIRECTORY_SEPARATOR . $filename;
+            if (!$this->copyFile($src, $dst, true)) {
+				return ['state' => false];
+			}
+            $newScripts[] = $filename;
         }
 
         if (!$this->cleanupDir($gitScriptDir, $oldScripts, $newScripts)) {
@@ -736,9 +744,7 @@ class ConfigVC extends IPSModule
         }
 
         $oldProfiles = $this->scanDir($gitProfilesPath);
-
         $newProfiles = [];
-
         $profiles = $snapshot['profiles'];
         foreach ($profiles as $key => $profile) {
             $profile['name'] = $key;
@@ -756,9 +762,7 @@ class ConfigVC extends IPSModule
         }
 
         $oldObjects = $this->scanDir($gitObjectsPath);
-
         $newObjects = [];
-
         $objects = $snapshot['objects'];
         foreach ($objects as $key => $object) {
             $objID = substr($key, 2);
@@ -820,13 +824,11 @@ class ConfigVC extends IPSModule
             return ['state' => false];
         }
 
-        // .../webfront/user
+        // .../symcon/webfront/user
 
         if ($with_zip && $with_webfront_user_zip) {
             $oldWebfrontUserDirs = $this->scanDir($gitWebfrontUserPath);
-
             $newWebfrontUserDirs = [];
-
             $dirnames = scandir($ipsWebfrontUserPath, 0);
             foreach ($dirnames as $dirname) {
                 if ($dirname == '.' || $dirname == '..') {
@@ -851,6 +853,69 @@ class ConfigVC extends IPSModule
                 return ['state' => false];
             }
         }
+
+        // .../symcon/media
+
+		$oldMedia = $this->scanDir($ipsMediaPath);
+		$newMedia = [];
+		$filenames = scandir($ipsMediaPath, 0);
+		foreach ($filenames as $filename) {
+			if (substr($filename, 0, 1) == '.') {
+				continue;
+			}
+            $src = $ipsMediaPath . DIRECTORY_SEPARATOR . $filename;
+            $dst = $gitMediaPath . DIRECTORY_SEPARATOR . $filename;
+            if (!$this->copyFile($src, $dst, true)) {
+                $this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
+                return ['state' => false];
+            }
+			$newMedia[] = $filename;
+		}
+		if (!$this->cleanupDir($gitMediaPath, $oldMedia, $newMedia)) {
+			return ['state' => false];
+		}
+
+		// .../symcon/db
+
+		if ($with_zip && $with_db_zip) {
+			$parentDirs = scandir($ipsDbPath, 0);
+			foreach ($parentDirs as $parentDir) {
+				if ($parentDir == '.' || $parentDir == '..') {
+					continue;
+				}
+				$path = $ipsDbPath . DIRECTORY_SEPARATOR . $parentDir;
+				if (!is_dir($path)) {
+					continue;
+				}
+				$dbDir = $gitDbPath . DIRECTORY_SEPARATOR . $parentDir;
+				if (!$this->checkDir($dbDir, true)) {
+					return ['state' => false];
+				}
+
+				$oldDbDirs = $this->scanDir($dbDir);
+				$newDbDirs = [];
+				$parentpath = $ipsDbPath . DIRECTORY_SEPARATOR . $parentDir;
+				$childDirs = scandir($parentpath, 0);
+				foreach ($childDirs as $childDir) {
+					if ($childDir == '.' || $childDir == '..') {
+						continue;
+					}
+					if (!$this->changeDir($parentpath)) {
+						return ['state' => false];
+					}
+					$mtime = $this->mtime4dir($childDir);
+					$path = $gitDbPath . DIRECTORY_SEPARATOR . $parentDir . DIRECTORY_SEPARATOR . $childDir . '.zip';
+					if (!$this->buildZip($childDir, $path, $mtime)) {
+						return ['state' => false];
+					}
+					$newDbDirs[] = $childDir . '.zip';
+				}
+			}
+		}
+
+		if (!$this->cleanupDir($gitDbPath, $oldDbDirs, $newDbDirs)) {
+			return ['state' => false];
+		}
 
         // final git-commands
 
