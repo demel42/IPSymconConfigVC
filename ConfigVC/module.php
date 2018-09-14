@@ -863,10 +863,10 @@ class ConfigVC extends IPSModule
             if (substr($filename, 0, 1) == '.') {
                 continue;
             }
-			$path = $ipsMediaPath . DIRECTORY_SEPARATOR . $filename;
-			if (is_dir($path)) {
-				continue;
-			}
+            $path = $ipsMediaPath . DIRECTORY_SEPARATOR . $filename;
+            if (is_dir($path)) {
+                continue;
+            }
             $src = $ipsMediaPath . DIRECTORY_SEPARATOR . $filename;
             $dst = $gitMediaPath . DIRECTORY_SEPARATOR . $filename;
             if (!$this->copyFile($src, $dst, true)) {
