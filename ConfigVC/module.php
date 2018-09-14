@@ -35,7 +35,7 @@ class ConfigVC extends IPSModule
         $this->RegisterPropertyInteger('port', '22');
         $this->RegisterPropertyString('path', '');
         $this->RegisterPropertyBoolean('with_webfront_user_zip', false);
-        $this->RegisterPropertyBoolean('with_db_zip', false);
+        $this->RegisterPropertyBoolean('with_db', false);
 
         $this->CreateVarProfile('ConfigVC.Duration', vtInteger, ' sec', 0, 0, 0, 0, '');
     }
@@ -65,7 +65,7 @@ class ConfigVC extends IPSModule
         $formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
         $formElements[] = ['type' => 'CheckBox', 'name' => 'with_webfront_user_zip', 'caption' => 'save webfront/user as zip-archive'];
-        $formElements[] = ['type' => 'CheckBox', 'name' => 'with_db_zip', 'caption' => 'save db as monthly zip-archive'];
+        $formElements[] = ['type' => 'CheckBox', 'name' => 'with_db', 'caption' => 'save db'];
 
         $formActions = [];
         $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
@@ -376,7 +376,7 @@ class ConfigVC extends IPSModule
     {
         $dp = opendir($dirname);
         while ($f = readdir($dp)) {
-            if ($f == '.' || $f == '..') {
+            if (substr($f, 0, 1) == '.') {
                 continue;
             }
             $fullpath = $dirname . DIRECTORY_SEPARATOR . $f;
@@ -506,7 +506,7 @@ class ConfigVC extends IPSModule
         $newFiles = [];
         $dirnames = scandir($ipsPath, 0);
         foreach ($dirnames as $dirname) {
-            if ($dirname == '.' || $dirname == '..') {
+            if (substr($dirname, 0, 1) == '.') {
                 continue;
             }
             $path = $ipsPath . DIRECTORY_SEPARATOR . $dirname;
@@ -615,12 +615,12 @@ class ConfigVC extends IPSModule
     private function performAdjustment($with_zip)
     {
         $with_webfront_user_zip = $this->ReadPropertyBoolean('with_webfront_user_zip');
-        $with_db_zip = $this->ReadPropertyBoolean('with_db_zip');
+        $with_db = $this->ReadPropertyBoolean('with_db');
 
         $url = $this->ReadPropertyString('url');
         $path = $this->ReadPropertyString('path');
 
-        $gitBasePathh = $path . '/' . basename($url, '.git');
+        $gitBasePath = $path . '/' . basename($url, '.git');
 
         $msg = '';
 
@@ -635,40 +635,40 @@ class ConfigVC extends IPSModule
         $ipsDbPath = $ipsBasePath . DIRECTORY_SEPARATOR . 'db';
 
         $gitScriptDir = 'scripts';
-        $gitScriptPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitScriptDir;
+        $gitScriptPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitScriptDir;
 
         $gitSettingsName = 'settings.json';
 
         $gitModulesDir = 'modules';
-        $gitModulesPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitModulesDir;
+        $gitModulesPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitModulesDir;
 
         $gitSettingsDir = 'settings';
-        $gitSettingsPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitSettingsDir;
+        $gitSettingsPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitSettingsDir;
 
         $gitObjectsDir = $gitSettingsDir . DIRECTORY_SEPARATOR . 'objects';
-        $gitObjectsPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitObjectsDir;
+        $gitObjectsPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitObjectsDir;
 
         $gitProfilesDir = $gitSettingsDir . DIRECTORY_SEPARATOR . 'profiles';
-        $gitProfilesPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitProfilesDir;
+        $gitProfilesPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitProfilesDir;
 
         $gitMediaDir = 'media';
-        $gitMediaPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitMediaDir;
+        $gitMediaPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitMediaDir;
 
         $gitWebfrontDir = 'webfront';
-        $gitWebfrontPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitWebfrontDir;
+        $gitWebfrontPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitWebfrontDir;
 
         $gitWebfrontUserDir = $gitWebfrontDir . DIRECTORY_SEPARATOR . 'user';
-        $gitWebfrontUserPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitWebfrontUserDir;
+        $gitWebfrontUserPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitWebfrontUserDir;
 
         $gitWebfrontSkinsDir = $gitWebfrontDir . DIRECTORY_SEPARATOR . 'skins';
-        $gitWebfrontSkinsPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitWebfrontSkinsDir;
+        $gitWebfrontSkinsPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitWebfrontSkinsDir;
 
         $gitDbDir = 'db';
-        $gitDbPath = $gitBasePathh . DIRECTORY_SEPARATOR . $gitDbDir;
+        $gitDbPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitDbDir;
 
         $now = time();
 
-        if (!$this->checkDir($gitBasePathh, false)) {
+        if (!$this->checkDir($gitBasePath, false)) {
             return ['state' => false];
         }
 
@@ -683,13 +683,13 @@ class ConfigVC extends IPSModule
 
         // global files
 
-        if (!$this->changeDir($gitBasePathh)) {
+        if (!$this->changeDir($gitBasePath)) {
             return ['state' => false];
         }
 
         foreach ($ipsAdditionalFiles as $filename) {
             $src = $ipsBasePath . DIRECTORY_SEPARATOR . $filename;
-            $dst = $gitBasePathh . DIRECTORY_SEPARATOR . $filename;
+            $dst = $gitBasePath . DIRECTORY_SEPARATOR . $filename;
             if (!$this->copyFile($src, $dst, true)) {
                 $this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
                 return ['state' => false];
@@ -723,7 +723,7 @@ class ConfigVC extends IPSModule
 
         // Objects
 
-        if (!$this->changeDir($gitBasePathh)) {
+        if (!$this->changeDir($gitBasePath)) {
             return ['state' => false];
         }
 
@@ -831,7 +831,7 @@ class ConfigVC extends IPSModule
             $newWebfrontUserDirs = [];
             $dirnames = scandir($ipsWebfrontUserPath, 0);
             foreach ($dirnames as $dirname) {
-                if ($dirname == '.' || $dirname == '..') {
+				if (substr($dirname, 0, 1) == '.') {
                     continue;
                 }
                 $path = $ipsWebfrontUserPath . DIRECTORY_SEPARATOR . $dirname;
@@ -881,49 +881,61 @@ class ConfigVC extends IPSModule
 
         // .../symcon/db
 
-        if ($with_zip && $with_db_zip) {
-            $parentDirs = scandir($ipsDbPath, 0);
-            foreach ($parentDirs as $parentDir) {
-                if ($parentDir == '.' || $parentDir == '..') {
+        if ($with_db) {
+            $yearDirs = scandir($ipsDbPath, 0);
+            foreach ($yearDirs as $yearDir) {
+                if (substr($yearDir, 0, 1) == '.') {
                     continue;
                 }
-                $path = $ipsDbPath . DIRECTORY_SEPARATOR . $parentDir;
-                if (!is_dir($path)) {
+                $ipsDbYearDir = $ipsDbPath . DIRECTORY_SEPARATOR . $yearDir;
+                if (!is_dir($ipsDbYearDir)) {
                     continue;
                 }
-                $dbDir = $gitDbPath . DIRECTORY_SEPARATOR . $parentDir;
-                if (!$this->checkDir($dbDir, true)) {
+                $gitDbYearDir = $gitDbPath . DIRECTORY_SEPARATOR . $yearDir;
+                if (!$this->checkDir($gitDbYearDir, true)) {
                     return ['state' => false];
                 }
 
-                $oldDbDirs = $this->scanDir($dbDir);
-                $newDbDirs = [];
-                $parentpath = $ipsDbPath . DIRECTORY_SEPARATOR . $parentDir;
-                $childDirs = scandir($parentpath, 0);
-                foreach ($childDirs as $childDir) {
-                    if ($childDir == '.' || $childDir == '..') {
-                        continue;
-                    }
-                    if (!$this->changeDir($parentpath)) {
-                        return ['state' => false];
-                    }
-                    $mtime = $this->mtime4dir($childDir);
-                    $path = $gitDbPath . DIRECTORY_SEPARATOR . $parentDir . DIRECTORY_SEPARATOR . $childDir . '.zip';
-                    if (!$this->buildZip($childDir, $path, $mtime)) {
-                        return ['state' => false];
-                    }
-                    $newDbDirs[] = $childDir . '.zip';
-                }
-            }
-        }
+				$monthDirs = scandir($ipsDbYearDir, 0);
+				foreach ($monthDirs as $monthDir) {
+					if (substr($monthDir, 0, 1) == '.') {
+						continue;
+					}
+					$ipsDbMonthDir = $ipsDbYearDir . DIRECTORY_SEPARATOR . $monthDir;
+					if (!is_dir($ipsDbMonthDir)) {
+						continue;
+					}
+					$gitDbMonthDir = $gitDbYearDir . DIRECTORY_SEPARATOR . $monthDir;
+					if (!$this->checkDir($gitDbMonthDir, true)) {
+						return ['state' => false];
+					}
 
-        if (!$this->cleanupDir($gitDbPath, $oldDbDirs, $newDbDirs)) {
-            return ['state' => false];
+					$oldDbDirs = $this->scanDir($gitDbMonthDir);
+					$newDbDirs = [];
+					$filenames = scandir($ipsDbMonthDir, 0);
+					foreach ($filenames as $filename) {
+						if (is_dir($filename)) {
+							continue;
+						}
+						$src = $ipsDbMonthDir . DIRECTORY_SEPARATOR . $filename;
+						$dst = $gitDbMonthDir . DIRECTORY_SEPARATOR . $filename;
+						if (!$this->copyFile($src, $dst, true)) {
+							$this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
+							return ['state' => false];
+						}
+
+						$newDbDirs[] = $filename;
+					}
+					if (!$this->cleanupDir($gitDbMonthDir, $oldDbDirs, $newDbDirs)) {
+						return ['state' => false];
+					}
+				}
+            }
         }
 
         // final git-commands
 
-        if (!$this->changeDir($gitBasePathh)) {
+        if (!$this->changeDir($gitBasePath)) {
             return ['state' => false];
         }
 
