@@ -831,7 +831,7 @@ class ConfigVC extends IPSModule
             $newWebfrontUserDirs = [];
             $dirnames = scandir($ipsWebfrontUserPath, 0);
             foreach ($dirnames as $dirname) {
-				if (substr($dirname, 0, 1) == '.') {
+                if (substr($dirname, 0, 1) == '.') {
                     continue;
                 }
                 $path = $ipsWebfrontUserPath . DIRECTORY_SEPARATOR . $dirname;
@@ -896,40 +896,40 @@ class ConfigVC extends IPSModule
                     return ['state' => false];
                 }
 
-				$monthDirs = scandir($ipsDbYearDir, 0);
-				foreach ($monthDirs as $monthDir) {
-					if (substr($monthDir, 0, 1) == '.') {
-						continue;
-					}
-					$ipsDbMonthDir = $ipsDbYearDir . DIRECTORY_SEPARATOR . $monthDir;
-					if (!is_dir($ipsDbMonthDir)) {
-						continue;
-					}
-					$gitDbMonthDir = $gitDbYearDir . DIRECTORY_SEPARATOR . $monthDir;
-					if (!$this->checkDir($gitDbMonthDir, true)) {
-						return ['state' => false];
-					}
+                $monthDirs = scandir($ipsDbYearDir, 0);
+                foreach ($monthDirs as $monthDir) {
+                    if (substr($monthDir, 0, 1) == '.') {
+                        continue;
+                    }
+                    $ipsDbMonthDir = $ipsDbYearDir . DIRECTORY_SEPARATOR . $monthDir;
+                    if (!is_dir($ipsDbMonthDir)) {
+                        continue;
+                    }
+                    $gitDbMonthDir = $gitDbYearDir . DIRECTORY_SEPARATOR . $monthDir;
+                    if (!$this->checkDir($gitDbMonthDir, true)) {
+                        return ['state' => false];
+                    }
 
-					$oldDbDirs = $this->scanDir($gitDbMonthDir);
-					$newDbDirs = [];
-					$filenames = scandir($ipsDbMonthDir, 0);
-					foreach ($filenames as $filename) {
-						if (is_dir($filename)) {
-							continue;
-						}
-						$src = $ipsDbMonthDir . DIRECTORY_SEPARATOR . $filename;
-						$dst = $gitDbMonthDir . DIRECTORY_SEPARATOR . $filename;
-						if (!$this->copyFile($src, $dst, true)) {
-							$this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
-							return ['state' => false];
-						}
+                    $oldDbDirs = $this->scanDir($gitDbMonthDir);
+                    $newDbDirs = [];
+                    $filenames = scandir($ipsDbMonthDir, 0);
+                    foreach ($filenames as $filename) {
+                        if (is_dir($filename)) {
+                            continue;
+                        }
+                        $src = $ipsDbMonthDir . DIRECTORY_SEPARATOR . $filename;
+                        $dst = $gitDbMonthDir . DIRECTORY_SEPARATOR . $filename;
+                        if (!$this->copyFile($src, $dst, true)) {
+                            $this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
+                            return ['state' => false];
+                        }
 
-						$newDbDirs[] = $filename;
-					}
-					if (!$this->cleanupDir($gitDbMonthDir, $oldDbDirs, $newDbDirs)) {
-						return ['state' => false];
-					}
-				}
+                        $newDbDirs[] = $filename;
+                    }
+                    if (!$this->cleanupDir($gitDbMonthDir, $oldDbDirs, $newDbDirs)) {
+                        return ['state' => false];
+                    }
+                }
             }
         }
 
