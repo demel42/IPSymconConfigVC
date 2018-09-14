@@ -65,7 +65,7 @@ class ConfigVC extends IPSModule
         $formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
         $formElements[] = ['type' => 'CheckBox', 'name' => 'with_webfront_user_zip', 'caption' => 'save webfront/user as zip-archive'];
-        $formElements[] = ['type' => 'CheckBox', 'name' => 'with_db', 'caption' => 'save db'];
+        $formElements[] = ['type' => 'CheckBox', 'name' => 'with_db', 'caption' => 'save database'];
 
         $formActions = [];
         $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
