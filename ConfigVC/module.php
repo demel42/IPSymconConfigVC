@@ -57,9 +57,9 @@ class ConfigVC extends IPSModule
     {
         $formElements = [];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'url', 'caption' => 'Git-Repository'];
-        $formElements[] = ['type' => 'Label', 'label' => 'for https and ssh'];
+        $formElements[] = ['type' => 'Label', 'label' => 'for http/https and ssh'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'user', 'caption' => ' ... User'];
-        $formElements[] = ['type' => 'Label', 'label' => 'for https only'];
+        $formElements[] = ['type' => 'Label', 'label' => 'for http/https only'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'password', 'caption' => ' ... Password'];
         $formElements[] = ['type' => 'Label', 'label' => 'for ssh only'];
         $formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
