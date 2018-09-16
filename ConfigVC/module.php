@@ -348,18 +348,28 @@ class ConfigVC extends IPSModule
 
     private function copyFile($src, $dst, $onlyChanged)
     {
-        $r = $this->loadFile($src);
-        if (!$r) {
-            $this->SendDebug(__FUNCTION__, 'error loading file ' . $src, 0);
+		$src_stat = stat($src);
+        if ($onlyChanged && file_exists($dst)) {
+			$dst_stat = stat($dst);
+			$eq = true;
+			if ($eq && $src_stat['size'] != $dst_stat['size'])
+				$eq = false;
+			if ($eq && $src_stat['mtime'] != $dst_stat['mtime'])
+				$eq = false;
+			if ($eq && sha1_file($src) != sha1_file($dst))
+				$eq = false;
+			if ($eq)
+				return true;
+		}
+        if (!copy($src, $dst)) {
+            $this->SendDebug(__FUNCTION__, 'unable to copy file ' . $src . ' to ' . $dst, 0);
             return false;
         }
-        $stat = $r['stat'];
-        $data = $r['data'];
-        if (!$this->saveFile($dst, $data, $stat['mtime'], $onlyChanged)) {
-            $this->SendDebug(__FUNCTION__, 'error saving file ' . $dst, 0);
+        if (!touch($dst, $src_stat['mtime'])) {
+            $this->SendDebug(__FUNCTION__, 'unable to set mtime of file' . ' ' . $dst, 0);
             return false;
         }
-
+        $this->SendDebug(__FUNCTION__, 'dst=' . $dst, 0);
         return true;
     }
 
