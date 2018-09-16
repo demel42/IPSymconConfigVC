@@ -66,7 +66,7 @@ Dateien im Verzeichnis _media_ werden gesichert.
 Verzeichnisse unterhalb von _webfront/user_ werden optional als Zip-Archiv gesichert.
 
 #### Datenbank
-Die Datenbank (_db_) wird optional monatsweise als Zip-Archiv gesichert, Aggregationsdaten werden nicht gesichert.
+Die Datenbank (_db_) wird optional gesichert, Aggregationsdaten werden nicht gesichert.
 
 #### README.md
 In dieser Datei wird ein Protokoll der Änderungen des letzten Abgleichs dargestellt. Man sieht als sehr schnell, an welcher Stelle der Konfiguration seit dem letzten Lauf sich etwas geändert hat.
@@ -249,7 +249,7 @@ führt einen Abgleich durch. Durch _with_zip_ kann bei manuellem Aufruf gesteuer
 | Port                                 | integer  | 22           | SSH-Port (nur für ssh) |
 | lokales Verzeichnis                  | string   |              | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
 | Webfront/user als Zip-Archiv sichern | boolean  | false        | Sichern von Webfront/user als Zip-Archiv. Achtung: Größe beachten! |
-| Datenbank als Zip-Archiv sichern     | boolean  | false        | Datenbank monatsweise als Zip-Archiv. Achtung: Größe beachten! |
+| Værzeichnis db sichern               | boolean  | false        | Datenbank sichern |
 
 #### Schaltflächen
 
@@ -269,7 +269,7 @@ GUIDs
 ## 7. Versions-Historie
 
 - 1.3 @ 13.09.2018 09:08<br>
-  - optional Datenbank monatsweise als Zip-Archiv sichern
+  - optional Verzeichnis _db_ sichern
   - Verzeichnis _media_ sichern
   - Fix für den Umgang mit leeren Dateien
 
