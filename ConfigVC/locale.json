@@ -10,6 +10,10 @@
 			"for ssh only": "nur für ssh",
 			" ... Port": " ... Port",
 
+			"Informations for git config ...": "Angaben für git config ...",
+			" ... user.name": " ... user.name",
+			" ... user.email": " ... user.email",
+
 			"local path": "lokales Verzeichnis",
 
 			"save webfront/user as zip-archive": "Verzeichnis webfront/user als Zip-Archiv sichern",
@@ -17,9 +21,15 @@
 
 			"Action takes up several minutes (depending on amount of data)": "Die Aktion dauert bis zu einigen Minuten (in Abhängigkeit von der Datenmenge)",
 			"Perform adjustment": "Abgleich durchführen",
-			"Clone Repository": "Repository einrichten",
+			"Setup Repository": "Repository einrichten",
 
 			"Module description": "Modulbeschreibung",
+
+			"Setup Repository was successfully": "Einrichten des Repository war erfolgreich",
+			"Setup Repository failed": "Einrichten des Repository ist fehlgeschlagen",
+			"Duration": "Dauer",
+			"Perform adjustment was successfully": "Abgleich des Repository war erfolgreich",
+			"Perform adjustment failed": "Abgleich des Repository ist fehlgeschlagen",
 
 			"State": "Status",
 			"Summary of last adjustment": "Zusammenfassung des letzten Abgleichs",

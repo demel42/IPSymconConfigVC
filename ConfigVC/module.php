@@ -33,6 +33,8 @@ class ConfigVC extends IPSModule
         $this->RegisterPropertyString('user', '');
         $this->RegisterPropertyString('password', '');
         $this->RegisterPropertyInteger('port', '22');
+        $this->RegisterPropertyString('git_user_name', 'IP-Symcon');
+        $this->RegisterPropertyString('git_user_email', '');
         $this->RegisterPropertyString('path', '');
         $this->RegisterPropertyBoolean('with_webfront_user_zip', false);
         $this->RegisterPropertyBoolean('with_db', false);
@@ -63,14 +65,20 @@ class ConfigVC extends IPSModule
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'password', 'caption' => ' ... Password'];
         $formElements[] = ['type' => 'Label', 'label' => 'for ssh only'];
         $formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
+
+        $formElements[] = ['type' => 'Label', 'label' => 'Informations for git config ...'];
+        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'git_user_name', 'caption' => ' ... user.name'];
+        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'git_user_email', 'caption' => ' ... user.email'];
+
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
+
         $formElements[] = ['type' => 'CheckBox', 'name' => 'with_webfront_user_zip', 'caption' => 'save webfront/user as zip-archive'];
         $formElements[] = ['type' => 'CheckBox', 'name' => 'with_db', 'caption' => 'save database'];
 
         $formActions = [];
         $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
-        $formActions[] = ['type' => 'Button', 'label' => 'Perform adjustment', 'onClick' => 'CVC_CallAdjustment($id, true);'];
-        $formActions[] = ['type' => 'Button', 'label' => 'Clone Repository', 'onClick' => 'CVC_CloneRepository($id);'];
+        $formActions[] = ['type' => 'Button', 'label' => 'Perform adjustment', 'onClick' => 'CVC_internalCallAdjustment($id);'];
+        $formActions[] = ['type' => 'Button', 'label' => 'Setup Repository', 'onClick' => 'CVC_internalCloneRepository($id);'];
         $formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
         $formActions[] = [
                             'type'    => 'Button',
@@ -87,11 +95,36 @@ class ConfigVC extends IPSModule
         return json_encode(['elements' => $formElements, 'actions' => $formActions, 'status' => $formStatus]);
     }
 
+    public function internalCloneRepository()
+	{
+        $time_start = microtime(true);
+		$r = $this->CloneRepository();
+        $duration = floor((microtime(true) - $time_start) * 100) / 100;
+
+		$msg = $r ? 'Setup Repository was successfully' : 'Setup Repository failed';
+		$msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
+
+		echo $msg;
+	}
+
+    public function internalCallAdjustment()
+	{
+        $time_start = microtime(true);
+		$r = $this->CallAdjustment(true);
+        $duration = floor((microtime(true) - $time_start) * 100) / 100;
+
+		$msg = $r ? 'Perform adjustment was successfully' : 'Perform adjustment failed';
+		$msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
+
+		echo $msg;
+	}
+
     public function CloneRepository()
     {
         $url = $this->ReadPropertyString('url');
         $user = $this->ReadPropertyString('user');
         $password = $this->ReadPropertyString('password');
+
         if (substr($url, 0, 8) == 'https://') {
             $s = substr($url, 8);
             $url = 'https://';
@@ -171,12 +204,15 @@ class ConfigVC extends IPSModule
             return false;
         }
 
-        $name = 'IP-Symcon';
-        if (!$this->execute('git config --global user.name ' . $name, $output)) {
+        if (!$this->changeDir($ipsPath)) {
             return false;
         }
-        $email = 'root@' . gethostname();
-        if (!$this->execute('git config --global user.email ' . $email, $output)) {
+        $name = $this->ReadPropertyString('git_user_name');
+        if (!$this->execute('git config user.name \'' . $name . '\'', $output)) {
+            return false;
+        }
+        $email = $this->ReadPropertyString('git_user_email');
+        if (!$this->execute('git config user.email \'' . $email . '\'', $output)) {
             return false;
         }
 
@@ -232,6 +268,8 @@ class ConfigVC extends IPSModule
         $this->SetValue('Summary', $summary);
         $this->SetValue('Duration', $duration);
         $this->SetValue('Timestamp', time());
+
+		return $state;
     }
 
     private function loadFile($fname)
@@ -1048,7 +1086,7 @@ class ConfigVC extends IPSModule
                 return ['state' => false];
             }
 
-            if (!$this->execute('git commit -a -m \'' . $m . '\'', $output)) {
+            if (!$this->execute('git commit -a -m \'' . $m . '\' 2>&1', $output)) {
                 return ['state' => false];
             }
             if (!$this->execute('git push 2>&1', $output)) {

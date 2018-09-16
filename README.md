@@ -166,14 +166,13 @@ cd /tmp
 /bin/rm -rf /tmp/ipsymcon
 ```
 
-#### Git-Repository auf öffentlichen Git-Server (wie _GtHub_)
+#### Git-Repository auf öffentlichen Git-Server (wie _GitHub_)
 
 Wichtig: das Repository muss auf jeden Fall als **_privat_** eingerichtet werden! Ein lokaler Git-Server ist auf jeden Fall zu bevorzugen. Immerhin sind in diesem Git-Repository alle internen Informationen, Zugangsdaten u.s.w. enthalten.
 
 Für die Ansicht des Git-Repositories (ähnlich der Web-Oberfläche von GitHub) stehen verschiedene Programme zur Verfügung.
 
 Bei der Anlage des Repository sollte die Option gewählt werden, direkt ein leeres _README.md_ anzulegen; alternativ muss eine leere Datei wie oben beschrieben angelegt werden.
-
 
 #### ssh-Keys einrichten für lokale ssh-basierte Repositories
 
@@ -241,15 +240,17 @@ führt einen Abgleich durch. Durch _with_zip_ kann bei manuellem Aufruf gesteuer
 
 ### Variablen
 
-| Eigenschaft                          | Typ      | Standardwert | Beschreibung |
-| :----------------------------------: | :-----:  | :----------: | :----------------------------------------------------------------------------------------------------------: |
-| Git-Repository                       | string   |              | Pfad zu Git-Repository |
-| Benutzer                             | string   |              | Benutzer des Git-Repository (für https und ssh) |
-| Passwort                             | string   |              | Passwort (nur für https) |
-| Port                                 | integer  | 22           | SSH-Port (nur für ssh) |
-| lokales Verzeichnis                  | string   |              | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
-| Webfront/user als Zip-Archiv sichern | boolean  | false        | Sichern von Webfront/user als Zip-Archiv. Achtung: Größe beachten! |
-| Værzeichnis db sichern               | boolean  | false        | Datenbank sichern |
+| Eigenschaft                          | Typ      | Standardwert    | Beschreibung |
+| :----------------------------------: | :-----:  | :-------------: | :----------------------------------------------------------------------------------------------------------: |
+| Git-Repository                       | string   |                 | Pfad zu Git-Repository |
+| Benutzer                             | string   |                 | Benutzer des Git-Repository (für https und ssh) |
+| Passwort                             | string   |                 | Passwort (nur für https) |
+| Port                                 | integer  | 22              | SSH-Port (nur für ssh) |
+| ... user.name                        | string   | IP-Symcon       | Angabe für 'git config --global user.name' |
+| ... user.email                       | string   |                 | Angabe für 'git config --global email.name'. Angabe ist zwingend und muss eine korrekte Mail-Adresse sein |
+| lokales Verzeichnis                  | string   |                 | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
+| Webfront/user als Zip-Archiv sichern | boolean  | false           | Sichern von Webfront/user als Zip-Archiv. Achtung: Größe beachten! |
+| Datenbank sichern                    | boolean  | false           | Daten in Verzeichnis 'db' sichern |
 
 #### Schaltflächen
 
@@ -269,7 +270,9 @@ GUIDs
 ## 7. Versions-Historie
 
 - 1.4 @ 15.09.2018 18:50<br>
-  - Unterstützung von http für lokale Repositories
+  - Unterstützung von _http_ für lokale Repositories
+  - Angabe von user.name und user.email zum korrekten _git config_
+  - nach Betätigung der Schaltflächen wird ein Popup angezeigt zur Angeb von Erfolg oder Fehlschlag
 
 - 1.3 @ 13.09.2018 09:08<br>
   - optional Verzeichnis _db_ sichern
