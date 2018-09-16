@@ -140,7 +140,7 @@ class ConfigVC extends IPSModule
         }
         if (substr($url, 0, 7) == 'http://') {
             $s = substr($url, 7);
-            $url = 'https://';
+            $url = 'http://';
             if ($user != '') {
                 $url .= rawurlencode($user);
                 if ($password != '') {
