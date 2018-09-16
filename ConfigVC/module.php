@@ -96,28 +96,28 @@ class ConfigVC extends IPSModule
     }
 
     public function internalCloneRepository()
-	{
+    {
         $time_start = microtime(true);
-		$r = $this->CloneRepository();
+        $r = $this->CloneRepository();
         $duration = floor((microtime(true) - $time_start) * 100) / 100;
 
-		$msg = $r ? 'Setup Repository was successfully' : 'Setup Repository failed';
-		$msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
+        $msg = $r ? 'Setup Repository was successfully' : 'Setup Repository failed';
+        $msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
 
-		echo $msg;
-	}
+        echo $msg;
+    }
 
     public function internalCallAdjustment()
-	{
+    {
         $time_start = microtime(true);
-		$r = $this->CallAdjustment(true);
+        $r = $this->CallAdjustment(true);
         $duration = floor((microtime(true) - $time_start) * 100) / 100;
 
-		$msg = $r ? 'Perform adjustment was successfully' : 'Perform adjustment failed';
-		$msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
+        $msg = $r ? 'Perform adjustment was successfully' : 'Perform adjustment failed';
+        $msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
 
-		echo $msg;
-	}
+        echo $msg;
+    }
 
     public function CloneRepository()
     {
@@ -269,7 +269,7 @@ class ConfigVC extends IPSModule
         $this->SetValue('Duration', $duration);
         $this->SetValue('Timestamp', time());
 
-		return $state;
+        return $state;
     }
 
     private function loadFile($fname)
