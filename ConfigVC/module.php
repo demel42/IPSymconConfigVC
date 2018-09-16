@@ -57,9 +57,9 @@ class ConfigVC extends IPSModule
     {
         $formElements = [];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'url', 'caption' => 'Git-Repository'];
-        $formElements[] = ['type' => 'Label', 'label' => 'for https and ssh'];
+        $formElements[] = ['type' => 'Label', 'label' => 'for http/https and ssh'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'user', 'caption' => ' ... User'];
-        $formElements[] = ['type' => 'Label', 'label' => 'for https only'];
+        $formElements[] = ['type' => 'Label', 'label' => 'for http/https only'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'password', 'caption' => ' ... Password'];
         $formElements[] = ['type' => 'Label', 'label' => 'for ssh only'];
         $formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
@@ -94,7 +94,19 @@ class ConfigVC extends IPSModule
         $password = $this->ReadPropertyString('password');
         if (substr($url, 0, 8) == 'https://') {
             $s = substr($url, 8);
-
+            $url = 'https://';
+            if ($user != '') {
+                $url .= rawurlencode($user);
+                if ($password != '') {
+                    $url .= ':';
+                    $url .= rawurlencode($password);
+                }
+                $url .= '@';
+            }
+            $url .= $s;
+        }
+        if (substr($url, 0, 7) == 'http://') {
+            $s = substr($url, 7);
             $url = 'https://';
             if ($user != '') {
                 $url .= rawurlencode($user);
@@ -112,7 +124,6 @@ class ConfigVC extends IPSModule
             $pos = strpos($s, '/');
             $srv = substr($s, 0, $pos);
             $path = substr($s, $pos);
-
             $url = 'ssh://';
             if ($user != '') {
                 $url .= rawurlencode($user);

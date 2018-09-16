@@ -3,9 +3,9 @@
 		"de": {
 			"Git-Repository": "Git-Repository",
 
-			"for https and ssh": "für https und ssh",
+			"for http/https and ssh": "für http/https und ssh",
 			" ... User": " ... Benutzer",
-			"for https only": "nur für https",
+			"for http/https only": "nur für http/https",
 			" ... Password": " ... Passwort",
 			"for ssh only": "nur für ssh",
 			" ... Port": " ... Port",
