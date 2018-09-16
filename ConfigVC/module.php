@@ -348,19 +348,23 @@ class ConfigVC extends IPSModule
 
     private function copyFile($src, $dst, $onlyChanged)
     {
-		$src_stat = stat($src);
+        $src_stat = stat($src);
         if ($onlyChanged && file_exists($dst)) {
-			$dst_stat = stat($dst);
-			$eq = true;
-			if ($eq && $src_stat['size'] != $dst_stat['size'])
-				$eq = false;
-			if ($eq && $src_stat['mtime'] != $dst_stat['mtime'])
-				$eq = false;
-			if ($eq && sha1_file($src) != sha1_file($dst))
-				$eq = false;
-			if ($eq)
-				return true;
-		}
+            $dst_stat = stat($dst);
+            $eq = true;
+            if ($eq && $src_stat['size'] != $dst_stat['size']) {
+                $eq = false;
+            }
+            if ($eq && $src_stat['mtime'] != $dst_stat['mtime']) {
+                $eq = false;
+            }
+            if ($eq && sha1_file($src) != sha1_file($dst)) {
+                $eq = false;
+            }
+            if ($eq) {
+                return true;
+            }
+        }
         if (!copy($src, $dst)) {
             $this->SendDebug(__FUNCTION__, 'unable to copy file ' . $src . ' to ' . $dst, 0);
             return false;
