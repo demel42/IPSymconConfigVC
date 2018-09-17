@@ -215,15 +215,15 @@ CVC_CallAdjustment(4711 /*[System\Configuration Version-Control*/, true, true);
 und dieses dann im gewünschten Zeitmuster aufrufen.<br>
 Der Wert _true_ besagt, das, wenn in der Konfiguration so eingestellt, die Zip-Archive erstellt werden, _false_ bedeutet, das das nicht gemacht wird.
 
-Mit diesem Script werden (bei stündlichem Aufruf) die Zip-Archvie nur um 0 Uhr abgelichen, sonst nur die anderen Dateien/Objekte.
+Mit diesem Script werden (bei stündlichem Aufruf) die Zip-Archvie nur um 0 Uhr abgeglichen, sonst nur die anderen Dateien/Objekte und die Vollständige Überprüfung nur Sonntag um 0 Uhr.
 
 ```
 <?
 
 // Zip-Archive nur um Mitternacht
 $with_zip = date("H", time()) == 0 ? true : false;
-// vollständige Dateiüberprüfung nur am Sonntag
-$full_file_cmp = date("w", time()) == 0 ? true : false;
+// vollständige Dateiüberprüfung nur am Sonntag um 0 Uhr
+$full_file_cmp = date("w", time()) == 0 && date("H", time()) == 0 ? true : false;
 CVC_CallAdjustment(4711 /*[System\Configuration Version-Control*/, $with_zip, $full_file_cmp);
 
 ```
