@@ -1,7 +1,7 @@
 # IPSymconConfigVC
 
 [![IPS-Version](https://img.shields.io/badge/Symcon_Version-5.0-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-![Module-Version](https://img.shields.io/badge/Modul_Version-1.4-blue.svg)
+![Module-Version](https://img.shields.io/badge/Modul_Version-1.5-blue.svg)
 ![Code](https://img.shields.io/badge/Code-PHP-blue.svg)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![StyleCI](https://github.styleci.io/repos/126683101/shield?branch=master)](https://github.styleci.io/repos/146979798)
@@ -210,7 +210,7 @@ Der Abgleich wird nicht automatisch aufgerufen. Hierzu muss man ein kleines Scri
 ```
 <?
 
-CVC_CallAdjustment(4711 /*[System\Configuration Version-Control*/, true);
+CVC_CallAdjustment(4711 /*[System\Configuration Version-Control*/, true, true);
 ```
 und dieses dann im gewünschten Zeitmuster aufrufen.<br>
 Der Wert _true_ besagt, das, wenn in der Konfiguration so eingestellt, die Zip-Archive erstellt werden, _false_ bedeutet, das das nicht gemacht wird.
@@ -220,11 +220,14 @@ Mit diesem Script werden (bei stündlichem Aufruf) die Zip-Archvie nur um 0 Uhr 
 ```
 <?
 
+// Zip-Archive nur um Mitternacht
 $with_zip = date("H", time()) == 0 ? true : false;
-CVC_CallAdjustment(4711 /*[System\Configuration Version-Control*/, $with_zip);
+// vollständige Dateiüberprüfung nur am Sonntag
+$full_file_cmp = date("w", time()) == 0 ? true : false;
+CVC_CallAdjustment(4711 /*[System\Configuration Version-Control*/, $with_zip, $full_file_cmp);
 
 ```
-Bei Bedarf kann man natürlich jederzeit einen Abgleich manuell über die Schaltfläche _Abgleich durchführen_ durchführen.
+Bei Bedarf kann man natürlich jederzeit einen Abgleich manuell über die Schaltflächen _Abgleich_ durchführen.
 
 ## 4. Funktionsreferenz
 
@@ -233,8 +236,10 @@ Bei Bedarf kann man natürlich jederzeit einen Abgleich manuell über die Schalt
 `boolean CVC_CloneRepository(integer $InstanzID)`<br>
 legt ein frischen Clone des Repositories an. Dabei wird, wenn erforderlich, ein vorhænderen Clone gelöscht. Das angegebene lokale Verzeichnis muss vorhanden sein.<br>
 
-`boolean CVC_PerformAdjustment(integer $InstanzID, boolean $with_zip)`<br>
-führt einen Abgleich durch. Durch _with_zip_ kann bei manuellem Aufruf gesteuert werden, ob überhaupt Zip-Archive gebildet werden oder nicht (wirkt nur, _Module als Zip_ gesetzt ist).
+`boolean CVC_PerformAdjustment(integer $InstanzID, boolean $with_zip, boolean $full_file_cmp)`<br>
+führt einen Abgleich durch. <br>
+Durch _with_zip_ kann bei Aufruf gesteuert werden, ob überhaupt Zip-Archive gebildet werden oder nicht (wirkt nur, _webfront/user als Zip_ gesetzt ist).
+Durch _full_file_cmp_ regelt, wie Dateien auf Gleichheit verglichen werden. Bei dem einfachen Vergleich wird die Gräße und der Zeitpunkt der letzten Änderung verwendet: bei einer vollständigen Überprüfung wird der Dateiinhalt selbst verglichen. Das bietet eine erhöhte Sicherheit, alle Änderungen zu berücksichtigen, ist aber sicherlich nur ab und an erforderlich.
 
 ## 5. Konfiguration:
 
@@ -256,7 +261,8 @@ führt einen Abgleich durch. Durch _with_zip_ kann bei manuellem Aufruf gesteuer
 
 | Bezeichnung                  | Beschreibung |
 | :--------------------------: | :-------------------------------------------------: |
-| Abgleich durchführen         | führt einen Abgleich durch |
+| Vollständiger Abgleich       | führt einen vollständigen Abgleich durch (incl. Zip-Archive erstellen und kompletten Vergleich der Dateien auf Gleichheit |
+| Schneller Abgleich           | führt einen schnellen Abgleich durch (ohne die zuvor Punkte) |
 | Repository einrichten        | erzeugt einen aktuelle Clone des Repositories |
 
 ## 6. Anhang
@@ -268,6 +274,11 @@ GUIDs
   - ConfigVC: `{396EA137-2E5F-413A-A996-D662158EA481}`
 
 ## 7. Versions-Historie
+
+- 1.5 @ 17.09.2018 10:17<br>
+  - 2 Schaltflächen für den Abgleich (_Vollständig_ und _Schnell_)
+  - Vergleich von Dateien nun per _sha1_file()_ statt Vergleich der kompletten Datei im Speicher (Problem bei großen Dateien)
+  - Vergleich des Dateiinhalts nur noch optional
 
 - 1.4 @ 15.09.2018 18:50<br>
   - Unterstützung von _http_ für lokale Repositories

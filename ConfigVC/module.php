@@ -77,7 +77,8 @@ class ConfigVC extends IPSModule
 
         $formActions = [];
         $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
-        $formActions[] = ['type' => 'Button', 'label' => 'Perform adjustment', 'onClick' => 'CVC_internalCallAdjustment($id);'];
+        $formActions[] = ['type' => 'Button', 'label' => 'Full adjustment', 'onClick' => 'CVC_fullCallAdjustment($id);'];
+        $formActions[] = ['type' => 'Button', 'label' => 'Fast adjustment', 'onClick' => 'CVC_fastCallAdjustment($id);'];
         $formActions[] = ['type' => 'Button', 'label' => 'Setup Repository', 'onClick' => 'CVC_internalCloneRepository($id);'];
         $formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
         $formActions[] = [
@@ -107,13 +108,25 @@ class ConfigVC extends IPSModule
         echo $msg;
     }
 
-    public function internalCallAdjustment()
+    public function fullCallAdjustment()
     {
         $time_start = microtime(true);
-        $r = $this->CallAdjustment(true);
+        $r = $this->CallAdjustment(true, true);
         $duration = floor((microtime(true) - $time_start) * 100) / 100;
 
-        $msg = $r ? 'Perform adjustment was successfully' : 'Perform adjustment failed';
+        $msg = $r ? 'Full adjustment was successfully' : 'Full adjustment failed';
+        $msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
+
+        echo $msg;
+    }
+
+    public function fastCallAdjustment()
+    {
+        $time_start = microtime(true);
+        $r = $this->CallAdjustment(false, false);
+        $duration = floor((microtime(true) - $time_start) * 100) / 100;
+
+        $msg = $r ? 'Fast adjustment was successfully' : 'Fast adjustment failed';
         $msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
 
         echo $msg;
@@ -219,11 +232,11 @@ class ConfigVC extends IPSModule
         return true;
     }
 
-    public function CallAdjustment(bool $with_zip)
+    public function CallAdjustment(bool $with_zip, bool $full_file_cmp)
     {
-        $this->SendDebug(__FUNCTION__, 'with_zip=' . ($with_zip ? 'true' : 'false'), 0);
+        $this->SendDebug(__FUNCTION__, 'with_zip=' . ($with_zip ? 'true' : 'false') . ', full_file_cmp=' . ($full_file_cmp ? 'true' : 'false'), 0);
 
-        $r = $this->performAdjustment($with_zip);
+        $r = $this->performAdjustment($with_zip, $full_file_cmp);
         $state = $r['state'];
         $msg = isset($r['msg']) ? $r['msg'] : '';
         $duration = isset($r['duration']) ? $r['duration'] : 0;
@@ -346,8 +359,22 @@ class ConfigVC extends IPSModule
         return true;
     }
 
-    private function copyFile($src, $dst, $onlyChanged)
+    private function copyFile($src, $dst, $onlyChanged, $fullCmp, &$file_cmp_duration)
     {
+/*
+		$r = $this->loadFile($src);
+        if (!$r) {
+            $this->SendDebug(__FUNCTION__, 'error loading file ' . $src, 0);
+            return false;
+        }
+        $stat = $r['stat'];
+        $data = $r['data'];
+        if (!$this->saveFile($dst, $data, $stat['mtime'], $onlyChanged)) {
+            $this->SendDebug(__FUNCTION__, 'error saving file ' . $dst, 0);
+            return false;
+        }
+*/
+
         $src_stat = stat($src);
         if ($onlyChanged && file_exists($dst)) {
             $dst_stat = stat($dst);
@@ -358,8 +385,12 @@ class ConfigVC extends IPSModule
             if ($eq && $src_stat['mtime'] != $dst_stat['mtime']) {
                 $eq = false;
             }
-            if ($eq && sha1_file($src) != sha1_file($dst)) {
-                $eq = false;
+            if ($eq && $fullCmp) {
+				$_time_start = microtime(true);
+				if (sha1_file($src) != sha1_file($dst)) {
+					$eq = false;
+				}
+				$file_cmp_duration += floor((microtime(true) - $_time_start) * 100) / 100;
             }
             if ($eq) {
                 return true;
@@ -543,7 +574,7 @@ class ConfigVC extends IPSModule
         return $filelist;
     }
 
-    private function cleanupDir($gitPath, $oldFiles, $newFiles)
+    private function cleanupDir($gitPath, $oldFiles, $newFiles, &$git_rm_duration)
     {
         if (!$this->changeDir($gitPath)) {
             return false;
@@ -556,14 +587,16 @@ class ConfigVC extends IPSModule
                 $this->SendDebug(__FUNCTION__, 'unable to delete file ' . $filename, 0);
                 continue;
             }
+			$_time_start = microtime(true);
             if (!$this->execute('git rm ' . $filename, $output)) {
                 return false;
             }
+			$git_rm_duration += floor((microtime(true) - $_time_start) * 100) / 100;
         }
         return true;
     }
 
-    private function saveDir($ipsPath, $gitPath, $gitDir, $with_zip, $check4git)
+    private function saveDir($ipsPath, $gitPath, $gitDir, $with_zip, $check4git, &$git_rm_duration, &$zip_duration)
     {
         $oldFiles = $this->scanDir($gitPath);
         $newFiles = [];
@@ -646,9 +679,11 @@ class ConfigVC extends IPSModule
                     }
 
                     $path = $gitPath . DIRECTORY_SEPARATOR . $dirname . '.zip';
+					$_time_start = microtime(true);
                     if (!$this->buildZip($dirname, $path, $mtime)) {
                         return false;
                     }
+					$zip_duration = floor((microtime(true) - $_time_start) * 100) / 100;
                 } else {
                     $this->SendDebug(__FUNCTION__, '  ... no git-repository - skip', 0);
                 }
@@ -656,7 +691,7 @@ class ConfigVC extends IPSModule
             }
         }
 
-        return $this->cleanupDir($gitPath, $oldFiles, $newFiles);
+        return $this->cleanupDir($gitPath, $oldFiles, $newFiles, $git_rm_duration);
     }
 
     private function saveJson($data, $fname, $mtime)
@@ -675,7 +710,7 @@ class ConfigVC extends IPSModule
         return true;
     }
 
-    private function performAdjustment($with_zip)
+    private function performAdjustment($with_zip, $full_file_cmp)
     {
         $with_webfront_user_zip = $this->ReadPropertyBoolean('with_webfront_user_zip');
         $with_db = $this->ReadPropertyBoolean('with_db');
@@ -744,6 +779,15 @@ class ConfigVC extends IPSModule
 
         $time_start = microtime(true);
 
+		$git_add_duration = 0;
+		$git_rm_duration = 0;
+		$git_status_duration = 0;
+		$git_commit_duration = 0;
+		$git_push_duration = 0;
+
+		$file_cmp_duration = 0;
+		$zip_duration = 0;
+
         // global files
 
         if (!$this->changeDir($gitBasePath)) {
@@ -753,7 +797,7 @@ class ConfigVC extends IPSModule
         foreach ($ipsAdditionalFiles as $filename) {
             $src = $ipsBasePath . DIRECTORY_SEPARATOR . $filename;
             $dst = $gitBasePath . DIRECTORY_SEPARATOR . $filename;
-            if (!$this->copyFile($src, $dst, true)) {
+            if (!$this->copyFile($src, $dst, true, $full_file_cmp, $file_cmp_duration)) {
                 $this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
                 return ['state' => false];
             }
@@ -774,13 +818,13 @@ class ConfigVC extends IPSModule
                 continue;
             }
             $dst = $gitScriptDir . DIRECTORY_SEPARATOR . $filename;
-            if (!$this->copyFile($src, $dst, true)) {
+            if (!$this->copyFile($src, $dst, true, $full_file_cmp, $file_cmp_duration)) {
                 return ['state' => false];
             }
             $newScripts[] = $filename;
         }
 
-        if (!$this->cleanupDir($gitScriptDir, $oldScripts, $newScripts)) {
+        if (!$this->cleanupDir($gitScriptDir, $oldScripts, $newScripts, $git_rm_duration)) {
             return ['state' => false];
         }
 
@@ -820,7 +864,7 @@ class ConfigVC extends IPSModule
             }
         }
 
-        if (!$this->cleanupDir($gitProfilesDir, $oldProfiles, $newProfiles)) {
+        if (!$this->cleanupDir($gitProfilesDir, $oldProfiles, $newProfiles, $git_rm_duration)) {
             return ['state' => false];
         }
 
@@ -871,19 +915,19 @@ class ConfigVC extends IPSModule
             }
         }
 
-        if (!$this->cleanupDir($gitObjectsPath, $oldObjects, $newObjects)) {
+        if (!$this->cleanupDir($gitObjectsPath, $oldObjects, $newObjects, $git_rm_duration)) {
             return ['state' => false];
         }
 
         // .../symcon/modules
 
-        if (!$this->saveDir($ipsModulesPath, $gitModulesPath, $gitModulesDir, $with_zip, true)) {
+        if (!$this->saveDir($ipsModulesPath, $gitModulesPath, $gitModulesDir, $with_zip, true, $git_rm_duration, $zip_duration)) {
             return ['state' => false];
         }
 
         // .../symcon/webfront/skins
 
-        if (!$this->saveDir($ipsWebfrontSkinsPath, $gitWebfrontSkinsPath, $gitWebfrontSkinsDir, $with_zip, true)) {
+        if (!$this->saveDir($ipsWebfrontSkinsPath, $gitWebfrontSkinsPath, $gitWebfrontSkinsDir, $with_zip, true, $git_rm_duration, $zip_duration)) {
             return ['state' => false];
         }
 
@@ -906,13 +950,15 @@ class ConfigVC extends IPSModule
                 }
                 $mtime = $this->mtime4dir($dirname);
                 $path = $gitWebfrontUserPath . DIRECTORY_SEPARATOR . $dirname . '.zip';
-                if (!$this->buildZip($dirname, $path, $mtime)) {
+				$_time_start = microtime(true);
+                if (!$this->buildZip($dirname, $path, $mtime, $zip_duration)) {
                     return ['state' => false];
                 }
+				$zip_duration = floor((microtime(true) - $_time_start) * 100) / 100;
                 $newWebfrontUserDirs[] = $dirname . '.zip';
             }
 
-            if (!$this->cleanupDir($gitWebfrontUserPath, $oldWebfrontUserDirs, $newWebfrontUserDirs)) {
+            if (!$this->cleanupDir($gitWebfrontUserPath, $oldWebfrontUserDirs, $newWebfrontUserDirs, $git_rm_duration)) {
                 return ['state' => false];
             }
         }
@@ -932,13 +978,13 @@ class ConfigVC extends IPSModule
             }
             $src = $ipsMediaPath . DIRECTORY_SEPARATOR . $filename;
             $dst = $gitMediaPath . DIRECTORY_SEPARATOR . $filename;
-            if (!$this->copyFile($src, $dst, true)) {
+            if (!$this->copyFile($src, $dst, true, $full_file_cmp, $file_cmp_duration)) {
                 $this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
                 return ['state' => false];
             }
             $newMedia[] = $filename;
         }
-        if (!$this->cleanupDir($gitMediaPath, $oldMedia, $newMedia)) {
+        if (!$this->cleanupDir($gitMediaPath, $oldMedia, $newMedia, $git_rm_duration)) {
             return ['state' => false];
         }
 
@@ -982,14 +1028,14 @@ class ConfigVC extends IPSModule
                         }
                         $src = $ipsDbMonthDir . DIRECTORY_SEPARATOR . $filename;
                         $dst = $gitDbMonthDir . DIRECTORY_SEPARATOR . $filename;
-                        if (!$this->copyFile($src, $dst, true)) {
+                        if (!$this->copyFile($src, $dst, true, $full_file_cmp, $file_cmp_duration)) {
                             $this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
                             return ['state' => false];
                         }
 
                         $newDbDirs[] = $filename;
                     }
-                    if (!$this->cleanupDir($gitDbMonthDir, $oldDbDirs, $newDbDirs)) {
+                    if (!$this->cleanupDir($gitDbMonthDir, $oldDbDirs, $newDbDirs, $git_rm_duration)) {
                         return ['state' => false];
                     }
                 }
@@ -1009,9 +1055,13 @@ class ConfigVC extends IPSModule
         $fn_untracked = [];
         $fn_erroneous = [];
 
+        $_time_start = microtime(true);
         if (!$this->execute('git add . 2>&1', $output)) {
             return ['state' => false];
         }
+        $git_add_duration = floor((microtime(true) - $_time_start) * 100) / 100;
+
+        $_time_start = microtime(true);
         if (!$this->execute('git status --porcelain', $output)) {
             return ['state' => false];
         }
@@ -1042,6 +1092,7 @@ class ConfigVC extends IPSModule
                     break;
             }
         }
+        $git_status_duration = floor((microtime(true) - $_time_start) * 100) / 100;
 
         $n_modified = count($fn_modified);
         $n_added = count($fn_added);
@@ -1100,12 +1151,17 @@ class ConfigVC extends IPSModule
                 return ['state' => false];
             }
 
+			$_time_start = microtime(true);
             if (!$this->execute('git commit -a -m \'' . $m . '\' 2>&1', $output)) {
                 return ['state' => false];
             }
+			$git_commit_duration = floor((microtime(true) - $_time_start) * 100) / 100;
+
+			$_time_start = microtime(true);
             if (!$this->execute('git push 2>&1', $output)) {
                 return ['state' => false];
             }
+			$git_push_duration = floor((microtime(true) - $_time_start) * 100) / 100;
         }
 
         $duration = floor((microtime(true) - $time_start) * 100) / 100;
@@ -1125,6 +1181,18 @@ class ConfigVC extends IPSModule
         $this->SendDebug(__FUNCTION__, $s, 0);
 
         $s = 'duration: ' . $duration . 's';
+        $this->SendDebug(__FUNCTION__, $s, 0);
+
+        $s = ' ... git add: ' . $git_add_duration . 's'
+				. ' / rm: ' . $git_rm_duration . 's' 
+				. ' / status: ' . $git_status_duration . 's' 
+				. ' / commit: ' . $git_commit_duration . 's' 
+				. ' / push: ' . $git_push_duration . 's' 
+				;
+        $this->SendDebug(__FUNCTION__, $s, 0);
+        $s = ' ... zip: ' . $zip_duration . 's';
+        $this->SendDebug(__FUNCTION__, $s, 0);
+        $s = ' ... file_cmp: ' . $file_cmp_duration . 's';
         $this->SendDebug(__FUNCTION__, $s, 0);
 
         if ($msg != '') {
