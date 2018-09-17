@@ -222,7 +222,7 @@ Mit diesem Script werden (bei stündlichem Aufruf) die Zip-Archvie nur um 0 Uhr 
 
 // Zip-Archive nur um Mitternacht
 $with_zip = date("H", time()) == 0 ? true : false;
-// vollständige Dateiüberprüfung nur am Sonntag um 0 Uhr
+// vollständige Dateiüberprüfung nur am Sonntag um Mitternacht
 $full_file_cmp = date("w", time()) == 0 && date("H", time()) == 0 ? true : false;
 CVC_CallAdjustment(4711 /*[System\Configuration Version-Control*/, $with_zip, $full_file_cmp);
 
