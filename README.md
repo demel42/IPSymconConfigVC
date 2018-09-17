@@ -265,6 +265,12 @@ Durch _full_file_cmp_ regelt, wie Dateien auf Gleichheit verglichen werden. Bei 
 | Schneller Abgleich           | führt einen schnellen Abgleich durch (ohne die zuvor Punkte) |
 | Repository einrichten        | erzeugt einen aktuelle Clone des Repositories |
 
+### Variablenprofile
+
+Es werden folgende Variableprofile angelegt:
+* Integer<br>
+  - ConfigVC.Duration
+
 ## 6. Anhang
 
 GUIDs
