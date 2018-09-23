@@ -289,7 +289,7 @@ GUIDs
 - 1.4 @ 15.09.2018 18:50<br>
   - Unterstützung von _http_ für lokale Repositories
   - Angabe von user.name und user.email zum korrekten _git config_
-  - nach Betätigung der Schaltflächen wird ein Popup angezeigt zur Angeb von Erfolg oder Fehlschlag
+  - nach Betätigung der Schaltflächen wird ein Popup angezeigt mit Angabe von Erfolg oder Fehlschlag
 
 - 1.3 @ 13.09.2018 09:08<br>
   - optional Verzeichnis _db_ sichern
