@@ -282,9 +282,9 @@ GUIDs
 ## 7. Versions-Historie
 
 - 1.5 @ 17.09.2018 10:17<br>
-  - 2 Schaltflächen für den Abgleich (_Vollständig_ und _Schnell_)
+  - nun 2 Schaltflächen für den Abgleich (_Vollständig_ und _Schnell_)
   - Vergleich von Dateien nun per _sha1_file()_ statt Vergleich der kompletten Datei im Speicher (Problem bei großen Dateien)
-  - Vergleich des Dateiinhalts nur noch optional
+  - Vergleich des Dateiinhalts nur noch optional (Performance)
 
 - 1.4 @ 15.09.2018 18:50<br>
   - Unterstützung von _http_ für lokale Repositories
