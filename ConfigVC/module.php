@@ -100,7 +100,7 @@ class ConfigVC extends IPSModule
     {
         $time_start = microtime(true);
         $r = $this->CloneRepository();
-        $duration = floor((microtime(true) - $time_start) * 100) / 100;
+        $duration = round(microtime(true) - $time_start, 2);
 
         $msg = $r ? 'Setup Repository was successfully' : 'Setup Repository failed';
         $msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
@@ -112,7 +112,7 @@ class ConfigVC extends IPSModule
     {
         $time_start = microtime(true);
         $r = $this->CallAdjustment(true, true);
-        $duration = floor((microtime(true) - $time_start) * 100) / 100;
+        $duration = round(microtime(true) - $time_start, 2);
 
         $msg = $r ? 'Full adjustment was successfully' : 'Full adjustment failed';
         $msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
@@ -124,7 +124,7 @@ class ConfigVC extends IPSModule
     {
         $time_start = microtime(true);
         $r = $this->CallAdjustment(false, false);
-        $duration = floor((microtime(true) - $time_start) * 100) / 100;
+        $duration = round(microtime(true) - $time_start, 2);
 
         $msg = $r ? 'Fast adjustment was successfully' : 'Fast adjustment failed';
         $msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
@@ -390,7 +390,7 @@ class ConfigVC extends IPSModule
                 if (sha1_file($src) != sha1_file($dst)) {
                     $eq = false;
                 }
-                $file_cmp_duration += floor((microtime(true) - $_time_start) * 100) / 100;
+                $file_cmp_duration += round(microtime(true) - $_time_start, 2);
             }
             if ($eq) {
                 return true;
@@ -443,7 +443,7 @@ class ConfigVC extends IPSModule
 
         $time_start = microtime(true);
         $data = exec($cmd, $out, $exitcode);
-        $duration = floor((microtime(true) - $time_start) * 100) / 100;
+        $duration = round(microtime(true) - $time_start, 2);
 
         if ($exitcode) {
             $ok = false;
@@ -591,7 +591,7 @@ class ConfigVC extends IPSModule
             if (!$this->execute('git rm ' . $filename, $output)) {
                 return false;
             }
-            $git_rm_duration += floor((microtime(true) - $_time_start) * 100) / 100;
+            $git_rm_duration += round(microtime(true) - $_time_start, 2);
         }
         return true;
     }
@@ -683,7 +683,7 @@ class ConfigVC extends IPSModule
                     if (!$this->buildZip($dirname, $path, $mtime)) {
                         return false;
                     }
-                    $zip_duration = floor((microtime(true) - $_time_start) * 100) / 100;
+                    $zip_duration = round(microtime(true) - $_time_start, 2);
                 } else {
                     $this->SendDebug(__FUNCTION__, '  ... no git-repository - skip', 0);
                 }
@@ -954,7 +954,7 @@ class ConfigVC extends IPSModule
                 if (!$this->buildZip($dirname, $path, $mtime, $zip_duration)) {
                     return ['state' => false];
                 }
-                $zip_duration = floor((microtime(true) - $_time_start) * 100) / 100;
+                $zip_duration = round(microtime(true) - $_time_start, 2);
                 $newWebfrontUserDirs[] = $dirname . '.zip';
             }
 
@@ -1059,7 +1059,7 @@ class ConfigVC extends IPSModule
         if (!$this->execute('git add . 2>&1', $output)) {
             return ['state' => false];
         }
-        $git_add_duration = floor((microtime(true) - $_time_start) * 100) / 100;
+        $git_add_duration = round(microtime(true) - $_time_start, 2);
 
         $_time_start = microtime(true);
         if (!$this->execute('git status --porcelain', $output)) {
@@ -1092,7 +1092,7 @@ class ConfigVC extends IPSModule
                     break;
             }
         }
-        $git_status_duration = floor((microtime(true) - $_time_start) * 100) / 100;
+        $git_status_duration = round(microtime(true) - $_time_start, 2);
 
         $n_modified = count($fn_modified);
         $n_added = count($fn_added);
@@ -1155,16 +1155,16 @@ class ConfigVC extends IPSModule
             if (!$this->execute('git commit -a -m \'' . $m . '\' 2>&1', $output)) {
                 return ['state' => false];
             }
-            $git_commit_duration = floor((microtime(true) - $_time_start) * 100) / 100;
+            $git_commit_duration = round(microtime(true) - $_time_start, 2);
 
             $_time_start = microtime(true);
             if (!$this->execute('git push 2>&1', $output)) {
                 return ['state' => false];
             }
-            $git_push_duration = floor((microtime(true) - $_time_start) * 100) / 100;
+            $git_push_duration = round(microtime(true) - $_time_start, 2);
         }
 
-        $duration = floor((microtime(true) - $time_start) * 100) / 100;
+        $duration = round(microtime(true) - $time_start, 2);
 
         $s = 'files: '
             . 'modified=' . $n_modified
