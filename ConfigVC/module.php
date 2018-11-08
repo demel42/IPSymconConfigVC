@@ -1048,52 +1048,50 @@ class ConfigVC extends IPSModule
 
         // .../symcon/...
 
-		$additional_dirs = $this->ReadPropertyString('additional_dirs');
-		if ($additional_dirs != '') {
-			$dirs = explode(';', $additional_dirs);
-			foreach ($dirs as $dir) {
+        $additional_dirs = $this->ReadPropertyString('additional_dirs');
+        if ($additional_dirs != '') {
+            $dirs = explode(';', $additional_dirs);
+            foreach ($dirs as $dir) {
+                $ipsAddPath = $ipsBasePath . $dir;
+                $gitAddDir = $dir;
+                $gitAddPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitAddDir;
 
-				$ipsAddPath = $ipsBasePath . $dir;
-				$gitAddDir = $dir;
-				$gitAddPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitAddDir;
+                if ($this->checkDir($ipsAddPath, false)) {
+                    if (!$this->checkDir($gitAddPath, true)) {
+                        return ['state' => false];
+                    }
 
-				if ($this->checkDir($ipsAddPath, false)) {
-					if (!$this->checkDir($gitAddPath, true)) {
-						return ['state' => false];
-					}
+                    $oldAdd = $this->scanDir($gitAddPath);
+                    $newAdd = [];
+                    $filenames = scandir($ipsAddPath, 0);
+                    foreach ($filenames as $filename) {
+                        if (substr($filename, 0, 1) == '.') {
+                            continue;
+                        }
+                        $path = $ipsAddPath . DIRECTORY_SEPARATOR . $filename;
+                        if (is_dir($path)) {
+                            continue;
+                        }
+                        $src = $ipsAddPath . DIRECTORY_SEPARATOR . $filename;
+                        $dst = $gitAddPath . DIRECTORY_SEPARATOR . $filename;
+                        if (!$this->copyFile($src, $dst, true, $full_file_cmp, $file_cmp_duration)) {
+                            $this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
+                            return ['state' => false];
+                        }
+                        $newAdd[] = $filename;
+                    }
 
-					$oldAdd = $this->scanDir($gitAddPath);
-					$newAdd = [];
-					$filenames = scandir($ipsAddPath, 0);
-					foreach ($filenames as $filename) {
-						if (substr($filename, 0, 1) == '.') {
-							continue;
-						}
-						$path = $ipsAddPath . DIRECTORY_SEPARATOR . $filename;
-						if (is_dir($path)) {
-							continue;
-						}
-						$src = $ipsAddPath . DIRECTORY_SEPARATOR . $filename;
-						$dst = $gitAddPath . DIRECTORY_SEPARATOR . $filename;
-						if (!$this->copyFile($src, $dst, true, $full_file_cmp, $file_cmp_duration)) {
-							$this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
-							return ['state' => false];
-						}
-						$newAdd[] = $filename;
-					}
-
-					if (!$this->cleanupDir($gitAddPath, $oldAdd, $newAdd, $git_rm_duration)) {
-						return ['state' => false];
-					}
-				} else if ($this->checkDir($gitAddPath, false)) {
+                    if (!$this->cleanupDir($gitAddPath, $oldAdd, $newAdd, $git_rm_duration)) {
+                        return ['state' => false];
+                    }
+                } elseif ($this->checkDir($gitAddPath, false)) {
                     if (!rmdir($gitAddPath)) {
                         $this->SendDebug(__FUNCTION__, 'unable to delete firectory ' . $gitAddPath, 0);
                         return false;
                     }
-					
-				}
-			}
-		}
+                }
+            }
+        }
 
         // final git-commands
 
