@@ -19,6 +19,10 @@
 			"save webfront/user as zip-archive": "Verzeichnis webfront/user als Zip-Archiv sichern",
 			"save database": "Datenbank sichern",
 
+			"additional directories to be saved, relativ to symcon-root; list with ; as delimiter":
+				"zusätzliche zu sichernde Verzeichnisse, relativ zun Symcon-Wurzelverzeichnis; List mit ; als Trenner",
+			"Directories": "Verzeichnisse",
+
 			"Action takes up several minutes (depending on amount of data)": "Die Aktion dauert bis zu einigen Minuten (in Abhängigkeit von der Datenmenge)",
 			"Full adjustment": "Vollständiger Abgleich",
 			"Fast adjustment": "Schneller Abgleich",

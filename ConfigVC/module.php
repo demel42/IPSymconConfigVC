@@ -38,6 +38,7 @@ class ConfigVC extends IPSModule
         $this->RegisterPropertyString('path', '');
         $this->RegisterPropertyBoolean('with_webfront_user_zip', false);
         $this->RegisterPropertyBoolean('with_db', false);
+        $this->RegisterPropertyString('additional_dirs', '');
 
         $this->CreateVarProfile('ConfigVC.Duration', vtInteger, ' sec', 0, 0, 0, 0, '');
     }
@@ -74,6 +75,9 @@ class ConfigVC extends IPSModule
 
         $formElements[] = ['type' => 'CheckBox', 'name' => 'with_webfront_user_zip', 'caption' => 'save webfront/user as zip-archive'];
         $formElements[] = ['type' => 'CheckBox', 'name' => 'with_db', 'caption' => 'save database'];
+
+        $formElements[] = ['type' => 'Label', 'label' => 'additional directories to be saved, relativ to symcon-root; list with ; as delimiter'];
+        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'additional_dirs', 'caption' => 'Directories'];
 
         $formActions = [];
         $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
@@ -1041,6 +1045,55 @@ class ConfigVC extends IPSModule
                 }
             }
         }
+
+        // .../symcon/...
+
+		$additional_dirs = $this->ReadPropertyString('additional_dirs');
+		if ($additional_dirs != '') {
+			$dirs = explode(';', $additional_dirs);
+			foreach ($dirs as $dir) {
+
+				$ipsAddPath = $ipsBasePath . $dir;
+				$gitAddDir = $dir;
+				$gitAddPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitAddDir;
+
+				if ($this->checkDir($ipsAddPath, false)) {
+					if (!$this->checkDir($gitAddPath, true)) {
+						return ['state' => false];
+					}
+
+					$oldAdd = $this->scanDir($gitAddPath);
+					$newAdd = [];
+					$filenames = scandir($ipsAddPath, 0);
+					foreach ($filenames as $filename) {
+						if (substr($filename, 0, 1) == '.') {
+							continue;
+						}
+						$path = $ipsAddPath . DIRECTORY_SEPARATOR . $filename;
+						if (is_dir($path)) {
+							continue;
+						}
+						$src = $ipsAddPath . DIRECTORY_SEPARATOR . $filename;
+						$dst = $gitAddPath . DIRECTORY_SEPARATOR . $filename;
+						if (!$this->copyFile($src, $dst, true, $full_file_cmp, $file_cmp_duration)) {
+							$this->SendDebug(__FUNCTION__, 'error copy file ' . $filename, 0);
+							return ['state' => false];
+						}
+						$newAdd[] = $filename;
+					}
+
+					if (!$this->cleanupDir($gitAddPath, $oldAdd, $newAdd, $git_rm_duration)) {
+						return ['state' => false];
+					}
+				} else if ($this->checkDir($gitAddPath, false)) {
+                    if (!rmdir($gitAddPath)) {
+                        $this->SendDebug(__FUNCTION__, 'unable to delete firectory ' . $gitAddPath, 0);
+                        return false;
+                    }
+					
+				}
+			}
+		}
 
         // final git-commands
 

@@ -1,7 +1,7 @@
 # IPSymconConfigVC
 
 [![IPS-Version](https://img.shields.io/badge/Symcon_Version-5.0-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-![Module-Version](https://img.shields.io/badge/Modul_Version-1.5-blue.svg)
+![Module-Version](https://img.shields.io/badge/Modul_Version-1.6-blue.svg)
 ![Code](https://img.shields.io/badge/Code-PHP-blue.svg)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![StyleCI](https://github.styleci.io/repos/126683101/shield?branch=master)](https://github.styleci.io/repos/146979798)
@@ -254,6 +254,7 @@ Durch _full_file_cmp_ regelt, wie Dateien auf Gleichheit verglichen werden. Bei 
 | ... user.name                        | string   | IP-Symcon       | Angabe für 'git config --global user.name' |
 | ... user.email                       | string   |                 | Angabe für 'git config --global email.name'. Angabe ist zwingend und muss eine korrekte Mail-Adresse sein |
 | lokales Verzeichnis                  | string   |                 | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
+| zusätzliche Verzeichnisse            | string   |                 | Liste von zusätzlich zu sichernden Verzeichnissen, relativ zum Symcon-Verzeichis (_/var/lib/symcon_) |
 | Webfront/user als Zip-Archiv sichern | boolean  | false           | Sichern von Webfront/user als Zip-Archiv. Achtung: Größe beachten! |
 | Datenbank sichern                    | boolean  | false           | Daten in Verzeichnis 'db' sichern |
 
@@ -280,6 +281,9 @@ GUIDs
   - ConfigVC: `{396EA137-2E5F-413A-A996-D662158EA481}`
 
 ## 7. Versions-Historie
+
+- 1.6 @ 08.11.2018 17:15<br>
+  - Möglichkeit, zusätzlich zu sichernde Verzeichnisse anzugeben
 
 - 1.5 @ 17.09.2018 10:17<br>
   - nun 2 Schaltflächen für den Abgleich (_Vollständig_ und _Schnell_)
