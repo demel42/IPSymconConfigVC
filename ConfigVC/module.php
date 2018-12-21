@@ -2,23 +2,21 @@
 
 require_once __DIR__ . '/../libs/common.php';  // globale Funktionen
 
-if (!defined('vtBoolean')) {
-    define('vtBoolean', 0);
-    define('vtInteger', 1);
-    define('vtFloat', 2);
-    define('vtString', 3);
-    define('vtArray', 8);
-    define('vtObject', 9);
+if (!defined('VARIABLETYPE_BOOLEAN')) {
+    define('VARIABLETYPE_BOOLEAN', 0);
+    define('VARIABLETYPE_INTEGER', 1);
+    define('VARIABLETYPE_FLOAT', 2);
+    define('VARIABLETYPE_STRING', 3);
 }
 
-if (!defined('otCategory')) {
-    define('otCategory', 0);
-    define('otInstance', 1);
-    define('otVariable', 2);
-    define('otScript', 3);
-    define('otEvent', 4);
-    define('otMedia', 5);
-    define('otLink', 6);
+if (!defined('OBJECTTYPE_CATEGORY')) {
+    define('OBJECTTYPE_CATEGORY', 0);
+    define('OBJECTTYPE_INSTANCE', 1);
+    define('OBJECTTYPE_VARIABLE', 2);
+    define('OBJECTTYPE_SCRIPT', 3);
+    define('OBJECTTYPE_EVENT', 4);
+    define('OBJECTTYPE_MEDIA', 5);
+    define('OBJECTTYPE_LINK', 6);
 }
 
 class ConfigVC extends IPSModule
@@ -40,7 +38,7 @@ class ConfigVC extends IPSModule
         $this->RegisterPropertyBoolean('with_db', false);
         $this->RegisterPropertyString('additional_dirs', '');
 
-        $this->CreateVarProfile('ConfigVC.Duration', vtInteger, ' sec', 0, 0, 0, 0, '');
+        $this->CreateVarProfile('ConfigVC.Duration', VARIABLETYPE_INTEGER, ' sec', 0, 0, 0, 0, '');
     }
 
     public function ApplyChanges()
@@ -48,10 +46,10 @@ class ConfigVC extends IPSModule
         parent::ApplyChanges();
 
         $vpos = 0;
-        $this->MaintainVariable('State', $this->Translate('State'), vtBoolean, '~Alert.Reversed', $vpos++, true);
-        $this->MaintainVariable('Summary', $this->Translate('Summary of last adjustment'), vtString, '', $vpos++, true);
-        $this->MaintainVariable('Duration', $this->Translate('Duration of last adjustment'), vtInteger, 'ConfigVC.Duration', $vpos++, true);
-        $this->MaintainVariable('Timestamp', $this->Translate('Timestamp of last adjustment'), vtInteger, '~UnixTimestamp', $vpos++, true);
+        $this->MaintainVariable('State', $this->Translate('State'), VARIABLETYPE_BOOLEAN, '~Alert.Reversed', $vpos++, true);
+        $this->MaintainVariable('Summary', $this->Translate('Summary of last adjustment'), VARIABLETYPE_STRING, '', $vpos++, true);
+        $this->MaintainVariable('Duration', $this->Translate('Duration of last adjustment'), VARIABLETYPE_INTEGER, 'ConfigVC.Duration', $vpos++, true);
+        $this->MaintainVariable('Timestamp', $this->Translate('Timestamp of last adjustment'), VARIABLETYPE_INTEGER, '~UnixTimestamp', $vpos++, true);
 
         $this->SetStatus(102);
     }
@@ -880,32 +878,32 @@ class ConfigVC extends IPSModule
             $mtime = 0;
             $objType = $object['type'];
             switch ($objType) {
-                case otCategory:
+                case OBJECTTYPE_CATEGORY:
                     break;
-                case otInstance:
+                case OBJECTTYPE_INSTANCE:
                     $mtime = $object['data']['lastChange'];
                     $object['data']['lastChange'] = 0;
                     break;
-                case otVariable:
+                case OBJECTTYPE_VARIABLE:
                     $mtime = $object['data']['lastUpdate'];
                     $object['data']['lastChange'] = 0;
                     $object['data']['lastUpdate'] = 0;
                     $object['data']['value'] = '';
                     break;
-                case otScript:
+                case OBJECTTYPE_SCRIPT:
                     $mtime = $object['data']['lastExecute'];
                     $object['data']['lastExecute'] = 0;
                     break;
-                case otEvent:
+                case OBJECTTYPE_EVENT:
                     $mtime = $object['data']['lastRun'];
                     $object['data']['lastRun'] = 0;
                     $object['data']['nextRun'] = 0;
                     break;
-                case otMedia:
+                case OBJECTTYPE_MEDIA:
                     $mtime = $object['data']['lastUpdate'];
                     $object['data']['lastUpdate'] = 0;
                     break;
-                case otLink:
+                case OBJECTTYPE_LINK:
                     break;
                 default:
                     break;

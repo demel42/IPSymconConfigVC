@@ -1,7 +1,7 @@
 # IPSymconConfigVC
 
 [![IPS-Version](https://img.shields.io/badge/Symcon_Version-5.0-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-![Module-Version](https://img.shields.io/badge/Modul_Version-1.6-blue.svg)
+![Module-Version](https://img.shields.io/badge/Modul_Version-1.7-blue.svg)
 ![Code](https://img.shields.io/badge/Code-PHP-blue.svg)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![StyleCI](https://github.styleci.io/repos/126683101/shield?branch=master)](https://github.styleci.io/repos/146979798)
@@ -281,6 +281,9 @@ GUIDs
   - ConfigVC: `{396EA137-2E5F-413A-A996-D662158EA481}`
 
 ## 7. Versions-Historie
+
+- 1.7 @ 21.12.2018 13:10<br>
+  - Standard-Konstanten verwenden
 
 - 1.6 @ 08.11.2018 17:15<br>
   - Möglichkeit, zusätzlich zu sichernde Verzeichnisse anzugeben
