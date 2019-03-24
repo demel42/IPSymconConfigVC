@@ -223,11 +223,11 @@ class ConfigVC extends IPSModule
             return false;
         }
         $name = $this->ReadPropertyString('git_user_name');
-        if (!$this->execute('git config user.name \'' . $name . '\'', $output)) {
+        if (!$this->execute('git config user.name "' . $name . '"', $output)) {
             return false;
         }
         $email = $this->ReadPropertyString('git_user_email');
-        if (!$this->execute('git config user.email \'' . $email . '\'', $output)) {
+        if (!$this->execute('git config user.email "' . $email . '"', $output)) {
             return false;
         }
 
@@ -447,25 +447,19 @@ class ConfigVC extends IPSModule
         $data = exec($cmd, $out, $exitcode);
         $duration = round(microtime(true) - $time_start, 2);
 
+		foreach ($out as $s) {
+			$this->SendDebug(__FUNCTION__, '  ' . utf8_decode($s), 0);
+		}
+
         if ($exitcode) {
-            $ok = false;
-            $err = $data;
-            $out = '';
+            $this->SendDebug(__FUNCTION__, ' ... failed with exitcode=' . $exitcode, 0);
+
             $output = '';
-        } else {
-            $ok = true;
-            $err = '';
-            $output = $out;
+			return false;
         }
 
-        if ($ok) {
-            foreach ($output as $s) {
-                $this->SendDebug(__FUNCTION__, '  ' . utf8_decode($s), 0);
-            }
-        } else {
-            $this->SendDebug(__FUNCTION__, ' ... , exitcode=' . $exitcode . ', err=' . utf8_decode($err) . ',output=' . utf8_decode(print_r($output, true)), 0);
-        }
-        return $ok;
+		$output = $out;
+        return true;
     }
 
     private function doZip($dirname, &$zp, $pfxlen)
@@ -1201,7 +1195,7 @@ class ConfigVC extends IPSModule
             }
 
             $_time_start = microtime(true);
-            if (!$this->execute('git commit -a -m \'' . $m . '\' 2>&1', $output)) {
+            if (!$this->execute('git commit -a -m "' . $m . '" 2>&1', $output)) {
                 return ['state' => false];
             }
             $git_commit_duration = round(microtime(true) - $_time_start, 2);

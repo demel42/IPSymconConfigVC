@@ -282,6 +282,10 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.9 @ 24.03.2019 11:16<br>
+  - Kommando-Aufrufe "Windows-tauglich" gemacht
+  - komplette Fehlermeldung der aufgerufenen git-Kommandos bei Fehlschlag
+
 - 1.8 @ 21.03.2019 20:37<br>
   - Anpassung an IPS 5
 
