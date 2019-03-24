@@ -447,18 +447,18 @@ class ConfigVC extends IPSModule
         $data = exec($cmd, $out, $exitcode);
         $duration = round(microtime(true) - $time_start, 2);
 
-		foreach ($out as $s) {
-			$this->SendDebug(__FUNCTION__, '  ' . utf8_decode($s), 0);
-		}
+        foreach ($out as $s) {
+            $this->SendDebug(__FUNCTION__, '  ' . utf8_decode($s), 0);
+        }
 
         if ($exitcode) {
             $this->SendDebug(__FUNCTION__, ' ... failed with exitcode=' . $exitcode, 0);
 
             $output = '';
-			return false;
+            return false;
         }
 
-		$output = $out;
+        $output = $out;
         return true;
     }
 
