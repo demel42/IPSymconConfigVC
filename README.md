@@ -245,26 +245,26 @@ Durch _full_file_cmp_ regelt, wie Dateien auf Gleichheit verglichen werden. Bei 
 
 ### Variablen
 
-| Eigenschaft                          | Typ      | Standardwert    | Beschreibung |
-| :----------------------------------: | :-----:  | :-------------: | :----------------------------------------------------------------------------------------------------------: |
-| Git-Repository                       | string   |                 | Pfad zu Git-Repository |
-| Benutzer                             | string   |                 | Benutzer des Git-Repository (für https und ssh) |
-| Passwort                             | string   |                 | Passwort (nur für https) |
-| Port                                 | integer  | 22              | SSH-Port (nur für ssh) |
-| ... user.name                        | string   | IP-Symcon       | Angabe für 'git config --global user.name' |
-| ... user.email                       | string   |                 | Angabe für 'git config --global email.name'. Angabe ist zwingend und muss eine korrekte Mail-Adresse sein |
-| lokales Verzeichnis                  | string   |                 | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
-| zusätzliche Verzeichnisse            | string   |                 | Liste von zusätzlich zu sichernden Verzeichnissen, relativ zum Symcon-Verzeichis (_/var/lib/symcon_) |
-| Webfront/user als Zip-Archiv sichern | boolean  | false           | Sichern von Webfront/user als Zip-Archiv. Achtung: Größe beachten! |
-| Datenbank sichern                    | boolean  | false           | Daten in Verzeichnis 'db' sichern |
+| Eigenschaft                          | Typ     | Standardwert | Beschreibung |
+| :----------------------------------- | :------ | :----------- | :----------- |
+| Git-Repository                       | string  |              | Pfad zu Git-Repository |
+| Benutzer                             | string  |              | Benutzer des Git-Repository (für https und ssh) |
+| Passwort                             | string  |              | Passwort (nur für https) |
+| Port                                 | integer | 22           | SSH-Port (nur für ssh) |
+| ... user.name                        | string  | IP-Symcon    | Angabe für 'git config --global user.name' |
+| ... user.email                       | string  |              | Angabe für 'git config --global email.name'. Angabe ist zwingend und muss eine korrekte Mail-Adresse sein |
+| lokales Verzeichnis                  | string  |              | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
+| zusätzliche Verzeichnisse            | string  |              | Liste von zusätzlich zu sichernden Verzeichnissen, relativ zum Symcon-Verzeichis (_/var/lib/symcon_) |
+| Webfront/user als Zip-Archiv sichern | boolean | false        | Sichern von Webfront/user als Zip-Archiv. Achtung: Größe beachten! |
+| Datenbank sichern                    | boolean | false        | Daten in Verzeichnis 'db' sichern |
 
 #### Schaltflächen
 
-| Bezeichnung                  | Beschreibung |
-| :--------------------------: | :-------------------------------------------------: |
-| Vollständiger Abgleich       | führt einen vollständigen Abgleich durch (incl. Zip-Archive erstellen und kompletten Vergleich der Dateien auf Gleichheit |
-| Schneller Abgleich           | führt einen schnellen Abgleich durch (ohne die zuvor Punkte) |
-| Repository einrichten        | erzeugt einen aktuelle Clone des Repositories |
+| Bezeichnung            | Beschreibung |
+| :--------------------- | :----------- |
+| Vollständiger Abgleich | führt einen vollständigen Abgleich durch (incl. Zip-Archive erstellen und kompletten Vergleich der Dateien auf Gleichheit |
+| Schneller Abgleich     | führt einen schnellen Abgleich durch (ohne die zuvor Punkte) |
+| Repository einrichten  | erzeugt einen aktuelle Clone des Repositories |
 
 ### Variablenprofile
 
