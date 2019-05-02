@@ -30,6 +30,8 @@
 
 			"Module description": "Modulbeschreibung",
 
+			"The following system prerequisites are missing": "Folgende Systemvoraussetzungen fehlen",
+
 			"Setup Repository was successfully": "Einrichten des Repository war erfolgreich",
 			"Setup Repository failed": "Einrichten des Repository ist fehlgeschlagen",
 			"Full adjustment was successfully": "Vollständiger Abgleich des Repository war erfolgreich",
@@ -45,9 +47,12 @@
 
 			"Instance getting created": "Instanz wird erstellt",
 			"Instance is active": "Instanz ist aktiv",
+			"Instance is deleted": "Instanz wird gelöscht",
 			"Instance is inactive": "Instanz ist inaktiv",
+			"Instance is not created": "Instanz wurde nicht erzeugt",
 
-			"Instance is inactive (invalid configuration)": "Instanz ist inaktiv (ungültige Konfiguration)"
+			"Instance is inactive (invalid configuration)": "Instanz ist inaktiv (ungültige Konfiguration)",
+			"Instance is inactive (invalid preconditions)": "Instanz ist inaktiv (ungültige Voraussetzungen)"
 		}
 	}
 }
