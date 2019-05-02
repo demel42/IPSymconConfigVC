@@ -51,21 +51,21 @@ class ConfigVC extends IPSModule
         $this->MaintainVariable('Duration', $this->Translate('Duration of last adjustment'), VARIABLETYPE_INTEGER, 'ConfigVC.Duration', $vpos++, true);
         $this->MaintainVariable('Timestamp', $this->Translate('Timestamp of last adjustment'), VARIABLETYPE_INTEGER, '~UnixTimestamp', $vpos++, true);
 
-		$url = $this->ReadPropertyString('url');
-		$path = $this->ReadPropertyString('path');
-		if ($url == '' || $path == '') {
-			$this->SetStatus(IS_INVALIDCONFIG);
-			return;
-		}
+        $url = $this->ReadPropertyString('url');
+        $path = $this->ReadPropertyString('path');
+        if ($url == '' || $path == '') {
+            $this->SetStatus(IS_INVALIDCONFIG);
+            return;
+        }
 
-		$output = '';
-		if (!$this->execute('git --version 2>&1', $output)) {
-			$this->SetStatus(IS_INVALIDPREREQUISITES);
-			$s = $this->Translate('The following system prerequisites are missing') . ':' . PHP_EOL;
-			$s .= '  - git' . PHP_EOL;
-			echo $s;
-			return;
-		}
+        $output = '';
+        if (!$this->execute('git --version 2>&1', $output)) {
+            $this->SetStatus(IS_INVALIDPREREQUISITES);
+            $s = $this->Translate('The following system prerequisites are missing') . ':' . PHP_EOL;
+            $s .= '  - git' . PHP_EOL;
+            echo $s;
+            return;
+        }
 
         $this->SetStatus(IS_ACTIVE);
     }
@@ -106,14 +106,14 @@ class ConfigVC extends IPSModule
                         ];
 
         $formStatus = [];
-		$formStatus[] = ['code' => IS_CREATING, 'icon' => 'inactive', 'caption' => 'Instance getting created'];
-		$formStatus[] = ['code' => IS_ACTIVE, 'icon' => 'active', 'caption' => 'Instance is active'];
-		$formStatus[] = ['code' => IS_DELETING, 'icon' => 'inactive', 'caption' => 'Instance is deleted'];
-		$formStatus[] = ['code' => IS_INACTIVE, 'icon' => 'inactive', 'caption' => 'Instance is inactive'];
-		$formStatus[] = ['code' => IS_NOTCREATED, 'icon' => 'inactive', 'caption' => 'Instance is not created'];
+        $formStatus[] = ['code' => IS_CREATING, 'icon' => 'inactive', 'caption' => 'Instance getting created'];
+        $formStatus[] = ['code' => IS_ACTIVE, 'icon' => 'active', 'caption' => 'Instance is active'];
+        $formStatus[] = ['code' => IS_DELETING, 'icon' => 'inactive', 'caption' => 'Instance is deleted'];
+        $formStatus[] = ['code' => IS_INACTIVE, 'icon' => 'inactive', 'caption' => 'Instance is inactive'];
+        $formStatus[] = ['code' => IS_NOTCREATED, 'icon' => 'inactive', 'caption' => 'Instance is not created'];
 
         $formStatus[] = ['code' => IS_INVALIDCONFIG, 'icon' => 'error', 'caption' => 'Instance is inactive (invalid configuration)'];
-		$formStatus[] = ['code' => IS_INVALIDPREREQUISITES, 'icon' => 'error', 'caption' => 'Instance is inactive (invalid preconditions)'];
+        $formStatus[] = ['code' => IS_INVALIDPREREQUISITES, 'icon' => 'error', 'caption' => 'Instance is inactive (invalid preconditions)'];
 
         return json_encode(['elements' => $formElements, 'actions' => $formActions, 'status' => $formStatus]);
     }

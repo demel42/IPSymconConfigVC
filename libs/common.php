@@ -1,8 +1,8 @@
 <?php
 
 if (!defined('IS_INVALIDCONFIG')) {
-	define('IS_INVALIDCONFIG', IS_EBASE + 1);
-	define('IS_INVALIDPREREQUISITES', IS_EBASE + 2);
+    define('IS_INVALIDCONFIG', IS_EBASE + 1);
+    define('IS_INVALIDPREREQUISITES', IS_EBASE + 2);
 }
 
 trait ConfigVCCommon
