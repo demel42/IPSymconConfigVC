@@ -24,17 +24,17 @@ class ConfigVC extends IPSModule
         $this->CreateVarProfile('ConfigVC.Duration', VARIABLETYPE_INTEGER, ' sec', 0, 0, 0, 0, '');
     }
 
-	private function CheckPrerequisites()
-	{
-		$s = '';
+    private function CheckPrerequisites()
+    {
+        $s = '';
 
         $output = '';
         if (!$this->execute('git --version 2>&1', $output)) {
             $s = $this->Translate('The following system prerequisites are missing') . ': git';
         }
 
-		return $s;
-	}
+        return $s;
+    }
 
     public function ApplyChanges()
     {
@@ -53,8 +53,8 @@ class ConfigVC extends IPSModule
             return;
         }
 
-		$s = $this->CheckPrerequisites();
-		if ($s != '') {
+        $s = $this->CheckPrerequisites();
+        if ($s != '') {
             $this->SetStatus(IS_INVALIDPREREQUISITES);
             return;
         }
@@ -66,13 +66,13 @@ class ConfigVC extends IPSModule
     {
         $formElements = [];
 
-		$s = $this->CheckPrerequisites();
-		if ($s != '') {
-			$items = [
-					[ 'type' => 'Label', 'caption' => $s ],
-				];
-			$formElements[] = ['type'  => 'PopupAlert', 'popup' => [ 'items' => $items ]];
-		}
+        $s = $this->CheckPrerequisites();
+        if ($s != '') {
+            $items = [
+                    ['type' => 'Label', 'caption' => $s],
+                ];
+            $formElements[] = ['type'  => 'PopupAlert', 'popup' => ['items' => $items]];
+        }
 
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'url', 'caption' => 'Git-Repository'];
         $formElements[] = ['type' => 'Label', 'label' => 'for http/https and ssh'];
