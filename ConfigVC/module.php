@@ -2,23 +2,6 @@
 
 require_once __DIR__ . '/../libs/common.php';  // globale Funktionen
 
-if (!defined('VARIABLETYPE_BOOLEAN')) {
-    define('VARIABLETYPE_BOOLEAN', 0);
-    define('VARIABLETYPE_INTEGER', 1);
-    define('VARIABLETYPE_FLOAT', 2);
-    define('VARIABLETYPE_STRING', 3);
-}
-
-if (!defined('OBJECTTYPE_CATEGORY')) {
-    define('OBJECTTYPE_CATEGORY', 0);
-    define('OBJECTTYPE_INSTANCE', 1);
-    define('OBJECTTYPE_VARIABLE', 2);
-    define('OBJECTTYPE_SCRIPT', 3);
-    define('OBJECTTYPE_EVENT', 4);
-    define('OBJECTTYPE_MEDIA', 5);
-    define('OBJECTTYPE_LINK', 6);
-}
-
 class ConfigVC extends IPSModule
 {
     use ConfigVCCommon;
@@ -41,6 +24,18 @@ class ConfigVC extends IPSModule
         $this->CreateVarProfile('ConfigVC.Duration', VARIABLETYPE_INTEGER, ' sec', 0, 0, 0, 0, '');
     }
 
+	private function CheckPrerequisites()
+	{
+		$s = '';
+
+        $output = '';
+        if (!$this->execute('git --version 2>&1', $output)) {
+            $s = $this->Translate('The following system prerequisites are missing') . ': git';
+        }
+
+		return $s;
+	}
+
     public function ApplyChanges()
     {
         parent::ApplyChanges();
@@ -58,12 +53,9 @@ class ConfigVC extends IPSModule
             return;
         }
 
-        $output = '';
-        if (!$this->execute('git --version 2>&1', $output)) {
+		$s = $this->CheckPrerequisites();
+		if ($s != '') {
             $this->SetStatus(IS_INVALIDPREREQUISITES);
-            $s = $this->Translate('The following system prerequisites are missing') . ':' . PHP_EOL;
-            $s .= '  - git' . PHP_EOL;
-            echo $s;
             return;
         }
 
@@ -73,6 +65,15 @@ class ConfigVC extends IPSModule
     public function GetConfigurationForm()
     {
         $formElements = [];
+
+		$s = $this->CheckPrerequisites();
+		if ($s != '') {
+			$items = [
+					[ 'type' => 'Label', 'caption' => $s ],
+				];
+			$formElements[] = ['type'  => 'PopupAlert', 'popup' => [ 'items' => $items ]];
+		}
+
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'url', 'caption' => 'Git-Repository'];
         $formElements[] = ['type' => 'Label', 'label' => 'for http/https and ssh'];
         $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'user', 'caption' => ' ... User'];
@@ -383,20 +384,6 @@ class ConfigVC extends IPSModule
 
     private function copyFile($src, $dst, $onlyChanged, $fullCmp, &$file_cmp_duration)
     {
-        /*
-                $r = $this->loadFile($src);
-                if (!$r) {
-                    $this->SendDebug(__FUNCTION__, 'error loading file ' . $src, 0);
-                    return false;
-                }
-                $stat = $r['stat'];
-                $data = $r['data'];
-                if (!$this->saveFile($dst, $data, $stat['mtime'], $onlyChanged)) {
-                    $this->SendDebug(__FUNCTION__, 'error saving file ' . $dst, 0);
-                    return false;
-                }
-        */
-
         $src_stat = stat($src);
         if ($onlyChanged && file_exists($dst)) {
             $dst_stat = stat($dst);
