@@ -64,41 +64,40 @@ class ConfigVC extends IPSModule
 
     public function GetConfigurationForm()
     {
-        $formElements = [];
-
         $s = $this->CheckPrerequisites();
-        if ($s != '') {
-            $items = [
-                    ['type' => 'Label', 'caption' => $s],
-                ];
-            $formElements[] = ['type'  => 'PopupAlert', 'popup' => ['items' => $items]];
-        }
 
-        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'url', 'caption' => 'Git-Repository'];
-        $formElements[] = ['type' => 'Label', 'label' => 'for http/https and ssh'];
-        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'user', 'caption' => ' ... User'];
-        $formElements[] = ['type' => 'Label', 'label' => 'for http/https only'];
-        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'password', 'caption' => ' ... Password'];
-        $formElements[] = ['type' => 'Label', 'label' => 'for ssh only'];
-        $formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
+		$formElements = [];
+        if ($s == '') {
+			$formElements[] = ['type' => 'ValidationTextBox', 'name' => 'url', 'caption' => 'Git-Repository'];
+			$formElements[] = ['type' => 'Label', 'label' => 'for http/https and ssh'];
+			$formElements[] = ['type' => 'ValidationTextBox', 'name' => 'user', 'caption' => ' ... User'];
+			$formElements[] = ['type' => 'Label', 'label' => 'for http/https only'];
+			$formElements[] = ['type' => 'ValidationTextBox', 'name' => 'password', 'caption' => ' ... Password'];
+			$formElements[] = ['type' => 'Label', 'label' => 'for ssh only'];
+			$formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
 
-        $formElements[] = ['type' => 'Label', 'label' => 'Informations for git config ...'];
-        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'git_user_name', 'caption' => ' ... user.name'];
-        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'git_user_email', 'caption' => ' ... user.email'];
+			$formElements[] = ['type' => 'Label', 'label' => 'Informations for git config ...'];
+			$formElements[] = ['type' => 'ValidationTextBox', 'name' => 'git_user_name', 'caption' => ' ... user.name'];
+			$formElements[] = ['type' => 'ValidationTextBox', 'name' => 'git_user_email', 'caption' => ' ... user.email'];
 
-        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
+			$formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
 
-        $formElements[] = ['type' => 'CheckBox', 'name' => 'with_webfront_user_zip', 'caption' => 'save webfront/user as zip-archive'];
-        $formElements[] = ['type' => 'CheckBox', 'name' => 'with_db', 'caption' => 'save database'];
+			$formElements[] = ['type' => 'CheckBox', 'name' => 'with_webfront_user_zip', 'caption' => 'save webfront/user as zip-archive'];
+			$formElements[] = ['type' => 'CheckBox', 'name' => 'with_db', 'caption' => 'save database'];
 
-        $formElements[] = ['type' => 'Label', 'label' => 'additional directories to be saved, relativ to symcon-root; list with ; as delimiter'];
-        $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'additional_dirs', 'caption' => 'Directories'];
+			$formElements[] = ['type' => 'Label', 'label' => 'additional directories to be saved, relativ to symcon-root; list with ; as delimiter'];
+			$formElements[] = ['type' => 'ValidationTextBox', 'name' => 'additional_dirs', 'caption' => 'Directories'];
+        } else {
+			$formElements[] = ['type' => 'Label', 'label' => $s];
+		}
 
         $formActions = [];
-        $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
-        $formActions[] = ['type' => 'Button', 'label' => 'Full adjustment', 'onClick' => 'CVC_fullCallAdjustment($id);'];
-        $formActions[] = ['type' => 'Button', 'label' => 'Fast adjustment', 'onClick' => 'CVC_fastCallAdjustment($id);'];
-        $formActions[] = ['type' => 'Button', 'label' => 'Setup Repository', 'onClick' => 'CVC_internalCloneRepository($id);'];
+        if ($s == '') {
+			$formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
+			$formActions[] = ['type' => 'Button', 'label' => 'Full adjustment', 'onClick' => 'CVC_fullCallAdjustment($id);'];
+			$formActions[] = ['type' => 'Button', 'label' => 'Fast adjustment', 'onClick' => 'CVC_fastCallAdjustment($id);'];
+			$formActions[] = ['type' => 'Button', 'label' => 'Setup Repository', 'onClick' => 'CVC_internalCloneRepository($id);'];
+		}
         $formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
         $formActions[] = [
                             'type'    => 'Button',
