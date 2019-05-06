@@ -46,16 +46,16 @@ class ConfigVC extends IPSModule
         $this->MaintainVariable('Duration', $this->Translate('Duration of last adjustment'), VARIABLETYPE_INTEGER, 'ConfigVC.Duration', $vpos++, true);
         $this->MaintainVariable('Timestamp', $this->Translate('Timestamp of last adjustment'), VARIABLETYPE_INTEGER, '~UnixTimestamp', $vpos++, true);
 
+        $s = $this->CheckPrerequisites();
+        if ($s != '') {
+            $this->SetStatus(IS_INVALIDPREREQUISITES);
+            return;
+        }
+
         $url = $this->ReadPropertyString('url');
         $path = $this->ReadPropertyString('path');
         if ($url == '' || $path == '') {
             $this->SetStatus(IS_INVALIDCONFIG);
-            return;
-        }
-
-        $s = $this->CheckPrerequisites();
-        if ($s != '') {
-            $this->SetStatus(IS_INVALIDPREREQUISITES);
             return;
         }
 
