@@ -1,7 +1,7 @@
 # IPSymconConfigVC
 
 [![IPS-Version](https://img.shields.io/badge/Symcon_Version-5.0+-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-![Module-Version](https://img.shields.io/badge/Modul_Version-1.13-blue.svg)
+![Module-Version](https://img.shields.io/badge/Modul_Version-1.14-blue.svg)
 ![Code](https://img.shields.io/badge/Code-PHP-blue.svg)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![StyleCI](https://github.styleci.io/repos/146979798/shield?branch=master)](https://github.styleci.io/repos/146979798)
@@ -255,7 +255,8 @@ Durch _full_file_cmp_ regelt, wie Dateien auf Gleichheit verglichen werden. Bei 
 | ... user.email                       | string  |              | Angabe für 'git config --global email.name'. Angabe ist zwingend und muss eine korrekte Mail-Adresse sein |
 | lokales Verzeichnis                  | string  |              | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
 | zusätzliche Verzeichnisse            | string  |              | Liste von zusätzlich zu sichernden Verzeichnissen, relativ zum Symcon-Verzeichis (_/var/lib/symcon_) |
-| Webfront/user als Zip-Archiv sichern | boolean | false        | Sichern von Webfront/user als Zip-Archiv. Achtung: Größe beachten! |
+| Webfront/user als Zip-Archiv sichern | boolean | false        | Sichern von _webfront/user_ als Zip-Archiv. Achtung: Größe beachten! |
+| auszuschliessende Verzeichnisse      | string  |              | Liste von zusätzlich auszuschliessende Verzeichnissen, relativ zu _webfront/user_ |
 | Datenbank sichern                    | boolean | false        | Daten in Verzeichnis 'db' sichern |
 
 #### Schaltflächen
@@ -281,6 +282,10 @@ GUIDs
   - ConfigVC: `{396EA137-2E5F-413A-A996-D662158EA481}`
 
 ## 7. Versions-Historie
+
+- 1.14 @ 30.06.2019 19:40<br>
+  - Liste von zusätzlich auszuschliessende Verzeichnissen, relativ zu _webfront/user_
+  - Schreibfehler
 
 - 1.13 @ 06.05.2019 11:35<br>
   - Konfigurationsdialog ist reduziert, wenn Systemvoraussetzungen fehlen

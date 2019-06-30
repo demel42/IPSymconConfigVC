@@ -18,6 +18,7 @@ class ConfigVC extends IPSModule
         $this->RegisterPropertyString('git_user_email', '');
         $this->RegisterPropertyString('path', '');
         $this->RegisterPropertyBoolean('with_webfront_user_zip', false);
+        $this->RegisterPropertyString('exclude_dirs_webfront_user', '');
         $this->RegisterPropertyBoolean('with_db', false);
         $this->RegisterPropertyString('additional_dirs', '');
 
@@ -83,6 +84,9 @@ class ConfigVC extends IPSModule
             $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
 
             $formElements[] = ['type' => 'CheckBox', 'name' => 'with_webfront_user_zip', 'caption' => 'save webfront/user as zip-archive'];
+            $formElements[] = ['type' => 'Label', 'label' => 'directories to be excluded, relativ to \'webfront/user\'; list with ; as delimiter'];
+            $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'exclude_dirs_webfront_user', 'caption' => 'Directories'];
+
             $formElements[] = ['type' => 'CheckBox', 'name' => 'with_db', 'caption' => 'save database'];
 
             $formElements[] = ['type' => 'Label', 'label' => 'additional directories to be saved, relativ to symcon-root; list with ; as delimiter'];
@@ -936,6 +940,8 @@ class ConfigVC extends IPSModule
         // .../symcon/webfront/user
 
         if ($with_zip && $with_webfront_user_zip) {
+			$exclude_dirs_webfront_user = $this->ReadPropertyString('exclude_dirs_webfront_user');
+			$exclude_dirs = $exclude_dirs_webfront_user != '' ? explode(';', $exclude_dirs_webfront_user) : [];
             $oldWebfrontUserDirs = $this->scanDir($gitWebfrontUserPath);
             $newWebfrontUserDirs = [];
             $dirnames = scandir($ipsWebfrontUserPath, 0);
@@ -943,6 +949,9 @@ class ConfigVC extends IPSModule
                 if (substr($dirname, 0, 1) == '.') {
                     continue;
                 }
+				if (in_array($dirname, $exclude_dirs)) {
+					continue;
+				}
                 $path = $ipsWebfrontUserPath . DIRECTORY_SEPARATOR . $dirname;
                 if (!is_dir($path)) {
                     continue;
