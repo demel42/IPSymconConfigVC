@@ -1034,6 +1034,9 @@ class ConfigVC extends IPSModule
                     $newDbDirs = [];
                     $filenames = scandir($ipsDbMonthDir, 0);
                     foreach ($filenames as $filename) {
+                        if (substr($filename, 0, 1) == '.') {
+                            continue;
+                        }
                         if (is_dir($filename)) {
                             continue;
                         }
