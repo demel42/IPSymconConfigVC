@@ -1,7 +1,7 @@
 # IPSymconConfigVC
 
 [![IPS-Version](https://img.shields.io/badge/Symcon_Version-5.0+-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-![Module-Version](https://img.shields.io/badge/Modul_Version-1.15-blue.svg)
+![Module-Version](https://img.shields.io/badge/Modul_Version-1.16-blue.svg)
 ![Code](https://img.shields.io/badge/Code-PHP-blue.svg)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 [![StyleCI](https://github.styleci.io/repos/146979798/shield?branch=master)](https://github.styleci.io/repos/146979798)
@@ -282,6 +282,9 @@ GUIDs
   - ConfigVC: `{396EA137-2E5F-413A-A996-D662158EA481}`
 
 ## 7. Versions-Historie
+
+- 1.16 @ 16.07.2019 18:14<br>
+  - Man konnte trotz fehlerhafter Konfiguration sowohl in Test-Funktionen aufrufen; das gibt nun eㄩen entsprechnede Meldung.
 
 - 1.15 @ 12.07.2019 09:36<br>
   - Absicherung beim Kopieren von Daten aus _.../db_

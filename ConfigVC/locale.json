@@ -26,6 +26,8 @@
 				"zusätzliche zu sichernde Verzeichnisse, relativ zum Symcon-Wurzelverzeichnis; Liste mit ; als Trenner",
 			"Directories": "Verzeichnisse",
 
+			"Instance is not activ": "Instanz ist nicht aktiv",
+
 			"Action takes up several minutes (depending on amount of data)": "Die Aktion dauert bis zu einigen Minuten (in Abhängigkeit von der Datenmenge)",
 			"Full adjustment": "Vollständiger Abgleich",
 			"Fast adjustment": "Schneller Abgleich",

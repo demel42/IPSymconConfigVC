@@ -124,6 +124,11 @@ class ConfigVC extends IPSModule
 
     public function internalCloneRepository()
     {
+		if ($this->GetStatus() != IS_ACTIVE) {
+			echo $this->Translate('Instance is not activ');
+			return;
+		}
+
         $time_start = microtime(true);
         $r = $this->CloneRepository();
         $duration = round(microtime(true) - $time_start, 2);
@@ -136,6 +141,11 @@ class ConfigVC extends IPSModule
 
     public function fullCallAdjustment()
     {
+		if ($this->GetStatus() != IS_ACTIVE) {
+			echo $this->Translate('Instance is not activ');
+			return;
+		}
+
         $time_start = microtime(true);
         $r = $this->CallAdjustment(true, true);
         $duration = round(microtime(true) - $time_start, 2);
@@ -148,6 +158,11 @@ class ConfigVC extends IPSModule
 
     public function fastCallAdjustment()
     {
+		if ($this->GetStatus() != IS_ACTIVE) {
+			echo $this->Translate('Instance is not activ');
+			return;
+		}
+
         $time_start = microtime(true);
         $r = $this->CallAdjustment(false, false);
         $duration = round(microtime(true) - $time_start, 2);
@@ -160,6 +175,11 @@ class ConfigVC extends IPSModule
 
     public function CloneRepository()
     {
+		if ($this->GetStatus() != IS_ACTIVE) {
+			$this->SendDebug(__FUNCTION__, 'Instance is not activ', 0);
+			return;
+		}
+
         $url = $this->ReadPropertyString('url');
         $user = $this->ReadPropertyString('user');
         $password = $this->ReadPropertyString('password');
@@ -260,6 +280,11 @@ class ConfigVC extends IPSModule
 
     public function CallAdjustment(bool $with_zip, bool $full_file_cmp)
     {
+		if ($this->GetStatus() != IS_ACTIVE) {
+			$this->SendDebug(__FUNCTION__, 'Instance is not activ', 0);
+			return;
+		}
+
         $this->SendDebug(__FUNCTION__, 'with_zip=' . ($with_zip ? 'true' : 'false') . ', full_file_cmp=' . ($full_file_cmp ? 'true' : 'false'), 0);
 
         $r = $this->performAdjustment($with_zip, $full_file_cmp);
