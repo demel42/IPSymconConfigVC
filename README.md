@@ -284,7 +284,7 @@ GUIDs
 ## 7. Versions-Historie
 
 - 1.16 @ 16.07.2019 18:14<br>
-  - Man konnte trotz fehlerhafter Konfiguration sowohl in Test-Funktionen aufrufen; das gibt nun eㄩen entsprechnede Meldung.
+  - es war möglich trotz fehlerhafter Konfiguration die Test-Funktionen aufzurufen; das gibt nun eine entsprechende Meldung.
 
 - 1.15 @ 12.07.2019 09:36<br>
   - Absicherung beim Kopieren von Daten aus _.../db_
