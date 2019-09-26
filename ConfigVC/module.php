@@ -102,12 +102,14 @@ class ConfigVC extends IPSModule
             $formActions[] = ['type' => 'Button', 'label' => 'Fast adjustment', 'onClick' => 'CVC_fastCallAdjustment($id);'];
             $formActions[] = ['type' => 'Button', 'label' => 'Setup Repository', 'onClick' => 'CVC_internalCloneRepository($id);'];
         }
-        $formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
-        $formActions[] = [
-                            'type'    => 'Button',
-                            'caption' => 'Module description',
-                            'onClick' => 'echo "https://github.com/demel42/IPSymconConfigVC/blob/master/README.md";'
-                        ];
+		if (IPS_GetKernelVersion() < 5.2) {
+			$formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
+			$formActions[] = [
+								'type'    => 'Button',
+								'caption' => 'Module description',
+								'onClick' => 'echo "https://github.com/demel42/IPSymconConfigVC/blob/master/README.md";'
+							];
+		}
 
         $formStatus = [];
         $formStatus[] = ['code' => IS_CREATING, 'icon' => 'inactive', 'caption' => 'Instance getting created'];

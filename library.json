@@ -1,12 +1,12 @@
 {
 	"id": "{EA906449-5DDA-4D99-9110-276BB31B6FFC}",
 	"author": "Ch. Damsky",
-	"name": "IPSymconConfigVC",
+	"name": "ConfigVersionControl",
 	"url": "https://github.com/demel42/IPSymconConfigVC",
 	"compatibility": {
 		"version": "5.0"
 	},
-	"version": "1.17",
+	"version": "1.18",
 	"build": 0,
-	"date": 1565353933
+	"date": 1569515041
 }

@@ -9,5 +9,6 @@
 	"parentRequirements": [],
 	"childRequirements": [],
 	"implemented": [],
-	"prefix": "CVC"
+	"prefix": "CVC",
+     "url": "https://github.com/demel42/IPSymconConfigVC/blob/master/README.md"
 }
