@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 require_once __DIR__ . '/../libs/common.php';  // globale Funktionen
 
 class ConfigVC extends IPSModule
@@ -105,10 +107,10 @@ class ConfigVC extends IPSModule
         if (IPS_GetKernelVersion() < 5.2) {
             $formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
             $formActions[] = [
-                                'type'    => 'Button',
-                                'caption' => 'Module description',
-                                'onClick' => 'echo "https://github.com/demel42/IPSymconConfigVC/blob/master/README.md";'
-                            ];
+                'type'    => 'Button',
+                'caption' => 'Module description',
+                'onClick' => 'echo "https://github.com/demel42/IPSymconConfigVC/blob/master/README.md";'
+            ];
         }
 
         $formStatus = [];
@@ -692,12 +694,12 @@ class ConfigVC extends IPSModule
                 }
 
                 $jdata = [
-                        'name'     => $dirname,
-                        'url'      => $url,
-                        'branch'   => $branch,
-                        'commitID' => $commitID,
-                        'mtime'    => $mtime
-                    ];
+                    'name'     => $dirname,
+                    'url'      => $url,
+                    'branch'   => $branch,
+                    'commitID' => $commitID,
+                    'mtime'    => $mtime
+                ];
 
                 $fname = $gitPath . DIRECTORY_SEPARATOR . $dirname . '.json';
                 if (!$this->saveJson($jdata, $fname, 0)) {
@@ -1287,18 +1289,18 @@ class ConfigVC extends IPSModule
         }
 
         $r = [
-                'state'        => true,
-                'msg'          => $msg,
-                'duration'     => $duration,
-                'files'        => [
-                    'modified'     => $n_modified,
-                    'added'        => $n_added,
-                    'renamed'      => $n_renamed,
-                    'deleted'      => $n_deleted,
-                    'untracked'    => $n_untracked,
-                    'erroneous'    => $n_erroneous,
-                ],
-            ];
+            'state'        => true,
+            'msg'          => $msg,
+            'duration'     => $duration,
+            'files'        => [
+                'modified'     => $n_modified,
+                'added'        => $n_added,
+                'renamed'      => $n_renamed,
+                'deleted'      => $n_deleted,
+                'untracked'    => $n_untracked,
+                'erroneous'    => $n_erroneous,
+            ],
+        ];
         return $r;
     }
 }
