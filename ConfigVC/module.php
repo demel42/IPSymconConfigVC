@@ -72,26 +72,26 @@ class ConfigVC extends IPSModule
         $formElements = [];
         if ($s == '') {
             $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'url', 'caption' => 'Git-Repository'];
-            $formElements[] = ['type' => 'Label', 'label' => 'for http/https and ssh'];
+            $formElements[] = ['type' => 'Label', 'caption' => 'for http/https and ssh'];
             $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'user', 'caption' => ' ... User'];
-            $formElements[] = ['type' => 'Label', 'label' => 'for http/https only'];
+            $formElements[] = ['type' => 'Label', 'caption' => 'for http/https only'];
             $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'password', 'caption' => ' ... Password'];
-            $formElements[] = ['type' => 'Label', 'label' => 'for ssh only'];
+            $formElements[] = ['type' => 'Label', 'caption' => 'for ssh only'];
             $formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
 
-            $formElements[] = ['type' => 'Label', 'label' => 'Informations for git config ...'];
+            $formElements[] = ['type' => 'Label', 'caption' => 'Informations for git config ...'];
             $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'git_user_name', 'caption' => ' ... user.name'];
             $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'git_user_email', 'caption' => ' ... user.email'];
 
             $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
 
             $formElements[] = ['type' => 'CheckBox', 'name' => 'with_webfront_user_zip', 'caption' => 'save webfront/user as zip-archive'];
-            $formElements[] = ['type' => 'Label', 'label' => 'directories to be excluded, relativ to \'webfront/user\'; list with ; as delimiter'];
+            $formElements[] = ['type' => 'Label', 'caption' => 'directories to be excluded, relativ to \'webfront/user\'; list with ; as delimiter'];
             $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'exclude_dirs_webfront_user', 'caption' => 'Directories'];
 
             $formElements[] = ['type' => 'CheckBox', 'name' => 'with_db', 'caption' => 'save database'];
 
-            $formElements[] = ['type' => 'Label', 'label' => 'additional directories to be saved, relativ to symcon-root; list with ; as delimiter'];
+            $formElements[] = ['type' => 'Label', 'caption' => 'additional directories to be saved, relativ to symcon-root; list with ; as delimiter'];
             $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'additional_dirs', 'caption' => 'Directories'];
         } else {
             $formElements[] = ['type' => 'Label', 'label' => $s];
@@ -99,13 +99,13 @@ class ConfigVC extends IPSModule
 
         $formActions = [];
         if ($s == '') {
-            $formActions[] = ['type' => 'Label', 'label' => 'Action takes up several minutes (depending on amount of data)'];
-            $formActions[] = ['type' => 'Button', 'label' => 'Full adjustment', 'onClick' => 'CVC_fullCallAdjustment($id);'];
-            $formActions[] = ['type' => 'Button', 'label' => 'Fast adjustment', 'onClick' => 'CVC_fastCallAdjustment($id);'];
-            $formActions[] = ['type' => 'Button', 'label' => 'Setup Repository', 'onClick' => 'CVC_internalCloneRepository($id);'];
+            $formActions[] = ['type' => 'Label', 'caption' => 'Action takes up several minutes (depending on amount of data)'];
+            $formActions[] = ['type' => 'Button', 'caption' => 'Full adjustment', 'onClick' => 'CVC_fullCallAdjustment($id);'];
+            $formActions[] = ['type' => 'Button', 'caption' => 'Fast adjustment', 'onClick' => 'CVC_fastCallAdjustment($id);'];
+            $formActions[] = ['type' => 'Button', 'caption' => 'Setup Repository', 'onClick' => 'CVC_internalCloneRepository($id);'];
         }
         if (IPS_GetKernelVersion() < 5.2) {
-            $formActions[] = ['type' => 'Label', 'label' => '____________________________________________________________________________________________________'];
+            $formActions[] = ['type' => 'Label', 'caption' => '____________________________________________________________________________________________________'];
             $formActions[] = [
                 'type'    => 'Button',
                 'caption' => 'Module description',

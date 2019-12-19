@@ -1,7 +1,7 @@
 # IPSymconConfigVC
 
 [![IPS-Version](https://img.shields.io/badge/Symcon_Version-5.0+-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
-![Module-Version](https://img.shields.io/badge/Modul_Version-1.18-blue.svg)
+![Module-Version](https://img.shields.io/badge/Modul_Version-1.19-blue.svg)
 ![Code](https://img.shields.io/badge/Code-PHP-blue.svg)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
@@ -282,71 +282,75 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.18 @ 10.10.2019 17:27<br>
+- 1.19 @ 19.12.2019 14:09
+  - Anpassungen an IPS 5.3
+    - Formular-Elemente: 'label' in 'caption' geändert
+
+- 1.18 @ 10.10.2019 17:27
   - Anpassungen an IPS 5.2
     - IPS_SetVariableProfileValues(), IPS_SetVariableProfileDigits() nur bei INTEGER, FLOAT
     - Dokumentation-URL in module.json
   - Umstellung auf strict_types=1
   - Umstellung von StyleCI auf php-cs-fixer
 
-- 1.17 @ 09.08.2019 14:32<br>
+- 1.17 @ 09.08.2019 14:32
   - Schreibfehler korrigiert
 
-- 1.16 @ 16.07.2019 18:14<br>
+- 1.16 @ 16.07.2019 18:14
   - es war möglich trotz fehlerhafter Konfiguration die Test-Funktionen aufzurufen; das gibt nun eine entsprechende Meldung.
 
-- 1.15 @ 12.07.2019 09:36<br>
+- 1.15 @ 12.07.2019 09:36
   - Absicherung beim Kopieren von Daten aus _.../db_
 
-- 1.14 @ 30.06.2019 19:40<br>
+- 1.14 @ 30.06.2019 19:40
   - Liste von zusätzlich auszuschliessende Verzeichnissen, relativ zu _webfront/user_
   - Schreibfehler
 
-- 1.13 @ 06.05.2019 11:35<br>
+- 1.13 @ 06.05.2019 11:35
   - Konfigurationsdialog ist reduziert, wenn Systemvoraussetzungen fehlen
 
-- 1.12 @ 03.05.2019 16:40<br>
+- 1.12 @ 03.05.2019 16:40
   - Prüfung der Systemvoraussetzungen im Konfigurationsdialog
 
-- 1.11 @ 02.05.2019 19:04<br>
+- 1.11 @ 02.05.2019 19:04
   - Prüfung beim Speichern der Konfiguration, ob 'git' vorhanden ist
 
-- 1.10 @ 29.03.2019 16:19<br>
+- 1.10 @ 29.03.2019 16:19
   - SetValue() abgesichert
 
-- 1.9 @ 24.03.2019 11:16<br>
+- 1.9 @ 24.03.2019 11:16
   - Kommando-Aufrufe "Windows-tauglich" gemacht
   - komplette Fehlermeldung der aufgerufenen git-Kommandos bei Fehlschlag
 
-- 1.8 @ 21.03.2019 20:37<br>
+- 1.8 @ 21.03.2019 20:37
   - Anpassung an IPS 5
 
-- 1.7 @ 21.12.2018 13:10<br>
+- 1.7 @ 21.12.2018 13:10
   - Standard-Konstanten verwenden
 
-- 1.6 @ 08.11.2018 17:15<br>
+- 1.6 @ 08.11.2018 17:15
   - Möglichkeit, zusätzlich zu sichernde Verzeichnisse anzugeben
 
-- 1.5 @ 17.09.2018 10:17<br>
+- 1.5 @ 17.09.2018 10:17
   - nun 2 Schaltflächen für den Abgleich (_Vollständig_ und _Schnell_)
   - Vergleich von Dateien nun per _sha1_file()_ statt Vergleich der kompletten Datei im Speicher (Problem bei großen Dateien)
   - Vergleich des Dateiinhalts nur noch optional (Performance)
 
-- 1.4 @ 15.09.2018 18:50<br>
+- 1.4 @ 15.09.2018 18:50
   - Unterstützung von _http_ für lokale Repositories
   - Angabe von user.name und user.email zum korrekten _git config_
   - nach Betätigung der Schaltflächen wird ein Popup angezeigt mit Angabe von Erfolg oder Fehlschlag
 
-- 1.3 @ 13.09.2018 09:08<br>
+- 1.3 @ 13.09.2018 09:08
   - optional Verzeichnis _db_ sichern
   - Verzeichnis _media_ sichern
   - Fix für den Umgang mit leeren Dateien
 
-- 1.2 @ 12.09.2018 08:05<br>
+- 1.2 @ 12.09.2018 08:05
   - Modules und Skins, die nicht unter Git-Kontrolle stehen werden als Zip-Archiv gesichert
   - Code aufgeräumt
 
-- 1.1 @ 10.09.2018 10:14<br>
+- 1.1 @ 10.09.2018 10:14
   - Commit-ID der Module in den <modules>.json-Dateien gesichert, Dokumentation ergänzt
   - keine Zip-Archive mehr für Module
   - optional Zip-Archive für Verzeichnisse unterhalb von _webfront/user_
@@ -354,5 +358,5 @@ GUIDs
   - Sicherung von php.ini
   - Umgang mit nicht-uft8-Daten bei _IPS_Snapshot()_
 
-- 1.0 @ 01.09.2018 10:12<br>
-  Initiale Version
+- 1.0 @ 01.09.2018 10:12
+  - Initiale Version
