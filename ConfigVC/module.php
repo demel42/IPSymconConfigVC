@@ -94,7 +94,7 @@ class ConfigVC extends IPSModule
             $formElements[] = ['type' => 'Label', 'caption' => 'additional directories to be saved, relativ to symcon-root; list with ; as delimiter'];
             $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'additional_dirs', 'caption' => 'Directories'];
         } else {
-            $formElements[] = ['type' => 'Label', 'label' => $s];
+            $formElements[] = ['type' => 'Label', 'caption' => $s];
         }
 
         $formActions = [];
