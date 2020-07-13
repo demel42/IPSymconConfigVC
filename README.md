@@ -281,6 +281,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.21 @ 13.07.2020 14:56
+  - LICENSE.md hinzugefügt
+
 - 1.20 @ 18.01.2020 10:46
   - Anpassungen an IPS 5.3
 	- auch in der Dokumentation das 'PHP Long Tag' verwenden
