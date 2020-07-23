@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../libs/common.php';  // globale Funktionen
+require_once __DIR__ . '/../libs/local.php';   // lokale Funktionen
 
 class ConfigVC extends IPSModule
 {
-    use ConfigVCCommon;
+    use ConfigVCCommonLib;
+    use ConfigVCLocalLib;
 
     public function Create()
     {
@@ -51,14 +53,15 @@ class ConfigVC extends IPSModule
 
         $s = $this->CheckPrerequisites();
         if ($s != '') {
-            $this->SetStatus(IS_INVALIDPREREQUISITES);
+            $this->SetStatus(self::$IS_INVALIDPREREQUISITES);
+            $this->LogMessage($s, KL_WARNING);
             return;
         }
 
         $url = $this->ReadPropertyString('url');
         $path = $this->ReadPropertyString('path');
         if ($url == '' || $path == '') {
-            $this->SetStatus(IS_INVALIDCONFIG);
+            $this->SetStatus(self::$IS_INVALIDCONFIG);
             return;
         }
 
@@ -67,55 +70,151 @@ class ConfigVC extends IPSModule
 
     public function GetConfigurationForm()
     {
-        $s = $this->CheckPrerequisites();
+        $formElements = $this->GetFormElements();
+        $formActions = $this->GetFormActions();
+        $formStatus = $this->GetFormStatus();
 
+        $form = json_encode(['elements' => $formElements, 'actions' => $formActions, 'status' => $formStatus]);
+        if ($form == '') {
+            $this->SendDebug(__FUNCTION__, 'json_error=' . json_last_error_msg(), 0);
+            $this->SendDebug(__FUNCTION__, '=> formElements=' . print_r($formElements, true), 0);
+            $this->SendDebug(__FUNCTION__, '=> formActions=' . print_r($formActions, true), 0);
+            $this->SendDebug(__FUNCTION__, '=> formStatus=' . print_r($formStatus, true), 0);
+        }
+        return $form;
+    }
+
+    private function GetFormElements()
+    {
         $formElements = [];
-        if ($s == '') {
-            $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'url', 'caption' => 'Git-Repository'];
-            $formElements[] = ['type' => 'Label', 'caption' => 'for http/https and ssh'];
-            $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'user', 'caption' => ' ... User'];
-            $formElements[] = ['type' => 'Label', 'caption' => 'for http/https only'];
-            $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'password', 'caption' => ' ... Password'];
-            $formElements[] = ['type' => 'Label', 'caption' => 'for ssh only'];
-            $formElements[] = ['type' => 'NumberSpinner', 'name' => 'port', 'caption' => ' ... Port'];
 
-            $formElements[] = ['type' => 'Label', 'caption' => 'Informations for git config ...'];
-            $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'git_user_name', 'caption' => ' ... user.name'];
-            $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'git_user_email', 'caption' => ' ... user.email'];
-
-            $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'path', 'caption' => 'local path'];
-
-            $formElements[] = ['type' => 'CheckBox', 'name' => 'with_webfront_user_zip', 'caption' => 'save webfront/user as zip-archive'];
-            $formElements[] = ['type' => 'Label', 'caption' => 'directories to be excluded, relativ to \'webfront/user\'; list with ; as delimiter'];
-            $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'exclude_dirs_webfront_user', 'caption' => 'Directories'];
-
-            $formElements[] = ['type' => 'CheckBox', 'name' => 'with_db', 'caption' => 'save database'];
-
-            $formElements[] = ['type' => 'Label', 'caption' => 'additional directories to be saved, relativ to symcon-root; list with ; as delimiter'];
-            $formElements[] = ['type' => 'ValidationTextBox', 'name' => 'additional_dirs', 'caption' => 'Directories'];
-        } else {
-            $formElements[] = ['type' => 'Label', 'caption' => $s];
+        $s = $this->CheckPrerequisites();
+        if ($s != false) {
+            $formElements[] = [
+                'type'    => 'Label',
+                'caption' => $s
+            ];
         }
 
+        $formElements[] = [
+            'type'    => 'ValidationTextBox',
+            'name'    => 'url',
+            'caption' => 'Git-Repository',
+            'width'   => '80%',
+        ];
+        $formElements[] = [
+            'type'    => 'Label',
+            'caption' => 'for http/https and ssh'
+        ];
+        $formElements[] = [
+            'type'    => 'ValidationTextBox',
+            'name'    => 'user',
+            'caption' => ' ... User'
+        ];
+        $formElements[] = [
+            'type'    => 'Label',
+            'caption' => 'for http/https only'
+        ];
+        $formElements[] = [
+            'type'    => 'ValidationTextBox',
+            'name'    => 'password',
+            'caption' => ' ... Password'
+        ];
+        $formElements[] = [
+            'type'    => 'Label',
+            'caption' => 'for ssh only'
+        ];
+        $formElements[] = [
+            'type'    => 'NumberSpinner',
+            'name'    => 'port',
+            'caption' => ' ... Port'
+        ];
+
+        $formElements[] = [
+            'type'    => 'Label',
+            'caption' => 'Informations for git config ...'
+        ];
+        $formElements[] = [
+            'type'    => 'ValidationTextBox',
+            'name'    => 'git_user_name',
+            'caption' => ' ... user.name'
+        ];
+        $formElements[] = [
+            'type'    => 'ValidationTextBox',
+            'name'    => 'git_user_email',
+            'caption' => ' ... user.email'
+        ];
+
+        $formElements[] = [
+            'type'    => 'ValidationTextBox',
+            'name'    => 'path',
+            'caption' => 'local path'
+        ];
+
+        $formElements[] = [
+            'type'    => 'CheckBox',
+            'name'    => 'with_webfront_user_zip',
+            'caption' => 'save webfront/user as zip-archive'
+        ];
+        $formElements[] = [
+            'type'    => 'Label',
+            'caption' => 'directories to be excluded, relativ to \'webfront/user\'; list with ; as delimiter'
+        ];
+        $formElements[] = [
+            'type'    => 'ValidationTextBox',
+            'name'    => 'exclude_dirs_webfront_user',
+            'caption' => 'Directories',
+            'width'   => '80%',
+        ];
+
+        $formElements[] = [
+            'type'    => 'CheckBox',
+            'name'    => 'with_db',
+            'caption' => 'save database'
+        ];
+
+        $formElements[] = [
+            'type'    => 'Label',
+            'caption' => 'additional directories to be saved, relativ to symcon-root; list with ; as delimiter'
+        ];
+        $formElements[] = [
+            'type'    => 'ValidationTextBox',
+            'name'    => 'additional_dirs',
+            'caption' => 'Directories',
+            'width'   => '80%',
+        ];
+
+        return $formElements;
+    }
+
+    private function GetFormActions()
+    {
         $formActions = [];
+
+        $s = $this->CheckPrerequisites();
         if ($s == '') {
-            $formActions[] = ['type' => 'Label', 'caption' => 'Action takes up several minutes (depending on amount of data)'];
-            $formActions[] = ['type' => 'Button', 'caption' => 'Full adjustment', 'onClick' => 'CVC_fullCallAdjustment($id);'];
-            $formActions[] = ['type' => 'Button', 'caption' => 'Fast adjustment', 'onClick' => 'CVC_fastCallAdjustment($id);'];
-            $formActions[] = ['type' => 'Button', 'caption' => 'Setup Repository', 'onClick' => 'CVC_internalCloneRepository($id);'];
+            $formActions[] = [
+                'type'    => 'Label',
+                'caption' => 'Action takes up several minutes (depending on amount of data)'
+            ];
+            $formActions[] = [
+                'type'    => 'Button',
+                'caption' => 'Full adjustment',
+                'onClick' => 'CVC_fullCallAdjustment($id);'
+            ];
+            $formActions[] = [
+                'type'    => 'Button',
+                'caption' => 'Fast adjustment',
+                'onClick' => 'CVC_fastCallAdjustment($id);'
+            ];
+            $formActions[] = [
+                'type'    => 'Button',
+                'caption' => 'Setup Repository',
+                'onClick' => 'CVC_internalCloneRepository($id);'
+            ];
         }
 
-        $formStatus = [];
-        $formStatus[] = ['code' => IS_CREATING, 'icon' => 'inactive', 'caption' => 'Instance getting created'];
-        $formStatus[] = ['code' => IS_ACTIVE, 'icon' => 'active', 'caption' => 'Instance is active'];
-        $formStatus[] = ['code' => IS_DELETING, 'icon' => 'inactive', 'caption' => 'Instance is deleted'];
-        $formStatus[] = ['code' => IS_INACTIVE, 'icon' => 'inactive', 'caption' => 'Instance is inactive'];
-        $formStatus[] = ['code' => IS_NOTCREATED, 'icon' => 'inactive', 'caption' => 'Instance is not created'];
-
-        $formStatus[] = ['code' => IS_INVALIDCONFIG, 'icon' => 'error', 'caption' => 'Instance is inactive (invalid configuration)'];
-        $formStatus[] = ['code' => IS_INVALIDPREREQUISITES, 'icon' => 'error', 'caption' => 'Instance is inactive (invalid preconditions)'];
-
-        return json_encode(['elements' => $formElements, 'actions' => $formActions, 'status' => $formStatus]);
+        return $formActions;
     }
 
     public function internalCloneRepository()
