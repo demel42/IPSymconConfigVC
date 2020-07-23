@@ -191,28 +191,25 @@ class ConfigVC extends IPSModule
     {
         $formActions = [];
 
-        $s = $this->CheckPrerequisites();
-        if ($s == '') {
-            $formActions[] = [
-                'type'    => 'Label',
-                'caption' => 'Action takes up several minutes (depending on amount of data)'
-            ];
-            $formActions[] = [
-                'type'    => 'Button',
-                'caption' => 'Full adjustment',
-                'onClick' => 'CVC_fullCallAdjustment($id);'
-            ];
-            $formActions[] = [
-                'type'    => 'Button',
-                'caption' => 'Fast adjustment',
-                'onClick' => 'CVC_fastCallAdjustment($id);'
-            ];
-            $formActions[] = [
-                'type'    => 'Button',
-                'caption' => 'Setup Repository',
-                'onClick' => 'CVC_internalCloneRepository($id);'
-            ];
-        }
+        $formActions[] = [
+            'type'    => 'Label',
+            'caption' => 'Action takes up several minutes (depending on amount of data)'
+        ];
+        $formActions[] = [
+            'type'    => 'Button',
+            'caption' => 'Full adjustment',
+            'onClick' => 'CVC_fullCallAdjustment($id);'
+        ];
+        $formActions[] = [
+            'type'    => 'Button',
+            'caption' => 'Fast adjustment',
+            'onClick' => 'CVC_fastCallAdjustment($id);'
+        ];
+        $formActions[] = [
+            'type'    => 'Button',
+            'caption' => 'Setup Repository',
+            'onClick' => 'CVC_internalCloneRepository($id);'
+        ];
 
         return $formActions;
     }
