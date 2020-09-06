@@ -281,12 +281,13 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.21 @ 23.07.2020 11:33 (beta)
+- 1.21 @ 02.08.2020 16:04
   - LICENSE.md hinzugefügt
   - lokale Funktionen aus common.php in locale.php verlagert
   - Traits des Moduls haben nun Postfix "Lib"
   - GetConfigurationForm() überarbeitet
   - define's durch statische Klassen-Variablen ersetzt
+  - Übersetzung ergänzt
 
 - 1.20 @ 18.01.2020 10:46
   - Anpassungen an IPS 5.3

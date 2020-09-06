@@ -43,7 +43,19 @@
 			"Full adjustment failed": "Vollständiger Abgleich des Repository ist fehlgeschlagen",
 			"Fast adjustment was successfully": "Schneller Abgleich des Repository war erfolgreich",
 			"Fast adjustment failed": "Schneller Abgleich des Repository ist fehlgeschlagen",
-			"Duration": "Dauer",
+
+			"Duration {$duration}s": "Dauer {$duration}s",
+
+			"status=ok, duration={$duration}s": "Status=OK, Dauer={$duration}s",
+			"{$n_modified} modified": "{$n_modified} geändert",
+			"{$n_added} added": "{$n_added} hinzugefügt",
+			"{$n_renamed} renamed": "{$n_renamed} umbenannt",
+			"{$n_deleted} deleted": "{$n_deleted} gelöscht",
+			"{$n_untracked} untracked": "{$n_untracked} unversioniert",
+			"{$n_erroneous} erroneous": "{$n_erroneous} fehlerhaft",
+			"affected files: ": "betroffene Dateien: ",
+			"no changes": "keine Änderungen",
+			"status=fail": "Status=Fehler",
 
 			"State": "Status",
 			"Summary of last adjustment": "Zusammenfassung des letzten Abgleichs",

@@ -226,7 +226,7 @@ class ConfigVC extends IPSModule
         $duration = round(microtime(true) - $time_start, 2);
 
         $msg = $r ? 'Setup Repository was successfully' : 'Setup Repository failed';
-        $msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
+        $msg = $this->Translate($msg) . PHP_EOL . $this->TranslateFormat('Duration {$duration}s', ['{$duration}' => $duration]);
 
         echo $msg;
     }
@@ -243,7 +243,7 @@ class ConfigVC extends IPSModule
         $duration = round(microtime(true) - $time_start, 2);
 
         $msg = $r ? 'Full adjustment was successfully' : 'Full adjustment failed';
-        $msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
+        $msg = $this->Translate($msg) . PHP_EOL . $this->TranslateFormat('Duration {$duration}s', ['{$duration}' => $duration]);
 
         echo $msg;
     }
@@ -260,7 +260,7 @@ class ConfigVC extends IPSModule
         $duration = round(microtime(true) - $time_start, 2);
 
         $msg = $r ? 'Fast adjustment was successfully' : 'Fast adjustment failed';
-        $msg = $this->translate($msg) . PHP_EOL . $this->translate('Duration') . ': ' . $duration . 's';
+        $msg = $this->Translate($msg) . PHP_EOL . $this->TranslateFormat('Duration {$duration}s', ['{$duration}' => $duration]);
 
         echo $msg;
     }
@@ -384,7 +384,7 @@ class ConfigVC extends IPSModule
         $msg = isset($r['msg']) ? $r['msg'] : '';
         $duration = isset($r['duration']) ? $r['duration'] : 0;
         if ($state) {
-            $log = 'status=ok, duration=' . $duration . ' sec';
+            $log = $this->TranslateFormat('status=ok, duration={$duration}s', $vars = ['{$duration}' => $duration]);
 
             $n_modified = $r['files']['modified'];
             $n_added = $r['files']['added'];
@@ -395,26 +395,26 @@ class ConfigVC extends IPSModule
 
             $s = '';
             if ($n_modified) {
-                $s .= ($s != '' ? ', ' : '') . $n_modified . ' modified';
+                $s .= ($s != '' ? ', ' : '') . $this->TranslateFormat('{$n_modified} modified', ['{$n_modified}' => $n_modified]);
             }
             if ($n_added) {
-                $s .= ($s != '' ? ', ' : '') . $n_added . ' added';
+                $s .= ($s != '' ? ', ' : '') . $this->TranslateFormat('{$n_added} added', ['{$n_added}' => $n_added]);
             }
             if ($n_renamed) {
-                $s .= ($s != '' ? ', ' : '') . $n_renamed . ' renamed';
+                $s .= ($s != '' ? ', ' : '') . $this->TranslateFormat('{$n_renamed} renamed', ['{$n_renamed}' => $n_renamed]);
             }
             if ($n_deleted) {
-                $s .= ($s != '' ? ', ' : '') . $n_deleted . ' deleted';
+                $s .= ($s != '' ? ', ' : '') . $this->TranslateFormat('{$n_deleted} deleted', ['{$n_deleted}' => $n_deleted]);
             }
             if ($n_untracked) {
-                $s .= ($s != '' ? ', ' : '') . $n_untracked . ' untracked';
+                $s .= ($s != '' ? ', ' : '') . $this->TranslateFormat('{$n_untracked} untracked', ['{$n_untracked}' => $n_untracked]);
             }
             if ($n_erroneous) {
-                $s .= ($s != '' ? ', ' : '') . $n_erroneous . ' erroneous';
+                $s .= ($s != '' ? ', ' : '') . $this->TranslateFormat('{$n_erroneous} erroneous', ['{$n_erroneous}' => $n_erroneous]);
             }
-            $summary = 'affected files: ' . ($s != '' ? $s : 'no changes');
+            $summary = $this->Translate('affected files: ') . ($s != '' ? $s : $this->Translate('no changes'));
         } else {
-            $log = 'status=fail';
+            $log = $this->Translate('status=fail');
             $summary = $msg;
         }
 

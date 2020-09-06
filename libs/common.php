@@ -96,6 +96,24 @@ trait ConfigVCCommonLib
 
     private function GetArrayElem($data, $var, $dflt)
     {
-        return isset($data[$var]) ? $data[$var] : $dflt;
+        $ret = $data;
+        $vs = explode('.', $var);
+        foreach ($vs as $v) {
+            if (!isset($ret[$v])) {
+                $ret = $dflt;
+                break;
+            }
+            $ret = $ret[$v];
+        }
+        return $ret;
+    }
+
+    private function TranslateFormat(string $str, array $vars = null)
+    {
+        $str = $this->Translate($str);
+        if ($vars != null) {
+            $str = strtr($str, $vars);
+        }
+        return $str;
     }
 }
