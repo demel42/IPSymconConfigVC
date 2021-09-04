@@ -281,7 +281,11 @@ GUIDs
 
 ## 7. Versions-Historie
 
-- 1.22 @ 18.12.2020 14:57 (beta)
+- 1.23 @ 13.08.2021 17:31
+  - Anpassungen für IPS 6
+    - IPS_LogMessage(...) ersetzt durch $this->LogMessage(..., KL_MESSAGE);
+
+- 1.22 @ 18.12.2020 14:57
   - PHP_CS_FIXER_IGNORE_ENV=1 in github/workflows/style.yml eingefügt
 
 - 1.21 @ 02.08.2020 16:04

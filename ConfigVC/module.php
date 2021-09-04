@@ -418,7 +418,7 @@ class ConfigVC extends IPSModule
             $summary = $msg;
         }
 
-        IPS_LogMessage(__CLASS__ . __FUNCTION__, $log . PHP_EOL . $summary);
+        $this->LogMessage($log . PHP_EOL . $summary, KL_MESSAGE);
 
         $this->SetValue('State', $state);
         $this->SetValue('Summary', $summary);
