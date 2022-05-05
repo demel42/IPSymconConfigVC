@@ -1,6 +1,14 @@
 {
 	"translations": {
 		"de": {
+			"Symcon Configuration Version-Control": "Versionskontrolle der Symcon-Konfiguration",
+
+			"__function__": "CheckConfiguration",
+			"Git-Repository must be specified": "Git-Repository muss angegeben werden",
+			"Local path must be specified": "Lokaler Pfad muss angegeben werden",
+
+			"__emelents__": "",
+			"Repository remote configuration": "Konfiguration des entfernten Repositorys",
 			"Git-Repository": "Git-Repository",
 
 			"for http/https and ssh": "für http/https und ssh",
@@ -10,12 +18,14 @@
 			"for ssh only": "nur für ssh",
 			" ... Port": " ... Port",
 
+			"Repository local configuration": "Konfiguration des lokalen Repositorys",
 			"Informations for git config ...": "Angaben für git config ...",
 			" ... user.name": " ... user.name",
 			" ... user.email": " ... user.email",
 
 			"local path": "lokales Verzeichnis",
 
+			"Options": "Optionen ",
 			"save webfront/user as zip-archive": "Verzeichnis webfront/user als Zip-Archiv sichern",
 			"directories to be excluded, relativ to 'webfront/user'; list with ; as delimiter":
 				"auszuschliessende Verzeichnisse, relativ zu 'webfront/user'; Liste mit ; als Trenner",
@@ -26,26 +36,34 @@
 				"zusätzliche zu sichernde Verzeichnisse, relativ zum Symcon-Wurzelverzeichnis; Liste mit ; als Trenner",
 			"Directories": "Verzeichnisse",
 
-			"Instance is not activ": "Instanz ist nicht aktiv",
+			"__variables__": "",
+			"State": "Status",
+			"Summary of last adjustment": "Zusammenfassung des letzten Abgleichs",
+			"Duration of last adjustment": "Dauer des letzten Abgleichs",
+			"Timestamp of last adjustment": "Zeitpunkt des letzten Abgleichs",
 
+			"__actions__": "",
 			"Action takes up several minutes (depending on amount of data)": "Die Aktion dauert bis zu einigen Minuten (in Abhängigkeit von der Datenmenge)",
 			"Full adjustment": "Vollständiger Abgleich",
 			"Fast adjustment": "Schneller Abgleich",
 			"Setup Repository": "Repository einrichten",
 
-			"Module description": "Modulbeschreibung",
-
-			"The following system prerequisites are missing": "Folgende Systemvoraussetzungen fehlen",
-
+			"__function__": "internalCloneRepository",
 			"Setup Repository was successfully": "Einrichten des Repository war erfolgreich",
 			"Setup Repository failed": "Einrichten des Repository ist fehlgeschlagen",
-			"Full adjustment was successfully": "Vollständiger Abgleich des Repository war erfolgreich",
-			"Full adjustment failed": "Vollständiger Abgleich des Repository ist fehlgeschlagen",
-			"Fast adjustment was successfully": "Schneller Abgleich des Repository war erfolgreich",
-			"Fast adjustment failed": "Schneller Abgleich des Repository ist fehlgeschlagen",
-
 			"Duration {$duration}s": "Dauer {$duration}s",
 
+			"__function__": "fullCallAdjustment",
+			"Full adjustment was successfully": "Vollständiger Abgleich des Repository war erfolgreich",
+			"Full adjustment failed": "Vollständiger Abgleich des Repository ist fehlgeschlagen",
+			"Duration {$duration}s": "Dauer {$duration}s",
+
+			"__function__": "fastCallAdjustment",
+			"Fast adjustment was successfully": "Schneller Abgleich des Repository war erfolgreich",
+			"Fast adjustment failed": "Schneller Abgleich des Repository ist fehlgeschlagen",
+			"Duration {$duration}s": "Dauer {$duration}s",
+
+			"__function__": "CallAdjustment",
 			"status=ok, duration={$duration}s": "Status=OK, Dauer={$duration}s",
 			"{$n_modified} modified": "{$n_modified} geändert",
 			"{$n_added} added": "{$n_added} hinzugefügt",
@@ -57,19 +75,7 @@
 			"no changes": "keine Änderungen",
 			"status=fail": "Status=Fehler",
 
-			"State": "Status",
-			"Summary of last adjustment": "Zusammenfassung des letzten Abgleichs",
-			"Duration of last adjustment": "Dauer des letzten Abgleichs",
-			"Timestamp of last adjustment": "Zeitpunkt des letzten Abgleichs",
-
-			"Instance getting created": "Instanz wird erstellt",
-			"Instance is active": "Instanz ist aktiv",
-			"Instance is deleted": "Instanz wird gelöscht",
-			"Instance is inactive": "Instanz ist inaktiv",
-			"Instance is not created": "Instanz wurde nicht erzeugt",
-
-			"Instance is inactive (invalid configuration)": "Instanz ist inaktiv (ungültige Konfiguration)",
-			"Instance is inactive (invalid preconditions)": "Instanz ist inaktiv (ungültige Voraussetzungen)"
+			"__end__": ""
 		}
 	}
 }

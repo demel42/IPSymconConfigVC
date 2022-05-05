@@ -1,6 +1,6 @@
 # IPSymconConfigVC
 
-[![IPS-Version](https://img.shields.io/badge/Symcon_Version-5.3+-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
+[![IPS-Version](https://img.shields.io/badge/Symcon_Version-6.0+-red.svg)](https://www.symcon.de/service/dokumentation/entwicklerbereich/sdk-tools/sdk-php/)
 ![Code](https://img.shields.io/badge/Code-PHP-blue.svg)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-green.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
@@ -78,7 +78,7 @@ Wichtig: dieses Modul ersetzt auf keinen Fall eine regelmässige Datensicherung!
 
 ## 2. Voraussetzungen
 
- - IP-Symcon ab Version 5.3
+ - IP-Symcon ab Version 6.0
 
 ## 3. Installation
 
@@ -268,6 +268,7 @@ Durch _full_file_cmp_ regelt, wie Dateien auf Gleichheit verglichen werden. Bei 
 ### Variablenprofile
 
 Es werden folgende Variableprofile angelegt:
+
 * Integer<br>
   - ConfigVC.Duration
 
@@ -280,6 +281,13 @@ GUIDs
   - ConfigVC: `{396EA137-2E5F-413A-A996-D662158EA481}`
 
 ## 7. Versions-Historie
+
+- 1.24 @ 05.05.2022 11:21
+  - IPS-Version ist nun minimal 6.0
+  - Anzeige der Modul/Bibliotheks-Informationen, Referenzen und Timer
+  - Implememtierung einer Update-Logik
+  - Überlagerung von Translate und Aufteilung von locale.json in 3 translation.json (Modul, libs und CommonStubs)
+  - diverse interne Änderungen
 
 - 1.23 @ 13.08.2021 17:31
   - Anpassungen für IPS 6

@@ -2,13 +2,22 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../libs/common.php';  // globale Funktionen
-require_once __DIR__ . '/../libs/local.php';   // lokale Funktionen
+require_once __DIR__ . '/../libs/common.php';
+require_once __DIR__ . '/../libs/local.php';
 
 class ConfigVC extends IPSModule
 {
-    use ConfigVCCommonLib;
+    use ConfigVC\StubsCommonLib;
     use ConfigVCLocalLib;
+
+    private $ModuleDir;
+
+    public function __construct(string $InstanceID)
+    {
+        parent::__construct($InstanceID);
+
+        $this->ModuleDir = __DIR__;
+    }
 
     public function Create()
     {
@@ -26,24 +35,62 @@ class ConfigVC extends IPSModule
         $this->RegisterPropertyBoolean('with_db', false);
         $this->RegisterPropertyString('additional_dirs', '');
 
-        $this->CreateVarProfile('ConfigVC.Duration', VARIABLETYPE_INTEGER, ' sec', 0, 0, 0, 0, '');
+        $this->RegisterAttributeString('UpdateInfo', '');
+
+        $this->InstallVarProfiles(false);
     }
 
-    private function CheckPrerequisites()
+    private function CheckModulePrerequisites()
     {
-        $s = '';
+        $r = [];
 
         $output = '';
-        if (!$this->execute('git --version 2>&1', $output)) {
-            $s = $this->Translate('The following system prerequisites are missing') . ': git';
+        if ($this->execute('git --version 2>&1', $output) == false) {
+            $r[] = 'git';
         }
 
-        return $s;
+        return $r;
+    }
+
+    private function CheckModuleConfiguration()
+    {
+        $r = [];
+
+        $url = $this->ReadPropertyString('url');
+        if ($url == '') {
+            $this->SendDebug(__FUNCTION__, '"url" is missing', 0);
+            $r[] = $this->Translate('Git-Repository must be specified');
+        }
+
+        $path = $this->ReadPropertyString('path');
+        if ($path == '') {
+            $this->SendDebug(__FUNCTION__, '"path" is missing', 0);
+            $r[] = $this->Translate('Local path must be specified');
+        }
+
+        return $r;
     }
 
     public function ApplyChanges()
     {
         parent::ApplyChanges();
+
+        $this->MaintainReferences();
+
+        if ($this->CheckPrerequisites() != false) {
+            $this->SetStatus(self::$IS_INVALIDPREREQUISITES);
+            return;
+        }
+
+        if ($this->CheckUpdate() != false) {
+            $this->SetStatus(self::$IS_UPDATEUNCOMPLETED);
+            return;
+        }
+
+        if ($this->CheckConfiguration() != false) {
+            $this->SetStatus(self::$IS_INVALIDCONFIG);
+            return;
+        }
 
         $vpos = 0;
         $this->MaintainVariable('State', $this->Translate('State'), VARIABLETYPE_BOOLEAN, '~Alert.Reversed', $vpos++, true);
@@ -51,137 +98,119 @@ class ConfigVC extends IPSModule
         $this->MaintainVariable('Duration', $this->Translate('Duration of last adjustment'), VARIABLETYPE_INTEGER, 'ConfigVC.Duration', $vpos++, true);
         $this->MaintainVariable('Timestamp', $this->Translate('Timestamp of last adjustment'), VARIABLETYPE_INTEGER, '~UnixTimestamp', $vpos++, true);
 
-        $s = $this->CheckPrerequisites();
-        if ($s != '') {
-            $this->SetStatus(self::$IS_INVALIDPREREQUISITES);
-            $this->LogMessage($s, KL_WARNING);
-            return;
-        }
-
-        $url = $this->ReadPropertyString('url');
-        $path = $this->ReadPropertyString('path');
-        if ($url == '' || $path == '') {
-            $this->SetStatus(self::$IS_INVALIDCONFIG);
-            return;
-        }
-
         $this->SetStatus(IS_ACTIVE);
-    }
-
-    public function GetConfigurationForm()
-    {
-        $formElements = $this->GetFormElements();
-        $formActions = $this->GetFormActions();
-        $formStatus = $this->GetFormStatus();
-
-        $form = json_encode(['elements' => $formElements, 'actions' => $formActions, 'status' => $formStatus]);
-        if ($form == '') {
-            $this->SendDebug(__FUNCTION__, 'json_error=' . json_last_error_msg(), 0);
-            $this->SendDebug(__FUNCTION__, '=> formElements=' . print_r($formElements, true), 0);
-            $this->SendDebug(__FUNCTION__, '=> formActions=' . print_r($formActions, true), 0);
-            $this->SendDebug(__FUNCTION__, '=> formStatus=' . print_r($formStatus, true), 0);
-        }
-        return $form;
     }
 
     private function GetFormElements()
     {
-        $formElements = [];
+        $formElements = $this->GetCommonFormElements('Symcon Configuration Version-Control');
 
-        $s = $this->CheckPrerequisites();
-        if ($s != false) {
-            $formElements[] = [
-                'type'    => 'Label',
-                'caption' => $s
-            ];
+        if ($this->GetStatus() == self::$IS_UPDATEUNCOMPLETED) {
+            return $formElements;
         }
 
         $formElements[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'url',
-            'caption' => 'Git-Repository',
-            'width'   => '80%',
-        ];
-        $formElements[] = [
-            'type'    => 'Label',
-            'caption' => 'for http/https and ssh'
-        ];
-        $formElements[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'user',
-            'caption' => ' ... User'
-        ];
-        $formElements[] = [
-            'type'    => 'Label',
-            'caption' => 'for http/https only'
-        ];
-        $formElements[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'password',
-            'caption' => ' ... Password'
-        ];
-        $formElements[] = [
-            'type'    => 'Label',
-            'caption' => 'for ssh only'
-        ];
-        $formElements[] = [
-            'type'    => 'NumberSpinner',
-            'name'    => 'port',
-            'caption' => ' ... Port'
-        ];
-
-        $formElements[] = [
-            'type'    => 'Label',
-            'caption' => 'Informations for git config ...'
-        ];
-        $formElements[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'git_user_name',
-            'caption' => ' ... user.name'
-        ];
-        $formElements[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'git_user_email',
-            'caption' => ' ... user.email'
+            'type'    => 'ExpansionPanel',
+            'items'   => [
+                [
+                    'name'    => 'url',
+                    'type'    => 'ValidationTextBox',
+                    'width'   => '80%',
+                    'caption' => 'Git-Repository',
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'for http/https and ssh'
+                ],
+                [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'user',
+                    'caption' => ' ... User'
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'for http/https only'
+                ],
+                [
+                    'type'    => 'PasswordTextBox',
+                    'name'    => 'password',
+                    'caption' => ' ... Password'
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'for ssh only'
+                ],
+                [
+                    'name'    => 'port',
+                    'type'    => 'NumberSpinner',
+                    'minimum' => 0,
+                    'caption' => ' ... Port'
+                ],
+            ],
+            'caption' => 'Repository remote configuration'
         ];
 
         $formElements[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'path',
-            'caption' => 'local path'
+            'type'    => 'ExpansionPanel',
+            'items'   => [
+                [
+                    'type'    => 'Label',
+                    'caption' => 'Informations for git config ...'
+                ],
+                [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'git_user_name',
+                    'caption' => ' ... user.name'
+                ],
+                [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'git_user_email',
+                    'caption' => ' ... user.email'
+                ],
+                [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'path',
+                    'caption' => 'local path'
+                ],
+            ],
+            'caption' => 'Repository local configuration'
         ];
 
         $formElements[] = [
-            'type'    => 'CheckBox',
-            'name'    => 'with_webfront_user_zip',
-            'caption' => 'save webfront/user as zip-archive'
-        ];
-        $formElements[] = [
-            'type'    => 'Label',
-            'caption' => 'directories to be excluded, relativ to \'webfront/user\'; list with ; as delimiter'
-        ];
-        $formElements[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'exclude_dirs_webfront_user',
-            'caption' => 'Directories',
-            'width'   => '80%',
-        ];
-
-        $formElements[] = [
-            'type'    => 'CheckBox',
-            'name'    => 'with_db',
-            'caption' => 'save database'
-        ];
-
-        $formElements[] = [
-            'type'    => 'Label',
-            'caption' => 'additional directories to be saved, relativ to symcon-root; list with ; as delimiter'
-        ];
-        $formElements[] = [
-            'type'    => 'ValidationTextBox',
-            'name'    => 'additional_dirs',
-            'caption' => 'Directories',
-            'width'   => '80%',
+            'type'    => 'ExpansionPanel',
+            'items'   => [
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'with_webfront_user_zip',
+                    'caption' => 'save webfront/user as zip-archive'
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'directories to be excluded, relativ to \'webfront/user\'; list with ; as delimiter'
+                ],
+                [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'exclude_dirs_webfront_user',
+                    'caption' => 'Directories',
+                    'width'   => '80%',
+                ],
+                [
+                    'type'    => 'CheckBox',
+                    'name'    => 'with_db',
+                    'caption' => 'save database'
+                ],
+                [
+                    'type'    => 'Label',
+                    'caption' => 'additional directories to be saved, relativ to symcon-root; list with ; as delimiter'
+                ],
+                [
+                    'type'    => 'ValidationTextBox',
+                    'name'    => 'additional_dirs',
+                    'caption' => 'Directories',
+                    'width'   => '80%',
+                ],
+            ],
+            'caption' => 'Options'
         ];
 
         return $formElements;
@@ -191,6 +220,15 @@ class ConfigVC extends IPSModule
     {
         $formActions = [];
 
+        if ($this->GetStatus() == self::$IS_UPDATEUNCOMPLETED) {
+            $formActions[] = $this->GetCompleteUpdateFormAction();
+
+            $formActions[] = $this->GetInformationFormAction();
+            $formActions[] = $this->GetReferencesFormAction();
+
+            return $formActions;
+        }
+
         $formActions[] = [
             'type'    => 'Label',
             'caption' => 'Action takes up several minutes (depending on amount of data)'
@@ -198,26 +236,41 @@ class ConfigVC extends IPSModule
         $formActions[] = [
             'type'    => 'Button',
             'caption' => 'Full adjustment',
-            'onClick' => 'CVC_fullCallAdjustment($id);'
+            'onClick' => $this->GetModulePrefix() . '_fullCallAdjustment($id);'
         ];
         $formActions[] = [
             'type'    => 'Button',
             'caption' => 'Fast adjustment',
-            'onClick' => 'CVC_fastCallAdjustment($id);'
+            'onClick' => $this->GetModulePrefix() . '_fastCallAdjustment($id);'
         ];
         $formActions[] = [
             'type'    => 'Button',
             'caption' => 'Setup Repository',
-            'onClick' => 'CVC_internalCloneRepository($id);'
+            'onClick' => $this->GetModulePrefix() . '_internalCloneRepository($id);'
         ];
+
+        $formActions[] = $this->GetInformationFormAction();
+        $formActions[] = $this->GetReferencesFormAction();
 
         return $formActions;
     }
 
+    public function RequestAction($ident, $value)
+    {
+        if ($this->CommonRequestAction($ident, $value)) {
+            return;
+        }
+        switch ($ident) {
+            default:
+                $this->SendDebug(__FUNCTION__, 'invalid ident ' . $ident, 0);
+                break;
+        }
+    }
+
     public function internalCloneRepository()
     {
-        if ($this->GetStatus() != IS_ACTIVE) {
-            echo $this->Translate('Instance is not activ');
+        if ($this->CheckStatus() == self::$STATUS_INVALID) {
+            $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
             return;
         }
 
@@ -233,8 +286,8 @@ class ConfigVC extends IPSModule
 
     public function fullCallAdjustment()
     {
-        if ($this->GetStatus() != IS_ACTIVE) {
-            echo $this->Translate('Instance is not activ');
+        if ($this->CheckStatus() == self::$STATUS_INVALID) {
+            $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
             return;
         }
 
@@ -250,8 +303,8 @@ class ConfigVC extends IPSModule
 
     public function fastCallAdjustment()
     {
-        if ($this->GetStatus() != IS_ACTIVE) {
-            echo $this->Translate('Instance is not activ');
+        if ($this->CheckStatus() == self::$STATUS_INVALID) {
+            $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
             return;
         }
 
@@ -267,8 +320,8 @@ class ConfigVC extends IPSModule
 
     public function CloneRepository()
     {
-        if ($this->GetStatus() != IS_ACTIVE) {
-            $this->SendDebug(__FUNCTION__, 'Instance is not activ', 0);
+        if ($this->CheckStatus() == self::$STATUS_INVALID) {
+            $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
             return;
         }
 
@@ -372,8 +425,8 @@ class ConfigVC extends IPSModule
 
     public function CallAdjustment(bool $with_zip, bool $full_file_cmp)
     {
-        if ($this->GetStatus() != IS_ACTIVE) {
-            $this->SendDebug(__FUNCTION__, 'Instance is not activ', 0);
+        if ($this->CheckStatus() == self::$STATUS_INVALID) {
+            $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
             return;
         }
 
