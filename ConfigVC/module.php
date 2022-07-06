@@ -19,6 +19,8 @@ class ConfigVC extends IPSModule
         $this->ModuleDir = __DIR__;
     }
 
+    private $semaphore = __CLASS__;
+
     public function Create()
     {
         parent::Create();
@@ -78,17 +80,17 @@ class ConfigVC extends IPSModule
         $this->MaintainReferences();
 
         if ($this->CheckPrerequisites() != false) {
-            $this->SetStatus(self::$IS_INVALIDPREREQUISITES);
+            $this->MaintainStatus(self::$IS_INVALIDPREREQUISITES);
             return;
         }
 
         if ($this->CheckUpdate() != false) {
-            $this->SetStatus(self::$IS_UPDATEUNCOMPLETED);
+            $this->MaintainStatus(self::$IS_UPDATEUNCOMPLETED);
             return;
         }
 
         if ($this->CheckConfiguration() != false) {
-            $this->SetStatus(self::$IS_INVALIDCONFIG);
+            $this->MaintainStatus(self::$IS_INVALIDCONFIG);
             return;
         }
 
@@ -98,7 +100,7 @@ class ConfigVC extends IPSModule
         $this->MaintainVariable('Duration', $this->Translate('Duration of last adjustment'), VARIABLETYPE_INTEGER, 'ConfigVC.Duration', $vpos++, true);
         $this->MaintainVariable('Timestamp', $this->Translate('Timestamp of last adjustment'), VARIABLETYPE_INTEGER, '~UnixTimestamp', $vpos++, true);
 
-        $this->SetStatus(IS_ACTIVE);
+        $this->MaintainStatus(IS_ACTIVE);
     }
 
     private function GetFormElements()
@@ -236,17 +238,26 @@ class ConfigVC extends IPSModule
         $formActions[] = [
             'type'    => 'Button',
             'caption' => 'Full adjustment',
-            'onClick' => $this->GetModulePrefix() . '_fullCallAdjustment($id);'
+            'onClick' => 'IPS_RequestAction(' . $this->InstanceID . ', "FullCallAdjustment", "");',
         ];
         $formActions[] = [
             'type'    => 'Button',
             'caption' => 'Fast adjustment',
-            'onClick' => $this->GetModulePrefix() . '_fastCallAdjustment($id);'
+            'onClick' => 'IPS_RequestAction(' . $this->InstanceID . ', "FastCallAdjustment", "");',
         ];
         $formActions[] = [
             'type'    => 'Button',
             'caption' => 'Setup Repository',
-            'onClick' => $this->GetModulePrefix() . '_internalCloneRepository($id);'
+            'onClick' => 'IPS_RequestAction(' . $this->InstanceID . ', "InternalCloneRepository", "");',
+        ];
+
+        $formActions[] = [
+            'type'      => 'ExpansionPanel',
+            'caption'   => 'Expert area',
+            'expanded ' => false,
+            'items'     => [
+                $this->GetInstallVarProfilesFormItem(),
+            ],
         ];
 
         $formActions[] = $this->GetInformationFormAction();
@@ -261,16 +272,26 @@ class ConfigVC extends IPSModule
             return;
         }
         switch ($ident) {
+            case 'FullCallAdjustment':
+                $this->FullCallAdjustment();
+                break;
+            case 'FastCallAdjustment':
+                $this->FastCallAdjustment();
+                break;
+            case 'InternalCloneRepository':
+                $this->InternalCloneRepository();
+                break;
             default:
                 $this->SendDebug(__FUNCTION__, 'invalid ident ' . $ident, 0);
                 break;
         }
     }
 
-    public function internalCloneRepository()
+    private function InternalCloneRepository()
     {
         if ($this->CheckStatus() == self::$STATUS_INVALID) {
-            $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
+            $msg = $this->GetStatusText();
+            $this->PopupMessage($msg);
             return;
         }
 
@@ -281,13 +302,14 @@ class ConfigVC extends IPSModule
         $msg = $r ? 'Setup Repository was successfully' : 'Setup Repository failed';
         $msg = $this->Translate($msg) . PHP_EOL . $this->TranslateFormat('Duration {$duration}s', ['{$duration}' => $duration]);
 
-        echo $msg;
+        $this->PopupMessage($msg);
     }
 
-    public function fullCallAdjustment()
+    private function FullCallAdjustment()
     {
         if ($this->CheckStatus() == self::$STATUS_INVALID) {
-            $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
+            $msg = $this->GetStatusText();
+            $this->PopupMessage($msg);
             return;
         }
 
@@ -298,13 +320,14 @@ class ConfigVC extends IPSModule
         $msg = $r ? 'Full adjustment was successfully' : 'Full adjustment failed';
         $msg = $this->Translate($msg) . PHP_EOL . $this->TranslateFormat('Duration {$duration}s', ['{$duration}' => $duration]);
 
-        echo $msg;
+        $this->PopupMessage($msg);
     }
 
-    public function fastCallAdjustment()
+    private function FastCallAdjustment()
     {
         if ($this->CheckStatus() == self::$STATUS_INVALID) {
-            $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
+            $msg = $this->GetStatusText();
+            $this->PopupMessage($msg);
             return;
         }
 
@@ -315,13 +338,18 @@ class ConfigVC extends IPSModule
         $msg = $r ? 'Fast adjustment was successfully' : 'Fast adjustment failed';
         $msg = $this->Translate($msg) . PHP_EOL . $this->TranslateFormat('Duration {$duration}s', ['{$duration}' => $duration]);
 
-        echo $msg;
+        $this->PopupMessage($msg);
     }
 
     public function CloneRepository()
     {
         if ($this->CheckStatus() == self::$STATUS_INVALID) {
             $this->SendDebug(__FUNCTION__, $this->GetStatusText() . ' => skip', 0);
+            return;
+        }
+
+        if (IPS_SemaphoreEnter($this->semaphore, 5 * 1000) == false) {
+            $this->SendDebug(__FUNCTION__, 'repository is locked', 0);
             return;
         }
 
@@ -387,39 +415,48 @@ class ConfigVC extends IPSModule
                 if (is_dir($fname)) {
                     if (!rmdir($fname)) {
                         $this->SendDebug(__FUNCTION__, 'unable to delete firectory ' . $fname, 0);
+                        IPS_SemaphoreLeave($this->semaphore);
                         return false;
                     }
                 } else {
                     if (!unlink($fname)) {
                         $this->SendDebug(__FUNCTION__, 'unable to delete file ' . $fname, 0);
+                        IPS_SemaphoreLeave($this->semaphore);
                         return false;
                     }
                 }
             }
             if (!rmdir($ipsPath)) {
                 $this->SendDebug(__FUNCTION__, 'unable to delete firectory ' . $ipsPath, 0);
+                IPS_SemaphoreLeave($this->semaphore);
                 return false;
             }
         }
         if (!$this->changeDir($path)) {
+            IPS_SemaphoreLeave($this->semaphore);
             return false;
         }
         if (!$this->execute('git clone ' . $url . ' 2>&1', $output)) {
+            IPS_SemaphoreLeave($this->semaphore);
             return false;
         }
 
         if (!$this->changeDir($ipsPath)) {
+            IPS_SemaphoreLeave($this->semaphore);
             return false;
         }
         $name = $this->ReadPropertyString('git_user_name');
         if (!$this->execute('git config user.name "' . $name . '"', $output)) {
+            IPS_SemaphoreLeave($this->semaphore);
             return false;
         }
         $email = $this->ReadPropertyString('git_user_email');
         if (!$this->execute('git config user.email "' . $email . '"', $output)) {
+            IPS_SemaphoreLeave($this->semaphore);
             return false;
         }
 
+        IPS_SemaphoreLeave($this->semaphore);
         return true;
     }
 
@@ -431,6 +468,11 @@ class ConfigVC extends IPSModule
         }
 
         $this->SendDebug(__FUNCTION__, 'with_zip=' . ($with_zip ? 'true' : 'false') . ', full_file_cmp=' . ($full_file_cmp ? 'true' : 'false'), 0);
+
+        if (IPS_SemaphoreEnter($this->semaphore, 5 * 1000) == false) {
+            $this->SendDebug(__FUNCTION__, 'repository is locked', 0);
+            return;
+        }
 
         $r = $this->performAdjustment($with_zip, $full_file_cmp);
         $state = $r['state'];
@@ -478,6 +520,7 @@ class ConfigVC extends IPSModule
         $this->SetValue('Duration', $duration);
         $this->SetValue('Timestamp', time());
 
+        IPS_SemaphoreLeave($this->semaphore);
         return $state;
     }
 
