@@ -664,15 +664,16 @@ class ConfigVC extends IPSModule
 
     private function execute($cmd, &$output)
     {
-        $this->SendDebug(__FUNCTION__, utf8_decode($cmd), 0);
+        $this->SendDebug(__FUNCTION__, $cmd, 0);
 
         $time_start = microtime(true);
         $data = exec($cmd, $out, $exitcode);
         $duration = round(microtime(true) - $time_start, 2);
 
         foreach ($out as $s) {
-            $this->SendDebug(__FUNCTION__, '  ' . utf8_decode($s), 0);
+            $this->SendDebug(__FUNCTION__, '  ' . $s, 0);
         }
+        $this->SendDebug(__FUNCTION__, '  ' . $data, 0);
 
         if ($exitcode) {
             $this->SendDebug(__FUNCTION__, ' ... failed with exitcode=' . $exitcode, 0);
@@ -921,8 +922,7 @@ class ConfigVC extends IPSModule
             $this->SendDebug(__FUNCTION__, 'unable to json-encode data for file ' . $fname . ' (error=' . $err . ')', 0);
             return false;
         }
-        $udata = utf8_decode($sdata);
-        if (!$this->saveFile($fname, $udata, $mtime, true)) {
+        if (!$this->saveFile($fname, $sdata, $mtime, true)) {
             $this->SendDebug(__FUNCTION__, 'error saving file ' . $fname, 0);
             return false;
         }
@@ -1054,8 +1054,7 @@ class ConfigVC extends IPSModule
         }
 
         $sdata = IPS_GetSnapshot();
-        $udata = utf8_encode($sdata);
-        $snapshot = json_decode($udata, true);
+        $snapshot = json_decode($sdata, true);
 
         // global optiones
         $fname = $gitSettingsDir . DIRECTORY_SEPARATOR . 'options.json';
