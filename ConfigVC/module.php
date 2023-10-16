@@ -10,16 +10,22 @@ class ConfigVC extends IPSModule
     use ConfigVC\StubsCommonLib;
     use ConfigVCLocalLib;
 
-    private $ModuleDir;
+    private static $semaphoreTM = 5 * 1000;
+
+    private $SemaphoreID;
 
     public function __construct(string $InstanceID)
     {
         parent::__construct($InstanceID);
 
-        $this->ModuleDir = __DIR__;
+        $this->CommonContruct(__DIR__);
+        $this->SemaphoreID = __CLASS__ . '_' . $InstanceID;
     }
 
-    private $semaphore = __CLASS__;
+    public function __destruct()
+    {
+        $this->CommonDestruct();
+    }
 
     public function Create()
     {
@@ -37,7 +43,8 @@ class ConfigVC extends IPSModule
         $this->RegisterPropertyBoolean('with_db', false);
         $this->RegisterPropertyString('additional_dirs', '');
 
-        $this->RegisterAttributeString('UpdateInfo', '');
+        $this->RegisterAttributeString('UpdateInfo', json_encode([]));
+        $this->RegisterAttributeString('ModuleStats', json_encode([]));
 
         $this->InstallVarProfiles(false);
     }
@@ -348,7 +355,7 @@ class ConfigVC extends IPSModule
             return;
         }
 
-        if (IPS_SemaphoreEnter($this->semaphore, 5 * 1000) == false) {
+        if (IPS_SemaphoreEnter($this->SemaphoreID, self::$semaphoreTM) == false) {
             $this->SendDebug(__FUNCTION__, 'repository is locked', 0);
             return;
         }
@@ -415,48 +422,48 @@ class ConfigVC extends IPSModule
                 if (is_dir($fname)) {
                     if (!rmdir($fname)) {
                         $this->SendDebug(__FUNCTION__, 'unable to delete firectory ' . $fname, 0);
-                        IPS_SemaphoreLeave($this->semaphore);
+                        IPS_SemaphoreLeave($this->SemaphoreID);
                         return false;
                     }
                 } else {
                     if (!unlink($fname)) {
                         $this->SendDebug(__FUNCTION__, 'unable to delete file ' . $fname, 0);
-                        IPS_SemaphoreLeave($this->semaphore);
+                        IPS_SemaphoreLeave($this->SemaphoreID);
                         return false;
                     }
                 }
             }
             if (!rmdir($ipsPath)) {
                 $this->SendDebug(__FUNCTION__, 'unable to delete firectory ' . $ipsPath, 0);
-                IPS_SemaphoreLeave($this->semaphore);
+                IPS_SemaphoreLeave($this->SemaphoreID);
                 return false;
             }
         }
         if (!$this->changeDir($path)) {
-            IPS_SemaphoreLeave($this->semaphore);
+            IPS_SemaphoreLeave($this->SemaphoreID);
             return false;
         }
         if (!$this->execute('git clone ' . $url . ' 2>&1', $output)) {
-            IPS_SemaphoreLeave($this->semaphore);
+            IPS_SemaphoreLeave($this->SemaphoreID);
             return false;
         }
 
         if (!$this->changeDir($ipsPath)) {
-            IPS_SemaphoreLeave($this->semaphore);
+            IPS_SemaphoreLeave($this->SemaphoreID);
             return false;
         }
         $name = $this->ReadPropertyString('git_user_name');
         if (!$this->execute('git config user.name "' . $name . '"', $output)) {
-            IPS_SemaphoreLeave($this->semaphore);
+            IPS_SemaphoreLeave($this->SemaphoreID);
             return false;
         }
         $email = $this->ReadPropertyString('git_user_email');
         if (!$this->execute('git config user.email "' . $email . '"', $output)) {
-            IPS_SemaphoreLeave($this->semaphore);
+            IPS_SemaphoreLeave($this->SemaphoreID);
             return false;
         }
 
-        IPS_SemaphoreLeave($this->semaphore);
+        IPS_SemaphoreLeave($this->SemaphoreID);
         return true;
     }
 
@@ -469,7 +476,7 @@ class ConfigVC extends IPSModule
 
         $this->SendDebug(__FUNCTION__, 'with_zip=' . ($with_zip ? 'true' : 'false') . ', full_file_cmp=' . ($full_file_cmp ? 'true' : 'false'), 0);
 
-        if (IPS_SemaphoreEnter($this->semaphore, 5 * 1000) == false) {
+        if (IPS_SemaphoreEnter($this->SemaphoreID, self::$semaphoreTM) == false) {
             $this->SendDebug(__FUNCTION__, 'repository is locked', 0);
             return;
         }
@@ -520,7 +527,7 @@ class ConfigVC extends IPSModule
         $this->SetValue('Duration', $duration);
         $this->SetValue('Timestamp', time());
 
-        IPS_SemaphoreLeave($this->semaphore);
+        IPS_SemaphoreLeave($this->SemaphoreID);
         return $state;
     }
 
