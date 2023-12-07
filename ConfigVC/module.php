@@ -185,17 +185,24 @@ class ConfigVC extends IPSModule
             'caption' => 'Repository local configuration'
         ];
 
+        if (IPS_GetKernelVersion() < 7.0) {
+            $caption1 = 'save \'webfront/user\' directory as zip-archive';
+            $caption2 = 'directories to be excluded, relativ to \'webfront/user\'; list with ";" as delimiter';
+        } else {
+            $caption1 = 'save \'user\' as zip-archive';
+            $caption2 = 'directories to be excluded, relativ to \'user\'; list with ";" as delimiter';
+        }
         $formElements[] = [
             'type'    => 'ExpansionPanel',
             'items'   => [
                 [
                     'type'    => 'CheckBox',
                     'name'    => 'with_webfront_user_zip',
-                    'caption' => 'save webfront/user as zip-archive'
+                    'caption' => $caption1,
                 ],
                 [
                     'type'    => 'Label',
-                    'caption' => 'directories to be excluded, relativ to \'webfront/user\'; list with ; as delimiter'
+                    'caption' => $caption2,
                 ],
                 [
                     'type'    => 'ValidationTextBox',
@@ -954,8 +961,13 @@ class ConfigVC extends IPSModule
         $ipsModulesPath = $ipsBasePath . 'modules';
         $ipsMediaPath = $ipsBasePath . 'media';
         $ipsWebfrontPath = $ipsBasePath . 'webfront';
-        $ipsWebfrontUserPath = $ipsWebfrontPath . DIRECTORY_SEPARATOR . 'user';
-        $ipsWebfrontSkinsPath = $ipsWebfrontPath . DIRECTORY_SEPARATOR . 'skins';
+        if (IPS_GetKernelVersion() < 7.0) {
+            $ipsUserPath = $ipsWebfrontPath . 'user';
+            $ipsSkinsPath = $ipsWebfrontPath . 'skins';
+        } else {
+            $ipsUserPath = $ipsBasePath . 'user';
+            $ipsSkinsPath = $ipsBasePath . 'skins';
+        }
         $ipsDbPath = $ipsBasePath . DIRECTORY_SEPARATOR . 'db';
 
         $gitScriptDir = 'scripts';
@@ -981,11 +993,15 @@ class ConfigVC extends IPSModule
         $gitWebfrontDir = 'webfront';
         $gitWebfrontPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitWebfrontDir;
 
-        $gitWebfrontUserDir = $gitWebfrontDir . DIRECTORY_SEPARATOR . 'user';
-        $gitWebfrontUserPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitWebfrontUserDir;
-
-        $gitWebfrontSkinsDir = $gitWebfrontDir . DIRECTORY_SEPARATOR . 'skins';
-        $gitWebfrontSkinsPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitWebfrontSkinsDir;
+        if (IPS_GetKernelVersion() < 7.0) {
+            $gitUserDir = $gitWebfrontDir . DIRECTORY_SEPARATOR . 'user';
+            $gitSkinsDir = $gitWebfrontDir . DIRECTORY_SEPARATOR . 'skins';
+        } else {
+            $gitUserDir = 'user';
+            $gitSkinsDir = 'skins';
+        }
+        $gitUserPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitUserDir;
+        $gitSkinsPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitSkinsDir;
 
         $gitDbDir = 'db';
         $gitDbPath = $gitBasePath . DIRECTORY_SEPARATOR . $gitDbDir;
@@ -996,7 +1012,7 @@ class ConfigVC extends IPSModule
             return ['state' => false];
         }
 
-        $dirs = [$gitScriptPath, $gitModulesPath, $gitSettingsPath, $gitObjectsPath, $gitProfilesPath, $gitMediaPath, $gitWebfrontPath, $gitWebfrontSkinsPath, $gitWebfrontUserPath, $gitDbPath];
+        $dirs = [$gitScriptPath, $gitModulesPath, $gitSettingsPath, $gitObjectsPath, $gitProfilesPath, $gitMediaPath, $gitWebfrontPath, $gitSkinsPath, $gitUserPath, $gitDbPath];
         foreach ($dirs as $dir) {
             if (!$this->checkDir($dir, true)) {
                 return ['state' => false];
@@ -1150,20 +1166,20 @@ class ConfigVC extends IPSModule
             return ['state' => false];
         }
 
-        // .../symcon/webfront/skins
+        // .../symcon/skins
 
-        if (!$this->saveDir($ipsWebfrontSkinsPath, $gitWebfrontSkinsPath, $gitWebfrontSkinsDir, $with_zip, true, $git_rm_duration, $zip_duration)) {
+        if (!$this->saveDir($ipsSkinsPath, $gitSkinsPath, $gitSkinsDir, $with_zip, true, $git_rm_duration, $zip_duration)) {
             return ['state' => false];
         }
 
-        // .../symcon/webfront/user
+        // .../symcon/user
 
         if ($with_zip && $with_webfront_user_zip) {
             $exclude_dirs_webfront_user = $this->ReadPropertyString('exclude_dirs_webfront_user');
             $exclude_dirs = $exclude_dirs_webfront_user != '' ? explode(';', $exclude_dirs_webfront_user) : [];
-            $oldWebfrontUserDirs = $this->scanDir($gitWebfrontUserPath);
+            $oldWebfrontUserDirs = $this->scanDir($gitUserPath);
             $newWebfrontUserDirs = [];
-            $dirnames = scandir($ipsWebfrontUserPath, 0);
+            $dirnames = scandir($ipsUserPath, 0);
             foreach ($dirnames as $dirname) {
                 if (substr($dirname, 0, 1) == '.') {
                     continue;
@@ -1171,15 +1187,15 @@ class ConfigVC extends IPSModule
                 if (in_array($dirname, $exclude_dirs)) {
                     continue;
                 }
-                $path = $ipsWebfrontUserPath . DIRECTORY_SEPARATOR . $dirname;
+                $path = $ipsUserPath . DIRECTORY_SEPARATOR . $dirname;
                 if (!is_dir($path)) {
                     continue;
                 }
-                if (!$this->changeDir($ipsWebfrontUserPath)) {
+                if (!$this->changeDir($ipsUserPath)) {
                     return ['state' => false];
                 }
                 $mtime = $this->mtime4dir($dirname);
-                $path = $gitWebfrontUserPath . DIRECTORY_SEPARATOR . $dirname . '.zip';
+                $path = $gitUserPath . DIRECTORY_SEPARATOR . $dirname . '.zip';
                 $_time_start = microtime(true);
                 if (!$this->buildZip($dirname, $path, $mtime, $zip_duration)) {
                     return ['state' => false];
@@ -1188,7 +1204,7 @@ class ConfigVC extends IPSModule
                 $newWebfrontUserDirs[] = $dirname . '.zip';
             }
 
-            if (!$this->cleanupDir($gitWebfrontUserPath, $oldWebfrontUserDirs, $newWebfrontUserDirs, $git_rm_duration)) {
+            if (!$this->cleanupDir($gitUserPath, $oldWebfrontUserDirs, $newWebfrontUserDirs, $git_rm_duration)) {
                 return ['state' => false];
             }
         }

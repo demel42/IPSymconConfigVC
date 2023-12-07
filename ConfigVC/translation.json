@@ -26,9 +26,12 @@
 			"local path": "lokales Verzeichnis",
 
 			"Options": "Optionen ",
-			"save webfront/user as zip-archive": "Verzeichnis webfront/user als Zip-Archiv sichern",
-			"directories to be excluded, relativ to 'webfront/user'; list with ; as delimiter":
-				"auszuschliessende Verzeichnisse, relativ zu 'webfront/user'; Liste mit ; als Trenner",
+			"save 'webfront/user' as zip-archive": "Verzeichnis 'webfront/user' als Zip-Archiv sichern",
+			"directories to be excluded, relativ to 'webfront/user'; list with \";\" as delimiter":
+				"auszuschliessende Verzeichnisse, relativ zu 'webfront/user'; Liste mit \";\" als Trenner",
+			"save 'user' as zip-archive": "Verzeichnis 'user' als Zip-Archiv sichern",
+			"directories to be excluded, relativ to 'user'; list with \";\" as delimiter":
+				"auszuschliessende Verzeichnisse, relativ zu 'user'; Liste mit \";\" als Trenner",
 
 			"save database": "Datenbank sichern",
 

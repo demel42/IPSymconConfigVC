@@ -38,7 +38,7 @@ Module, die nicht unter Git-Kontrolle stehen, werden als Zip-Archiv gesichert (n
 Wenn man wieder auf den aktuellen Stand zurückgehen möchte, muss man das analog durchführen: löschen und dann wieder die Original-URL angeben und ggfs den passenden Branch auswählen.
 
 #### Skins
-Analog zu den Modulen werden die unter _webfront/skins_ installierten Skins gesichert.
+Analog zu den Modulen werden die unter _skins_ installierten Skins gesichert.
 Skins, die nicht unter Git-Kontrolle stehen, werden als Zip-Archiv gesichert (nur wenn _with_zip_ = _true_ - siehe unten).
 
 #### IPS-Objekte & co
@@ -61,7 +61,7 @@ Auch diese Dateien werden grundsätzlich nur geschrieben, wenn sich etwas geänd
 Dateien im Verzeichnis _media_ werden gesichert.
 
 #### Webfront
-Verzeichnisse unterhalb von _webfront/user_ werden optional als Zip-Archiv gesichert.
+Verzeichnisse unterhalb von _user_ werden optional als Zip-Archiv gesichert.
 
 #### Datenbank
 Die Datenbank (_db_) wird optional gesichert, Aggregationsdaten werden nicht gesichert.
@@ -70,7 +70,7 @@ Die Datenbank (_db_) wird optional gesichert, Aggregationsdaten werden nicht ges
 In dieser Datei wird ein Protokoll der Änderungen des letzten Abgleichs dargestellt. Man sieht als sehr schnell, an welcher Stelle der Konfiguration seit dem letzten Lauf sich etwas geändert hat.
 Die Änderungen selber kann man dann auch leicht im Git darstellen.
 <br><br>
-Die Dauer eines Abgleich ist naturgemäß schwierig allgemeingültig darzustellen. Ein Anhaltswert: auf einem Raspberry 3B+ auf SD-Karte mit ca. 30 Scripten, 2000 Variablen und 20 Modulen dauert der initiale Abgleich ohne Erstellen von Zip-Archiven ca. 20 Sekunden, jeder weiterer Abgleich ca. 2-3 Sekunden. Die Zeit für das Erstellen von Zip-Archiven (_webfront/user_) ist sehr individuell, dürfte aber im Bereich einiger Minuten liegen.
+Die Dauer eines Abgleich ist naturgemäß schwierig allgemeingültig darzustellen. Ein Anhaltswert: auf einem Raspberry 3B+ auf SD-Karte mit ca. 30 Scripten, 2000 Variablen und 20 Modulen dauert der initiale Abgleich ohne Erstellen von Zip-Archiven ca. 20 Sekunden, jeder weiterer Abgleich ca. 2-3 Sekunden. Die Zeit für das Erstellen von Zip-Archiven (_user_) ist sehr individuell, dürfte aber im Bereich einiger Minuten liegen.
 
 Da alle Änderungen von IPS bei Abgleich in das lokale Repository übertragen und direkt an das zentrale Repository übertragen werden, ist dieses Verzeichnis nur von temporärem Interesse und kann jderzeit neu erstellt werden.
 
@@ -236,7 +236,7 @@ legt ein frischen Clone des Repositories an. Dabei wird, wenn erforderlich, ein 
 
 `boolean CVC_PerformAdjustment(integer $InstanzID, boolean $with_zip, boolean $full_file_cmp)`<br>
 führt einen Abgleich durch. <br>
-Durch _with_zip_ kann bei Aufruf gesteuert werden, ob überhaupt Zip-Archive gebildet werden oder nicht (wirkt nur, _webfront/user als Zip_ gesetzt ist).
+Durch _with_zip_ kann bei Aufruf gesteuert werden, ob überhaupt Zip-Archive gebildet werden oder nicht (wirkt nur, _user als Zip_ gesetzt ist).
 Durch _full_file_cmp_ regelt, wie Dateien auf Gleichheit verglichen werden. Bei dem einfachen Vergleich wird die Gräße und der Zeitpunkt der letzten Änderung verwendet: bei einer vollständigen Überprüfung wird der Dateiinhalt selbst verglichen. Das bietet eine erhöhte Sicherheit, alle Änderungen zu berücksichtigen, ist aber sicherlich nur ab und an erforderlich.
 
 ## 5. Konfiguration:
@@ -253,8 +253,8 @@ Durch _full_file_cmp_ regelt, wie Dateien auf Gleichheit verglichen werden. Bei 
 | ... user.email                       | string  |              | Angabe für 'git config --global email.name'. Angabe ist zwingend und muss eine korrekte Mail-Adresse sein |
 | lokales Verzeichnis                  | string  |              | lokales Verzeichnis indem der Clone des Git-Repository abgelegt wird |
 | zusätzliche Verzeichnisse            | string  |              | Liste von zusätzlich zu sichernden Verzeichnissen, relativ zum Symcon-Verzeichis (_/var/lib/symcon_) |
-| Webfront/user als Zip-Archiv sichern | boolean | false        | Sichern von _webfront/user_ als Zip-Archiv. Achtung: Größe beachten! |
-| auszuschliessende Verzeichnisse      | string  |              | Liste von zusätzlich auszuschliessende Verzeichnissen, relativ zu _webfront/user_ |
+| Webfront/user als Zip-Archiv sichern | boolean | false        | Sichern von _user_ als Zip-Archiv. Achtung: Größe beachten! |
+| auszuschliessende Verzeichnisse      | string  |              | Liste von zusätzlich auszuschliessende Verzeichnissen, relativ zu _user_ |
 | Datenbank sichern                    | boolean | false        | Daten in Verzeichnis 'db' sichern |
 
 #### Schaltflächen
@@ -281,6 +281,9 @@ GUIDs
   - ConfigVC: `{396EA137-2E5F-413A-A996-D662158EA481}`
 
 ## 7. Versions-Historie
+
+- 1.28 @ 07.12.2023 15:43
+  - Vorbereitung auf IPS 7 / PHP 8.2 (_user_ und _skins_ ist nn nicht mehr unterhalb von _webfront_)
 
 - 1.27 @ 03.11.2023 11:06
   - Neu: Ermittlung von Speicherbedarf und Laufzeit (aktuell und für 31 Tage) und Anzeige im Panel "Information"
