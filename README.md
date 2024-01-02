@@ -282,6 +282,9 @@ GUIDs
 
 ## 7. Versions-Historie
 
+- 1.29 @ 02.01.2024 12:04
+  - Fix: Meldungstext korrigiert
+
 - 1.28 @ 07.12.2023 15:43
   - Vorbereitung auf IPS 7 / PHP 8.2 (_user_ und _skins_ ist nn nicht mehr unterhalb von _webfront_)
 

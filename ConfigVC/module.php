@@ -55,7 +55,7 @@ class ConfigVC extends IPSModule
 
         $output = '';
         if ($this->execute('git --version 2>&1', $output) == false) {
-            $r[] = 'git';
+            $r[] = $this->Translate('missing "git"');
         }
 
         return $r;

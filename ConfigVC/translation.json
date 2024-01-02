@@ -3,6 +3,9 @@
 		"de": {
 			"Symcon Configuration Version-Control": "Versionskontrolle der Symcon-Konfiguration",
 
+			"__function__": "CheckModulePrerequisites",
+			"missing \"git\"": "\"Git\" fehlt",
+
 			"__function__": "CheckConfiguration",
 			"Git-Repository must be specified": "Git-Repository muss angegeben werden",
 			"Local path must be specified": "Lokaler Pfad muss angegeben werden",
