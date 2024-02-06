@@ -419,7 +419,7 @@ class ConfigVC extends IPSModule
         }
 
         $path = $this->ReadPropertyString('path');
-        $ipsPath = $path . '/' . basename($url, '.git');
+        $ipsPath = $path . DIRECTORY_SEPARATOR . basename($url, '.git');
 
         if (file_exists($ipsPath)) {
             $directory = new RecursiveDirectoryIterator($ipsPath, FilesystemIterator::SKIP_DOTS);
@@ -548,7 +548,7 @@ class ConfigVC extends IPSModule
         for ($n = 0; $n < 3; $n++) {
             $fp = fopen($fname, 'r');
             if (!$fp) {
-                $this->SendDebug(__FUNCTION__, 'unable to create file ' . $fname, 0);
+                $this->SendDebug(__FUNCTION__, 'unable to open file ' . $fname, 0);
                 return false;
             }
             $pre_stat = fstat($fp);
@@ -951,7 +951,7 @@ class ConfigVC extends IPSModule
         $url = $this->ReadPropertyString('url');
         $path = $this->ReadPropertyString('path');
 
-        $gitBasePath = $path . '/' . basename($url, '.git');
+        $gitBasePath = $path . DIRECTORY_SEPARATOR . basename($url, '.git');
 
         $msg = '';
 
